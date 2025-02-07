@@ -13,6 +13,19 @@ import seaborn as sns
 import scipy.stats as stats
 
 
+'''
+
+The program needs a user input for the .cs file from CryoSPARC. This would preferably
+be done using the full file path.
+
+
+All plots will display automatically when the program is run EXCEPT for covariance plots. 
+Covariance plots can be created by using the covariance_plot(class1, class2) function below.
+
+
+'''
+
+
 #loading in data for each particle as cs
 file_path = input("Please input file name or path: ")
 cs = np.load(file_path) 
@@ -313,160 +326,10 @@ matches_nondummies = non_dummies['Original Assignment'] == non_dummies['K-means 
 proportion_nondummies = matches_nondummies.mean()
 
 
-## GAUSSIAN MIXED MODEL
 
 
-# taken from https://github.com/mr-easy/GMM-EM-Python/blob/master/GMM.py
 
-# from numpy import random
-# from matplotlib.patches import Ellipse
-# import matplotlib.transforms as transforms
-# from scipy.stats import multivariate_normal
-
-# class GMM():
-#     def __init__(self, k, dim, init_mu=None, init_sigma=None, init_pi=None, colors=None):
-#         '''
-#         Define a model with known number of clusters and dimensions.
-#         input:
-#             - k: Number of Gaussian clusters
-#             - dim: Dimension 
-#             - init_mu: initial value of mean of clusters (k, dim)
-#                         (default) random from uniform[-10, 10]
-#             - init_sigma: initial value of covariance matrix of clusters (k, dim, dim)
-#                           (default) Identity matrix for each cluster
-#             - init_pi: initial value of cluster weights (k,)
-#                         (default) equal value to all cluster i.e. 1/k
-#             - colors: Color valu for plotting each cluster (k, 3)
-#                       (default) random from uniform[0, 1]
-#         '''
-#         self.k = k
-#         self.dim = dim
-#         if(init_mu is None):
-#             init_mu = random.rand(k, dim)*20 - 10
-#         self.mu = init_mu
-#         if(init_sigma is None):
-#             init_sigma = np.zeros((k, dim, dim))
-#             for i in range(k):
-#                 init_sigma[i] = np.eye(dim)
-#         self.sigma = init_sigma
-#         if(init_pi is None):
-#             init_pi = np.ones(self.k)/self.k
-#         self.pi = init_pi
-#         if(colors is None):
-#             colors = random.rand(k, 3)
-#         self.colors = colors
-    
-#     def init_em(self, X):
-#         '''
-#         Initialization for EM algorithm.
-#         input:
-#             - X: data (batch_size, dim)
-#         '''
-#         self.data = X
-#         self.num_points = X.shape[0]
-#         self.z = np.zeros((self.num_points, self.k))
-    
-#     def e_step(self):
-#         '''
-#         E-step of EM algorithm.
-#         '''
-#         for i in range(self.k):
-#             self.z[:, i] = self.pi[i] * multivariate_normal.pdf(self.data, mean=self.mu[i], cov=self.sigma[i])
-#         self.z /= self.z.sum(axis=1, keepdims=True)
-    
-#     def m_step(self):
-#         '''
-#         M-step of EM algorithm.
-#         '''
-#         sum_z = self.z.sum(axis=0)
-#         self.pi = sum_z / self.num_points
-#         self.mu = np.matmul(self.z.T, self.data)
-#         self.mu /= sum_z[:, None]
-#         for i in range(self.k):
-#             j = np.expand_dims(self.data, axis=1) - self.mu[i]
-#             s = np.matmul(j.transpose([0, 2, 1]), j)
-#             self.sigma[i] = np.matmul(s.transpose(1, 2, 0), self.z[:, i] )
-#             self.sigma[i] /= sum_z[i]
-            
-#     def log_likelihood(self, X):
-#         '''
-#         Compute the log-likelihood of X under current parameters
-#         input:
-#             - X: Data (batch_size, dim)
-#         output:
-#             - log-likelihood of X: Sum_n Sum_k log(pi_k * N( X_n | mu_k, sigma_k ))
-#         '''
-#         ll = []
-#         for d in X:
-#             tot = 0
-#             for i in range(self.k):
-#                 tot += self.pi[i] * multivariate_normal.pdf(d, mean=self.mu[i], cov=self.sigma[i])
-#             ll.append(np.log(tot))
-#         return np.sum(ll)
-    
-#     def plot_gaussian(self, mean, cov, ax, n_std=3.0, facecolor='none', **kwargs):
-#         '''
-#         Utility function to plot one Gaussian from mean and covariance.
-#         '''
-#         pearson = cov[0, 1]/np.sqrt(cov[0, 0] * cov[1, 1])
-#         ell_radius_x = np.sqrt(1 + pearson)
-#         ell_radius_y = np.sqrt(1 - pearson)
-#         ellipse = Ellipse((0, 0),
-#             width=ell_radius_x * 2,
-#             height=ell_radius_y * 2,
-#             facecolor=facecolor,
-#             **kwargs)
-#         scale_x = np.sqrt(cov[0, 0]) * n_std
-#         mean_x = mean[0]
-#         scale_y = np.sqrt(cov[1, 1]) * n_std
-#         mean_y = mean[1]
-#         transf = transforms.Affine2D() \
-#             .rotate_deg(45) \
-#             .scale(scale_x, scale_y) \
-#             .translate(mean_x, mean_y)
-#         ellipse.set_transform(transf + ax.transData)
-#         return ax.add_patch(ellipse)
-
-#     def draw(self, ax, n_std=2.0, facecolor='none', **kwargs):
-#         '''
-#         Function to draw the Gaussians.
-#         Note: Only for two-dimensionl dataset
-#         '''
-#         if(self.dim != 2):
-#             print("Drawing available only for 2D case.")
-#             return
-#         for i in range(self.k):
-#             self.plot_gaussian(self.mu[i], self.sigma[i], ax, n_std=n_std, edgecolor=self.colors[i], **kwargs)
-
-
-#creating the GMM
-
-# gmm = GMM(k = num_classes, dim = num_classes, init_mu=kmean_centers, init_sigma = kmeans_cov)
-# gmm.init_em(probabilities)
-
-
-# #running GMM
-# n_iterations = 100
-# tolerance = 1e-5
-# prev_log_likelihood = None
-
-# for iteration in range(n_iterations):
-
-#     #e and m step
-#     gmm.e_step()
-#     gmm.m_step()
-    
-#     #compute log-likelihood
-#     log_likelihood = gmm.log_likelihood(probabilities)
-
-#     if prev_log_likelihood is not None and abs(log_likelihood - prev_log_likelihood) < tolerance:
-#         print("Convergence reached.")
-#         break
-    
-#     prev_log_likelihood = log_likelihood
-
-
-# print(f'Gaussian cluster means: {gmm.mu}, Gaussian cluster variances: {gmm.sigma}')
+## GAUSSIAN MIXTURE MODELLING
 
 
 from sklearn.mixture import GaussianMixture
@@ -495,6 +358,32 @@ proportion_all_gmm = matches_all_gmm.mean()
 non_dummies_gmm = probabilities_df_gmm[probabilities_df_gmm['Original Assignment'] > 6]
 matches_nondummies_gmm = non_dummies_gmm['Original Assignment'] == non_dummies_gmm['GMM Assignment']
 proportion_nondummies_gmm = matches_nondummies_gmm.mean()
+
+
+
+
+### VISUALIZING MACHINE LEARNING ASSIGNMENT RESULTS
+
+for i in range(num_classes):
+    #
+    #subset to only one class 
+    filtered_df = probabilities_df_gmm[probabilities_df_gmm['GMM Assignment'] == i + 1]
+    
+    #count the frequency of original class assignments in above subset
+    class_counts = filtered_df['Original Assignment'].value_counts().reindex(range(1,num_classes+1), fill_value = 0)
+    
+    #bar chart
+    plt.figure(figsize=(8, 5))  # Adjust figure size for readability
+    plt.bar(class_counts.index, class_counts.values, color='skyblue', edgecolor='black')
+    
+    # Add labels and title
+    plt.xlabel('Original Assignment')
+    plt.ylabel('Frequency')
+    plt.xticks(range(1,num_classes + 1))
+    plt.title(f'Distribution of Original Assignments for GMM Class {i+1}')
+    
+    # Show the plot
+    plt.show()
 
 
 
