@@ -459,7 +459,7 @@ from sklearn.decomposition import PCA
 data_for_pca = plotX.drop(columns=['Original Assignment', 'K-means Assignment'])
 
 # Perform PCA (you can adjust the number of components based on explained variance)
-pca = PCA(n_components=13)  
+pca = PCA(n_components=7)  
 pca_result = pca.fit_transform(data_for_pca)
 
 # Create a DataFrame for the PCA components
