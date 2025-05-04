@@ -22,7 +22,7 @@ pip install numpy pandas matplotlib seaborn scipy scikit-learn
 ```
 
 To run the PDB file processing software on Mac OSX, you will need:
-'''pip3 install pandas matplotlib biopython ramachandraw'''
+```pip3 install pandas matplotlib biopython ramachandraw```
 
 
 ## Usage
