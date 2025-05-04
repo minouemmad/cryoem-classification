@@ -1,31 +1,36 @@
+# COMS W2132 Intermediate Computing in Python, Final Project 
+## Phi Psi Comparison
 
-# CRYO-EM Classification Analysis
+### Author:
+- [Polina Goldberg](https://github.com/...) <pmg2147@columbia.edu>
 
+## Project Description
+In protein structure, phi and psi angles are backbone diherdal angles that define the geometry and conformation of the protein chain. Comparing these angles between proteins can help understanding folding patterns, conformational changes upon drug binding or genetic mutations, and much more. However, individually calculating and comparing every angle in a full-length protein is a tedious task involving loading relevant structures into PyMol, extracting the angles from the command line, parsing this information into a datable (typically wih excel), aligning the protein sequences, and then finally carrying out calculations. 
 
-This program is designed to analyze particle classification data from CryoSPARC .cs files, producing various visualizations and statistical analyses to understand class assignments, probability distribution, and clustering performance.
+![Phi and Psi angles](PhiPsiDiagram.png)
 
-The program has the following features:
+This project automates this  protein structure comparison task through a Python script that essentially compiles these five steps into one program. Once the differences in angles are calculated, the program will notify the users of any areas of interest and provide some simple visualizations.
 
-* **normalized probability histograms**: normalized histograms of the probability each particle in the dataset is assigned to a given class
-* **confusion matrix**: confusion matrix of true (row) vs predicted (column) class assignments, with each cell in the matrix containing mean and standard deviation information. For instance, a cell in the 2nd row and 3rd column can be interpreted as 'the probability a particle assigned to class 2 would be assigned to class 3.' 
-* **shannon entropy histograms**: Shannon entropy distributions for each class
-* **covariance scatterplots**: pairwise class assignment probability comparisons
-* **k means clustering**: reclassification of particles using k means clustering
-* **Gaussian Mixture Modeling**" reclassification of particles using Gaussian Mixture modeling
+## Requirements 
+The program will require the following python packages: os, shutil, time, re, pandas, subprocess, tempfile, matplotlib, biopython, and ramachandraw. The program also requires that the PyMOL application be installed on the computer system.
 
+## Instructions
+When running the program, you will be prompted to input two PDB files. This can be either in the from of a Protein Data Bank entry ID or a filepath within the program directory. You will also be prompted to enter a minimum angle threshold by which to compare the proteins in the PDB files.
 
-## Requirements
+Important Notes:
+* The program is intended to be used on the same protein in two different conformational states or on two similar proteins. Comparing two nonrelated PDB files will lead to nonsensical results.
+* The program assumes the proteins use UNIPROT residue numbering (typical for PDB entries) or some other standardized numbering system set by the user.
 
-Download necessary Python libraries using the following code in terminal.
+The program will output a dataframe of all residues which have a phi or psi angle difference above the specified threshold. These residues can be identified by the first three columns, namely chain number (Chain), residue name (ResName), and residue number (Residue). The last two columns, Phi_diff and Psi_diff, give the difference in phi and psi angles, respectively.
 
-```bash
-pip install numpy pandas matplotlib seaborn scipy scikit-learn
-```
+## Example Inputs 
 
-## Usage
+If you don't know where to start, here are some example pairs of proteins you can input into the program! All of these are PDB entry id codes. The recommended minimum angle for comparison is 60°.
 
-The program needs a user input for the .cs file from CryoSPARC. This would preferably
-be done using the full file path.
+* 1AKE and 4AKE
+* 4YU3 and 4YU4
 
-All plots will display automatically when the program is run EXCEPT for covariance plots. 
-Covariance plots can be created by using the covariance_plot(class1, class2) function below.
+## Milestones 
+Milestone 1: Extract and process the phi psi angles from two given PDB files. List the protein residues whose phi or psi angle differences exceed a given value.
+
+Milestone 2: Provide data visualizations corresponding to the computed phi psi differences (e.g. Ramachandran Plots, line graphs)
