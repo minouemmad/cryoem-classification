@@ -16,11 +16,14 @@ The program has the following features:
 
 ## Requirements
 
-Download necessary Python libraries using the following code in terminal.
-
+Download necessary Python libraries using the following code in terminal.  To run the cryo-EM particle classification software on a LINUX system, you will need:
 ```bash
 pip install numpy pandas matplotlib seaborn scipy scikit-learn
 ```
+
+To run the PDB file processing software on Mac OSX, you will need:
+'pip3 install pandas matplotlib biopython ramachandraw'
+
 
 ## Usage
 
