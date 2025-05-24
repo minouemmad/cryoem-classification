@@ -52,6 +52,11 @@ for i in range(num_classes):
     plt.title(f'Class {i+1} Probability Distribution')
     plt.xlabel('Probability')
     plt.ylabel('Density')
+    
+    ax = plt.gca()
+    ax.set_xlim([0,0.5])
+    ax.set_ylim([0,25])
+    
     plt.show()
 
 
@@ -471,5 +476,104 @@ pca_df['K-means Assignment'] = kmeans.labels_[plotX.index].astype(str)
 # Create pairwise scatter plots
 sns.pairplot(pca_df, hue='K-means Assignment', palette='viridis', plot_kws={'alpha':0.7})
 plt.suptitle('Pairwise PCA Scatterplots', y=1.02)
+plt.show()
+
+
+# covariance heatmap
+labels = [i for i in range(7,14)]
+sns.heatmap(kmeans_cov, annot=False, cmap='crest', xticklabels = labels, yticklabels = labels)
+plt.xlabel('Class Assignment')
+plt.ylabel('Class Assignment')
+plt.title('Heatmap of Class Assignment Covariance')
+plt.show()
+
+
+
+from sklearn.metrics import confusion_matrix
+
+cryos_assignment = probabilities_nondummies['Original Assignment']
+
+cm = confusion_matrix(cryos_assignment, kmeans_prediction)
+sns.heatmap(cm, annot=True, fmt="d", cmap="viridis", xticklabels = labels, yticklabels = labels)
+plt.xlabel('K-means Class Assignment', fontsize = 16)
+plt.ylabel('CryoSPARC Class Assignment', fontsize = 16)
+plt.title('CryoSPARC vs. K-means Assignments by Class', fontsize = 18)
+plt.show()
+
+
+
+## PROBABILITY DENSITY GRAPHS (SAME AS FIRST BUT SMOOTHED)
+
+for i in range(num_classes):
+    class_probabilities = probabilities[:,i]
+    
+    sns.kdeplot(class_probabilities, \
+                color = 'darkgreen', \
+                fill = True, \
+                alpha = 0.5, \
+                linewidth = 1)
+    
+    plt.title(f'Class {i+1} Probability Distribution')
+    plt.xlabel('Probability')
+    plt.ylabel('Density')
+    
+    ax = plt.gca()
+    ax.set_xlim([0,0.5])
+    ax.set_ylim([0,30])
+    
+    plt.show()
+    
+    
+    
+## OVERLAYED PROBABILITY DENSITY GRAPHS
+
+
+for i in range(7, 14):
+    
+    class_index = i - 1
+    
+    #particles assigned to class i via CryoSPARC
+    cryos_class_particles = probabilities_nondummies[probabilities_nondummies['Original Assignment'] == i]
+    cryos_probs = cryos_class_particles[f'Class {i}'].values
+    
+    #particles assigned to class i via kmeans
+    kmeans_class_particles = probabilities_nondummies[probabilities_nondummies['K-means Assignment'] == i]
+    kmeans_probs = kmeans_class_particles[f'Class {i}'].values
+
+    plt.figure(figsize=(8,8))
+    sns.kdeplot(cryos_probs, label='CryoSPARC Assigned', color='darkgreen', fill = True, alpha = 0.5, linewidth=1)
+    sns.kdeplot(kmeans_probs, label='KMeans Assigned', color='crimson', fill = True, alpha = 0.5, linestyle='--', linewidth=1)
+
+    plt.title(f'Probability Distribution for Class {i} (CryoSPARC vs KMeans)')
+    plt.xlabel('Probability')
+    plt.ylabel('Density')
+    plt.legend()
+    plt.xlim([0, 0.5])
+    plt.ylim([0, 20])
+    plt.tight_layout()
+    plt.show()
+
+
+
+
+## SIDE BY SIDE ASSIGNMENT DISTRIBUTIONS
+
+
+#count of number of particles assigned to each class (Original vs KMeans)
+cryos_counts = probabilities_nondummies['Original Assignment'].value_counts().sort_index()
+kmeans_counts = probabilities_nondummies['K-means Assignment'].value_counts().sort_index()
+
+# Create a DataFrame for side-by-side comparison
+assignment_df = pd.DataFrame({
+    'CryoSPARC': cryos_counts,
+    'KMeans': kmeans_counts}).fillna(0).astype(int)
+
+assignment_df.plot(kind='bar', figsize=(10, 6), width=0.6, color=['darkgreen', 'crimson'], alpha = 0.7, edgecolor = 'black')
+plt.title('Number of Particles Assigned to Each Class: CryoSPARC vs KMeans')
+plt.xlabel('Class')
+plt.ylabel('Number of Particles')
+plt.xticks(rotation=0)
+plt.legend(title='Assignment Method')
+plt.tight_layout()
 plt.show()
 
