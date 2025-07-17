@@ -245,7 +245,7 @@ def analysis(df1, df2, angle):
     
     mask = (both['Phi_diff'] >= angle) | (both['Psi_diff'] >= angle)
        
-    notable = both.loc[mask, ['Chain','ResName','Residue','Phi_diff','Psi_diff']].copy()
+    notable = both.loc[mask, ['Chain','ResName','Residue','Phi_diff','Psi_diff', 'Phi_1','Psi_1','Phi_2','Psi_2']].copy()
     notable = notable.reset_index(drop = True)
     
     return both, notable
