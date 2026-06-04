@@ -5,28 +5,13 @@ Usage
     python run_pipeline.py --cs cryosparc_P25_J1442_00000_particles.cs \
                            --n-dummies 6 --outdir results_J1442
 
-Pipeline steps (mapped to the project notes)
---------------------------------------------
-0. Load CryoSPARC .cs file -> (N, K) posterior matrix.
-1. Drop dummy classes, keep particles whose hard assignment is a protein class,
-   renormalize their posteriors over the K_protein protein components only.
-2. Transform posteriors out of the simplex (default: additive log-ratio ALR)
-   so a Gaussian model is well posed.
-3. Fit a GaussianMixture (n_components = K_protein), warm-started from the
-   existing CryoSPARC hard assignments  -> Milestone 1.
-4. Monte-Carlo estimate of the misclassification matrix C[i,j]
-   = P(assigned=j | true=i), plus pairwise Bhattacharyya distances
-   -> Milestone 2.
-5. Population deconvolution pi_true = (C^T)^-1 pi_obs with bootstrap CIs
-   -> Milestone 3.
-6. (Optional) class-repetition analysis: refit with k+0, k+1, ... extra
-   components and report occupancy migration  -> Milestone 4 / Hunt strategy 2.
-7. Dump JSON + CSV + PNG diagnostics into --outdir.
+See gmm_pipeline/README.md for full documentation and flag descriptions.
 """
 from __future__ import annotations
 
 import argparse
 import json
+import subprocess
 from pathlib import Path
 
 import numpy as np
@@ -37,22 +22,33 @@ from gmm_pipeline import (
     alr_transform,
     bhattacharyya_pairwise,
     bootstrap_population_ci,
+    bootstrap_population_ci_analytical,
     class_repetition_analysis,
     deconvolve_populations,
     fit_gmm,
     gmm_diagnostics,
     analytical_pairwise_confusion,
+    analytical_multiclass_confusion,
     hard_assignment_confusion,
     load_posteriors,
     monte_carlo_confusion,
     observed_populations,
 )
-from gmm_pipeline.plots import plot_confusion, plot_population_ci, plot_repetition
+from gmm_pipeline.plots import (
+    plot_class_table,
+    plot_confusion,
+    plot_gmm_landscape,
+    plot_population_ci,
+    plot_repetition,
+    plot_summary_table,
+)
 
 
 def parse_args():
     p = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     p.add_argument("--cs", required=True, help="Path to CryoSPARC *_particles.cs file")
+    p.add_argument("--passthrough-cs", default=None,
+                   help="Optional path to matching CryoSPARC passthrough .cs file for low-uncertainty export")
     p.add_argument("--n-dummies", type=int, default=6,
                    help="Number of leading dummy classes to drop")
     p.add_argument("--protein-idx", type=int, nargs="*", default=None,
@@ -67,9 +63,49 @@ def parse_args():
                    help="Extra components for class-repetition analysis")
     p.add_argument("--resp-threshold", type=float, default=0.9,
                    help="GMM max-responsibility cut for low-uncertainty export (default 0.9)")
+    p.add_argument("--export-star", action="store_true",
+                   help="Also export per-class .star files using pyem/csparc2star during low-uncertainty export")
+    p.add_argument("--pyem-python", default=None,
+                   help="Python executable with pyem installed (used by --export-star)")
     p.add_argument("--outdir", default="results", help="Output directory")
     p.add_argument("--seed", type=int, default=0)
     return p.parse_args()
+
+
+def _convert_cs_to_star(cs_path: Path, passthrough_path: Path, star_path: Path,
+                        pyem_python: str | None = None) -> str:
+    """Convert CryoSPARC particle+passthrough .cs files to RELION .star.
+
+    Tries common converter entry points in order and returns the successful
+    command as a string. Raises RuntimeError if all methods fail.
+    """
+    attempts = []
+    if pyem_python:
+        attempts.append([pyem_python, "-m", "pyem.csparc2star",
+                         str(cs_path), str(passthrough_path), str(star_path)])
+    attempts.extend([
+        ["csparc2star.py", str(cs_path), str(passthrough_path), str(star_path)],
+        ["python", "-m", "pyem.csparc2star", str(cs_path), str(passthrough_path), str(star_path)],
+        ["python3", "-m", "pyem.csparc2star", str(cs_path), str(passthrough_path), str(star_path)],
+    ])
+
+    errors = []
+    for cmd in attempts:
+        try:
+            proc = subprocess.run(cmd, check=True, capture_output=True, text=True)
+            if proc.stdout.strip():
+                print(f"          converter output: {proc.stdout.strip()}")
+            return " ".join(cmd)
+        except (FileNotFoundError, subprocess.CalledProcessError) as exc:
+            msg = str(exc)
+            if isinstance(exc, subprocess.CalledProcessError) and exc.stderr:
+                msg = f"{msg}; stderr={exc.stderr.strip()}"
+            errors.append(f"{' '.join(cmd)} -> {msg}")
+
+    joined = "\n".join(errors)
+    raise RuntimeError(
+        "Could not convert .cs to .star. Tried the following commands:\n" + joined
+    )
 
 
 def main():
@@ -117,14 +153,27 @@ def main():
     print(f"      max off-diagonal overlap (Bhattacharyya coef.) = {overlap.max():.3f}")
 
     print("       Analytical pairwise confusion (Hunt erf formula, exact for K=2)")
-    C_analytical = analytical_pairwise_confusion(prot.posterior, prot.hard_class)
-    print(f"      diag(C_analytical) = {np.round(np.diag(C_analytical),4)}")
+    C_analytical_pair = analytical_pairwise_confusion(prot.posterior, prot.hard_class)
+    print(f"      diag(C_analytical_pair) = {np.round(np.diag(C_analytical_pair),4)}")
+
+    print("       Analytical multi-class confusion (proper K>2 extension, score-space Gaussian)")
+    C_analytical = analytical_multiclass_confusion(
+        prot.posterior, prot.hard_class,
+        n_samples=args.mc_samples, random_state=args.seed,
+    )
+    print(f"      diag(C_analytical_multi) = {np.round(np.diag(C_analytical),4)}")
 
     M_empirical = hard_assignment_confusion(prot.hard_class, res.hard_labels, prot.n_protein)
 
+    pi_obs_soft = prot.posterior.mean(axis=0)
+    print(f"      observed (soft, mean posterior over protein classes): {np.round(pi_obs_soft, 4)}")
+    print(f"      observed (CryoSPARC-hard, argmax): {np.round(pi_obs_raw, 4)}")
+
     print("[6/8] Population deconvolution + bootstrap CIs")
-    pi_corrected = deconvolve_populations(pi_obs_gmm, C)
-    print(f"      corrected populations: {np.round(pi_corrected,4)}")
+    pi_corrected = deconvolve_populations(pi_obs_raw, C)
+    pi_corrected_analytical = deconvolve_populations(pi_obs_raw, C_analytical)
+    print(f"      corrected populations  (MC,         input=CSparc-hard): {np.round(pi_corrected,4)}")
+    print(f"      corrected populations  (analytical, input=CSparc-hard): {np.round(pi_corrected_analytical,4)}")
 
     def fit_fn(Xb):
         return GaussianMixture(
@@ -139,8 +188,17 @@ def main():
         mc_samples=max(5_000, args.mc_samples // 5),
         random_state=args.seed,
     )
-    print(f"      corrected mean +/- std: "
+    print(f"      corrected mean +/- std (MC boot,       GMM-refit): "
           f"{np.round(boot['corrected_mean'],4)} +/- {np.round(boot['corrected_std'],4)}")
+
+    boot_analytical = bootstrap_population_ci_analytical(
+        prot.posterior, prot.hard_class, prot.n_protein,
+        n_boot=max(args.n_boot, 200),
+        mc_samples=max(5_000, args.mc_samples // 5),
+        random_state=args.seed,
+    )
+    print(f"      corrected mean +/- std (analytic boot, no refit): "
+          f"{np.round(boot_analytical['corrected_mean'],4)} +/- {np.round(boot_analytical['corrected_std'],4)}")
 
     print("[7/8] Class-repetition analysis")
     rep = class_repetition_analysis(
@@ -152,49 +210,90 @@ def main():
     for r, w in zip(rep["r_values"], rep["mapped_weights"]):
         print(f"        r={r}: {np.round(w,4)}")
 
-    # ----------------- persist -----------------
     labels = [f"P{int(c)}" for c in post.protein_idx]
     np.save(out / "posterior_protein.npy", prot.posterior)
     np.save(out / "responsibilities.npy", res.responsibilities)
-    pd.DataFrame(C, index=labels, columns=labels).to_csv(out / "confusion_mc.csv")
-    pd.DataFrame(C_analytical, index=labels, columns=labels).to_csv(out / "confusion_analytical.csv")
+    pd.DataFrame(C, index=labels, columns=labels).to_csv(out / "confusion_montecarlo.csv")
+    pd.DataFrame(C_analytical, index=labels, columns=labels).to_csv(out / "confusion_multiclass_analytical.csv")
+    pd.DataFrame(C_analytical_pair, index=labels, columns=labels).to_csv(out / "confusion_pairwise_analytical.csv")
     pd.DataFrame(M_empirical, index=labels, columns=labels).to_csv(out / "confusion_empirical.csv")
-    pd.DataFrame(overlap, index=labels, columns=labels).to_csv(out / "bhattacharyya_overlap.csv")
+    pd.DataFrame(overlap, index=labels, columns=labels).to_csv(out / "class_overlap_bhattacharyya.csv")
     pd.DataFrame({
         "class": labels,
-        "observed": pi_obs_gmm,
-        "corrected": pi_corrected,
-        "corrected_mean_boot": boot["corrected_mean"],
-        "corrected_std_boot": boot["corrected_std"],
-        "corrected_lo": boot["corrected_lo"],
-        "corrected_hi": boot["corrected_hi"],
-    }).to_csv(out / "populations.csv", index=False)
+        "observed_csparc_hard": pi_obs_raw,
+        "observed_soft_mean_post": pi_obs_soft,
+        "observed_gmm_hard": pi_obs_gmm,
+        "corrected_mc": pi_corrected,
+        "corrected_analytical": pi_corrected_analytical,
+        "corrected_mean_boot": boot_analytical["corrected_mean"],
+        "corrected_std_boot": boot_analytical["corrected_std"],
+        "corrected_lo": boot_analytical["corrected_lo"],
+        "corrected_hi": boot_analytical["corrected_hi"],
+        "corrected_mean_boot_mc": boot["corrected_mean"],
+        "corrected_std_boot_mc": boot["corrected_std"],
+    }).to_csv(out / "conformational_populations.csv", index=False)
     pd.DataFrame(rep["mapped_weights"],
                  index=[f"r={r}" for r in rep["r_values"]],
-                 columns=labels).to_csv(out / "class_repetition.csv")
+                 columns=labels).to_csv(out / "gmm_class_repetition.csv")
 
     with open(out / "gmm_diagnostics.json", "w") as f:
         json.dump({**diag, "protein_idx": list(map(int, post.protein_idx))}, f, indent=2)
 
-    plot_confusion(C, labels, "Monte-Carlo confusion P(assigned|true)",
-                   out / "confusion_mc.png")
+    plot_confusion(C, labels, "Monte-Carlo confusion",
+                   out / "confusion_montecarlo.png")
     plot_confusion(C_analytical, labels,
-                   "Analytical pairwise confusion P(classify j | true i)  [Hunt erf formula]",
-                   out / "confusion_analytical.png")
+                   "Analytical multi-class confusion",
+                   out / "confusion_multiclass_analytical.png")
+    plot_confusion(C_analytical_pair, labels,
+                   "Analytical pairwise confusion",
+                   out / "confusion_pairwise_analytical.png")
     plot_confusion(M_empirical, labels, "Empirical CryoSPARC vs GMM hard agreement",
                    out / "confusion_empirical.png")
-    plot_population_ci(pi_obs_gmm, boot["corrected_mean"],
-                       boot["corrected_lo"], boot["corrected_hi"],
-                       labels, out / "populations.png")
+    plot_confusion(overlap, labels,
+                   "Bhattacharyya overlap  (0 = distinct,  1 = identical)",
+                   out / "class_overlap_bhattacharyya.png")
+    plot_population_ci(pi_obs_raw, pi_corrected_analytical,
+                       boot_analytical["corrected_std"],
+                       labels=labels, out=out / "conformational_populations.png")
     plot_repetition(rep["r_values"], rep["mapped_weights"], labels,
-                    out / "class_repetition.png")
+                    out / "gmm_class_repetition.png")
+    plot_gmm_landscape(
+        res.model, X, res.hard_labels, labels,
+        title=f"Negative log-likelihood predicted by GMM  ({out.name})",
+        out=out / "gmm_nll_landscape.png",
+    )
+    plot_class_table(
+        labels=labels,
+        pi_obs=pi_obs_raw,
+        pi_corr=pi_corrected_analytical,
+        pi_corr_std=boot_analytical["corrected_std"],
+        pi_corr_lo=boot_analytical["corrected_lo"],
+        pi_corr_hi=boot_analytical["corrected_hi"],
+        confusion_mc=C,
+        confusion_analytical=C_analytical,
+        title=f"{out.name}  ·  K={prot.n_protein}  ·  N={len(X):,}  ·  BIC={diag['bic']:.0f}",
+        out=out / "summary_class_table.png",
+    )
+    plot_summary_table(
+        labels=labels,
+        pi_obs=pi_obs_raw,
+        pi_corr=pi_corrected_analytical,
+        pi_corr_mean=boot_analytical["corrected_mean"],
+        pi_corr_std=boot_analytical["corrected_std"],
+        pi_corr_lo=boot_analytical["corrected_lo"],
+        pi_corr_hi=boot_analytical["corrected_hi"],
+        confusion_mc=C,
+        confusion_analytical=C_analytical,
+        bhatt_overlap=overlap,
+        diag=diag,
+        title=f"{out.name}  ·  K={prot.n_protein}  ·  N={len(X):,}  ·  BIC={diag['bic']:.0f}",
+        out=out / "full_summary_table.png",
+    )
 
-    # ---- step 8: low-uncertainty particle export ----
     print(f"[8/8] Exporting low-uncertainty particles (max resp > {args.resp_threshold})")
-    max_resp = res.responsibilities.max(axis=1)          # (N_protein,)
-    gmm_hard_protein = res.hard_labels                   # 0-based within protein classes
+    max_resp = res.responsibilities.max(axis=1)
+    gmm_hard_protein = res.hard_labels
 
-    # max_resp is indexed into prot.uid (protein-only particle array)
     lo_mask = max_resp > args.resp_threshold
     lo_uids = prot.uid[lo_mask]
     lo_gmm_class = gmm_hard_protein[lo_mask]             # 0-based GMM component index
@@ -205,9 +304,16 @@ def main():
         n_k = (lo_gmm_class == k).sum()
         print(f"        GMM component {k} ({labels[k]}): {n_k:,} particles")
 
-    # Export a per-class subset .cs file
     cs_orig = np.load(args.cs)
-    # Build a UID -> original-row index map
+    passthrough_orig = None
+    passthrough_uid_to_row = None
+    if args.passthrough_cs:
+        print(f"      loading passthrough source: {args.passthrough_cs}")
+        passthrough_orig = np.load(args.passthrough_cs)
+        if "uid" in passthrough_orig.dtype.names:
+            passthrough_uid_to_row = {int(uid): i for i, uid in enumerate(passthrough_orig["uid"])}
+        else:
+            print("      warning: passthrough .cs has no uid field; falling back to particle-row indexing")
     uid_to_row = {int(uid): i for i, uid in enumerate(cs_orig["uid"])}
     for k in range(prot.n_protein):
         comp_mask = lo_gmm_class == k
@@ -222,7 +328,37 @@ def main():
             np.save(fh, subset)
         print(f"        {labels[k]}: saved {len(rows):,} particles -> {fname.name}")
 
-    # Summary table
+        passthrough_name = out / f"low_uncertainty_{labels[k]}_passthrough.cs"
+        if passthrough_orig is not None:
+            if passthrough_uid_to_row is not None:
+                pass_rows = np.array([
+                    passthrough_uid_to_row[int(u)]
+                    for u in comp_uids
+                    if int(u) in passthrough_uid_to_row
+                ])
+            else:
+                pass_rows = rows
+
+            if len(pass_rows) == 0:
+                print(f"        {labels[k]} passthrough: no matching rows found")
+            else:
+                with open(passthrough_name, "wb") as fh:
+                    np.save(fh, passthrough_orig[pass_rows])
+                print(f"        {labels[k]} passthrough: saved {len(pass_rows):,} rows -> {passthrough_name.name}")
+
+                if args.export_star:
+                    star_name = out / f"low_uncertainty_{labels[k]}.star"
+                    try:
+                        cmd_used = _convert_cs_to_star(
+                            fname, passthrough_name, star_name,
+                            pyem_python=args.pyem_python,
+                        )
+                        print(f"        {labels[k]} star: saved -> {star_name.name} (via: {cmd_used})")
+                    except RuntimeError as exc:
+                        print(f"        {labels[k]} star: conversion failed\n{exc}")
+        elif args.export_star:
+            print(f"        {labels[k]} star: skipped (no --passthrough-cs provided)")
+
     pd.DataFrame({
         "uid": lo_uids,
         "gmm_component": lo_gmm_class,

@@ -83,39 +83,12 @@ def analytical_pairwise_confusion(
     posteriors: np.ndarray,
     hard_labels: np.ndarray,
 ) -> np.ndarray:
-    """Exact pairwise confusion via the erf formula (Hunt classification notes).
+    """Pairwise confusion via the erf formula (Hunt, Oct 2024).
 
-    For each ordered pair (i, j) with i ≠ j, the method
-
-    1. Selects particles hard-assigned to class i.
-    2. Extracts their 2-D posterior score vector (S_i, S_j) from ``posteriors``.
-    3. Fits a Gaussian: empirical mean m and covariance C_cov.
-    4. Projects onto the difference axis a = [1, -1] / sqrt(2):
-           z  = (m · a) / sqrt(2 * a^T C_cov a)
-       which measures how far the mean score-difference is from the decision
-       boundary in units of the projected standard deviation.
-    5. Returns the misclassification probability
-           C[i, j] = 0.5 - 0.5 * erf(z)
-
-    This formula is *exact* for the 2-class Gaussian classifier.  For K > 2
-    classes it is a *pairwise approximation* — each (i,j) pair is evaluated
-    independently, ignoring competing classes.  The diagonal is set to
-    1 − sum_of_off-diagonal so each row sums to 1.
-
-    Reference: Hunt, H.S., "Score Classification Problem", Oct 2024.
-
-    Parameters
-    ----------
-    posteriors : (N, K) array
-        Raw class-posterior probabilities from CryoSPARC (not ALR-transformed).
-    hard_labels : (N,) int array
-        Hard class assignment for each particle (0-indexed, length K classes).
-
-    Returns
-    -------
-    C : (K, K) float array
-        Row-normalised pairwise confusion matrix.  NaN rows indicate classes
-        with fewer than 10 particles.
+    For each pair (i, j), fits a Gaussian to the 2-D posterior score vectors
+    of particles labeled i and returns C[i,j] = 0.5 - 0.5*erf(z).
+    Exact for K=2; pairwise approximation for K>2 (use
+    analytical_multiclass_confusion for the proper multi-class extension).
     """
     from scipy.special import erf as _erf
 
@@ -151,4 +124,38 @@ def analytical_pairwise_confusion(
 
         C[i, i] = max(0.0, 1.0 - off_sum)
 
+    return C
+
+
+def analytical_multiclass_confusion(
+    posteriors: np.ndarray,
+    hard_labels: np.ndarray,
+    n_samples: int = 50_000,
+    min_particles: int = 10,
+    reg: float = 1e-6,
+    random_state: int = 0,
+) -> np.ndarray:
+    """Multi-class confusion via score-space Gaussian sampling.
+
+    For each true class i, fits a K-dim Gaussian to the posterior score vectors
+    of particles labeled i, draws n_samples, and computes C[i,j] as the fraction
+    with argmax=j. Proper K>2 generalization of the pairwise erf formula.
+    """
+    rng = np.random.default_rng(random_state)
+    N, K = posteriors.shape
+    C = np.full((K, K), np.nan)
+    for i in range(K):
+        mask = hard_labels == i
+        if mask.sum() < min_particles:
+            continue
+        scores = posteriors[mask]
+        mu = scores.mean(axis=0)
+        cov = np.cov(scores.T) + reg * np.eye(K)
+        try:
+            samples = rng.multivariate_normal(mu, cov, size=n_samples)
+        except np.linalg.LinAlgError:
+            cov = cov + 1e-3 * np.eye(K)
+            samples = rng.multivariate_normal(mu, cov, size=n_samples)
+        preds = samples.argmax(axis=1)
+        C[i] = np.bincount(preds, minlength=K) / n_samples
     return C

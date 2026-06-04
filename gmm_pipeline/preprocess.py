@@ -30,12 +30,3 @@ def alr_transform(p: np.ndarray, ref: int = -1, eps: float = 1e-6) -> np.ndarray
     y = np.log(np.delete(p, ref, axis=1) / ref_col)
     return y
 
-
-def inverse_alr(y: np.ndarray, ref: int = -1) -> np.ndarray:
-    """Inverse ALR back to the simplex (for sanity checks / visualisations)."""
-    ey = np.exp(y)
-    denom = 1.0 + ey.sum(axis=1, keepdims=True)
-    p_rest = ey / denom
-    p_ref = 1.0 / denom
-    insert_at = y.shape[1] if ref == -1 else ref
-    return np.insert(p_rest, insert_at, p_ref[:, 0], axis=1)
