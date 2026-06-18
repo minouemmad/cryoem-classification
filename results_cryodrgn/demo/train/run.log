@@ -1,0 +1,148 @@
+C:\Users\maemm\OneDrive\Desktop\CryoEM\cryodrgn-py310\Scripts\cryodrgn train_vae results_cryodrgn/demo_idpose/inputs/particles.mrcs --poses results_cryodrgn/demo_idpose/inputs/poses.pkl --zdim 4 -n 20 --enc-dim 128 --enc-layers 2 --dec-dim 128 --dec-layers 2 -o results_cryodrgn/demo_idpose/train
+cryoDRGN 4.3.0
+Namespace(particles='C:\\Users\\maemm\\OneDrive\\Desktop\\CryoEM\\results_cryodrgn\\demo_idpose\\inputs\\particles.mrcs', outdir='C:\\Users\\maemm\\OneDrive\\Desktop\\CryoEM\\results_cryodrgn\\demo_idpose\\train', zdim=4, poses='C:\\Users\\maemm\\OneDrive\\Desktop\\CryoEM\\results_cryodrgn\\demo_idpose\\inputs\\poses.pkl', ctf=None, load=None, do_analysis=True, checkpoint=1, log_interval=1000, verbose=False, seed=31021, shuffle_seed=None, ind=None, invert_data=True, window=True, window_r=0.85, datadir=None, lazy=False, shuffler_size=0, num_workers=None, max_threads=16, ntilts=10, random_tilts=False, t_emb_dim=64, tlayers=3, tdim=1024, dose_per_tilt=None, angle_per_tilt=3, num_epochs=20, batch_size=16, wd=0, lr=0.0001, beta=None, beta_control=None, norm=None, amp=True, multigpu=False, do_pose_sgd=False, pretrain=1, emb_type='quat', pose_lr=0.0003, qlayers=2, qdim=128, encode_mode='resid', enc_mask=None, use_real=False, players=2, pdim=128, pe_type='gaussian', feat_sigma=0.5, pe_dim=None, domain='fourier', activation='relu', func=<function main at 0x00000292AA82D360>)
+Use cuda False
+WARNING: No GPUs detected
+Loading dataset from C:\Users\maemm\OneDrive\Desktop\CryoEM\results_cryodrgn\demo_idpose\inputs\particles.mrcs
+HetOnlyVAE(
+  (encoder): ResidLinearMLP(
+    (main): Sequential(
+      (0): MyLinear(in_features=3208, out_features=128, bias=True)
+      (1): ReLU()
+      (2): ResidLinear(
+        (linear): MyLinear(in_features=128, out_features=128, bias=True)
+      )
+      (3): ReLU()
+      (4): ResidLinear(
+        (linear): MyLinear(in_features=128, out_features=128, bias=True)
+      )
+      (5): ReLU()
+      (6): MyLinear(in_features=128, out_features=8, bias=True)
+    )
+  )
+  (decoder): FTPositionalDecoder(
+    (decoder): ResidLinearMLP(
+      (main): Sequential(
+        (0): MyLinear(in_features=196, out_features=128, bias=True)
+        (1): ReLU()
+        (2): ResidLinear(
+          (linear): MyLinear(in_features=128, out_features=128, bias=True)
+        )
+        (3): ReLU()
+        (4): ResidLinear(
+          (linear): MyLinear(in_features=128, out_features=128, bias=True)
+        )
+        (5): ReLU()
+        (6): MyLinear(in_features=128, out_features=2, bias=True)
+      )
+    )
+  )
+)
+503306 parameters in model
+444808 parameters in encoder
+58498 parameters in decoder
+Z dimension 4 is not a multiple of 8 -- AMP training speedup is not optimized!
+Using 0 workers for data loading
+# [Train Epoch: 1/20] [1008/3000 particles] gen loss=0.712792, kld=4.410580, beta=0.250000, loss=0.713136
+# [Train Epoch: 1/20] [2000/3000 particles] gen loss=0.513823, kld=8.971972, beta=0.250000, loss=0.514522
+# [Train Epoch: 1/20] [3000/3000 particles] gen loss=0.462984, kld=14.426623, beta=0.250000, loss=0.464108
+# =====> Epoch: 1 Average gen loss = 0.63011, KLD = 6.470688, total loss = 0.630615; Finished in 0:00:35.308997
+Evaluating z
+# [Train Epoch: 2/20] [1008/3000 particles] gen loss=0.431563, kld=14.989891, beta=0.250000, loss=0.432732
+# [Train Epoch: 2/20] [2000/3000 particles] gen loss=0.426052, kld=16.755325, beta=0.250000, loss=0.427358
+# [Train Epoch: 2/20] [3000/3000 particles] gen loss=0.422457, kld=17.715813, beta=0.250000, loss=0.423837
+# =====> Epoch: 2 Average gen loss = 0.431086, KLD = 15.218357, total loss = 0.432272; Finished in 0:00:57.616255
+Evaluating z
+# [Train Epoch: 3/20] [1008/3000 particles] gen loss=0.418892, kld=16.281412, beta=0.250000, loss=0.420161
+# [Train Epoch: 3/20] [2000/3000 particles] gen loss=0.413795, kld=16.470209, beta=0.250000, loss=0.415078
+# [Train Epoch: 3/20] [3000/3000 particles] gen loss=0.406218, kld=16.684816, beta=0.250000, loss=0.407518
+# =====> Epoch: 3 Average gen loss = 0.416769, KLD = 16.419339, total loss = 0.418049; Finished in 0:00:46.113316
+Evaluating z
+# [Train Epoch: 4/20] [1008/3000 particles] gen loss=0.412995, kld=15.330360, beta=0.250000, loss=0.414190
+# [Train Epoch: 4/20] [2000/3000 particles] gen loss=0.411640, kld=15.260188, beta=0.250000, loss=0.412830
+# [Train Epoch: 4/20] [3000/3000 particles] gen loss=0.411250, kld=14.733762, beta=0.250000, loss=0.412398
+# =====> Epoch: 4 Average gen loss = 0.412743, KLD = 15.137623, total loss = 0.413922; Finished in 0:00:43.935440
+Evaluating z
+# [Train Epoch: 5/20] [1008/3000 particles] gen loss=0.413153, kld=14.513144, beta=0.250000, loss=0.414284
+# [Train Epoch: 5/20] [2000/3000 particles] gen loss=0.407782, kld=14.133038, beta=0.250000, loss=0.408883
+# [Train Epoch: 5/20] [3000/3000 particles] gen loss=0.410984, kld=13.847472, beta=0.250000, loss=0.412063
+# =====> Epoch: 5 Average gen loss = 0.410352, KLD = 14.124925, total loss = 0.411453; Finished in 0:00:44.447352
+Evaluating z
+# [Train Epoch: 6/20] [1008/3000 particles] gen loss=0.411560, kld=13.579629, beta=0.250000, loss=0.412618
+# [Train Epoch: 6/20] [2000/3000 particles] gen loss=0.403006, kld=13.521905, beta=0.250000, loss=0.404060
+# [Train Epoch: 6/20] [3000/3000 particles] gen loss=0.418096, kld=13.319779, beta=0.250000, loss=0.419134
+# =====> Epoch: 6 Average gen loss = 0.408443, KLD = 13.451651, total loss = 0.409492; Finished in 0:00:44.707485
+Evaluating z
+# [Train Epoch: 7/20] [1008/3000 particles] gen loss=0.410432, kld=12.594282, beta=0.250000, loss=0.411414
+# [Train Epoch: 7/20] [2000/3000 particles] gen loss=0.406804, kld=13.108776, beta=0.250000, loss=0.407825
+# [Train Epoch: 7/20] [3000/3000 particles] gen loss=0.403691, kld=13.001507, beta=0.250000, loss=0.404705
+# =====> Epoch: 7 Average gen loss = 0.406749, KLD = 13.004581, total loss = 0.407762; Finished in 0:00:49.000695
+Evaluating z
+# [Train Epoch: 8/20] [1008/3000 particles] gen loss=0.411435, kld=13.009327, beta=0.250000, loss=0.412449
+# [Train Epoch: 8/20] [2000/3000 particles] gen loss=0.404575, kld=12.400321, beta=0.250000, loss=0.405541
+# [Train Epoch: 8/20] [3000/3000 particles] gen loss=0.402479, kld=12.332056, beta=0.250000, loss=0.403440
+# =====> Epoch: 8 Average gen loss = 0.405221, KLD = 12.518762, total loss = 0.406196; Finished in 0:00:47.213421
+Evaluating z
+# [Train Epoch: 9/20] [1008/3000 particles] gen loss=0.405851, kld=11.786489, beta=0.250000, loss=0.406770
+# [Train Epoch: 9/20] [2000/3000 particles] gen loss=0.395412, kld=12.494546, beta=0.250000, loss=0.396386
+# [Train Epoch: 9/20] [3000/3000 particles] gen loss=0.405134, kld=11.993670, beta=0.250000, loss=0.406068
+# =====> Epoch: 9 Average gen loss = 0.40396, KLD = 12.188130, total loss = 0.404910; Finished in 0:00:48.779362
+Evaluating z
+# [Train Epoch: 10/20] [1008/3000 particles] gen loss=0.406681, kld=11.883254, beta=0.250000, loss=0.407607
+# [Train Epoch: 10/20] [2000/3000 particles] gen loss=0.401481, kld=11.572039, beta=0.250000, loss=0.402383
+# [Train Epoch: 10/20] [3000/3000 particles] gen loss=0.397607, kld=11.359970, beta=0.250000, loss=0.398492
+# =====> Epoch: 10 Average gen loss = 0.403003, KLD = 11.840097, total loss = 0.403926; Finished in 0:00:46.554938
+Evaluating z
+# [Train Epoch: 11/20] [1008/3000 particles] gen loss=0.402200, kld=11.692558, beta=0.250000, loss=0.403111
+# [Train Epoch: 11/20] [2000/3000 particles] gen loss=0.405376, kld=11.899412, beta=0.250000, loss=0.406303
+# [Train Epoch: 11/20] [3000/3000 particles] gen loss=0.406511, kld=11.109451, beta=0.250000, loss=0.407377
+# =====> Epoch: 11 Average gen loss = 0.402284, KLD = 11.550508, total loss = 0.403184; Finished in 0:00:51.195451
+Evaluating z
+# [Train Epoch: 12/20] [1008/3000 particles] gen loss=0.401269, kld=11.850718, beta=0.250000, loss=0.402192
+# [Train Epoch: 12/20] [2000/3000 particles] gen loss=0.403341, kld=11.166030, beta=0.250000, loss=0.404211
+# [Train Epoch: 12/20] [3000/3000 particles] gen loss=0.391746, kld=11.367083, beta=0.250000, loss=0.392632
+# =====> Epoch: 12 Average gen loss = 0.401758, KLD = 11.308203, total loss = 0.402639; Finished in 0:00:51.117020
+Evaluating z
+# [Train Epoch: 13/20] [1008/3000 particles] gen loss=0.404882, kld=11.699966, beta=0.250000, loss=0.405793
+# [Train Epoch: 13/20] [2000/3000 particles] gen loss=0.397622, kld=10.695701, beta=0.250000, loss=0.398455
+# [Train Epoch: 13/20] [3000/3000 particles] gen loss=0.402903, kld=11.132353, beta=0.250000, loss=0.403771
+# =====> Epoch: 13 Average gen loss = 0.401425, KLD = 11.049485, total loss = 0.402286; Finished in 0:00:47.309826
+Evaluating z
+# [Train Epoch: 14/20] [1008/3000 particles] gen loss=0.403602, kld=10.991897, beta=0.250000, loss=0.404459
+# [Train Epoch: 14/20] [2000/3000 particles] gen loss=0.398638, kld=10.482991, beta=0.250000, loss=0.399455
+# [Train Epoch: 14/20] [3000/3000 particles] gen loss=0.405401, kld=10.798455, beta=0.250000, loss=0.406243
+# =====> Epoch: 14 Average gen loss = 0.401162, KLD = 10.879692, total loss = 0.402010; Finished in 0:00:46.133258
+Evaluating z
+# [Train Epoch: 15/20] [1008/3000 particles] gen loss=0.401788, kld=10.496706, beta=0.250000, loss=0.402606
+# [Train Epoch: 15/20] [2000/3000 particles] gen loss=0.397744, kld=10.554084, beta=0.250000, loss=0.398566
+# [Train Epoch: 15/20] [3000/3000 particles] gen loss=0.395115, kld=10.830976, beta=0.250000, loss=0.395959
+# =====> Epoch: 15 Average gen loss = 0.40096, KLD = 10.702812, total loss = 0.401794; Finished in 0:00:46.629472
+Evaluating z
+# [Train Epoch: 16/20] [1008/3000 particles] gen loss=0.408496, kld=10.402477, beta=0.250000, loss=0.409306
+# [Train Epoch: 16/20] [2000/3000 particles] gen loss=0.396203, kld=10.394968, beta=0.250000, loss=0.397013
+# [Train Epoch: 16/20] [3000/3000 particles] gen loss=0.404622, kld=10.719466, beta=0.250000, loss=0.405458
+# =====> Epoch: 16 Average gen loss = 0.400805, KLD = 10.490202, total loss = 0.401623; Finished in 0:00:46.262185
+Evaluating z
+# [Train Epoch: 17/20] [1008/3000 particles] gen loss=0.399783, kld=10.173119, beta=0.250000, loss=0.400576
+# [Train Epoch: 17/20] [2000/3000 particles] gen loss=0.398750, kld=10.010182, beta=0.250000, loss=0.399530
+# [Train Epoch: 17/20] [3000/3000 particles] gen loss=0.395532, kld=10.643868, beta=0.250000, loss=0.396361
+# =====> Epoch: 17 Average gen loss = 0.400663, KLD = 10.373913, total loss = 0.401471; Finished in 0:00:44.876220
+Evaluating z
+# [Train Epoch: 18/20] [1008/3000 particles] gen loss=0.404434, kld=10.920516, beta=0.250000, loss=0.405285
+# [Train Epoch: 18/20] [2000/3000 particles] gen loss=0.393930, kld=10.048020, beta=0.250000, loss=0.394713
+# [Train Epoch: 18/20] [3000/3000 particles] gen loss=0.406730, kld=10.182237, beta=0.250000, loss=0.407524
+# =====> Epoch: 18 Average gen loss = 0.400545, KLD = 10.271023, total loss = 0.401345; Finished in 0:00:43.630092
+Evaluating z
+# [Train Epoch: 19/20] [1008/3000 particles] gen loss=0.403034, kld=10.300230, beta=0.250000, loss=0.403837
+# [Train Epoch: 19/20] [2000/3000 particles] gen loss=0.399054, kld=9.589512, beta=0.250000, loss=0.399801
+# [Train Epoch: 19/20] [3000/3000 particles] gen loss=0.396262, kld=10.038498, beta=0.250000, loss=0.397044
+# =====> Epoch: 19 Average gen loss = 0.400433, KLD = 10.122524, total loss = 0.401222; Finished in 0:00:43.977277
+Evaluating z
+# [Train Epoch: 20/20] [1008/3000 particles] gen loss=0.397490, kld=10.057917, beta=0.250000, loss=0.398274
+# [Train Epoch: 20/20] [2000/3000 particles] gen loss=0.398096, kld=9.606794, beta=0.250000, loss=0.398844
+# [Train Epoch: 20/20] [3000/3000 particles] gen loss=0.400193, kld=10.164902, beta=0.250000, loss=0.400985
+# =====> Epoch: 20 Average gen loss = 0.400403, KLD = 10.036490, total loss = 0.401185; Finished in 0:00:44.152998
+Evaluating z
+Training complete
+Evaluating z
+Finished in 0:15:42.562773 (0:00:47.128139 per epoch)

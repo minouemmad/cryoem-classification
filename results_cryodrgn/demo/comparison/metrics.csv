@@ -1,0 +1,3 @@
+reference,clustering,ARI,AMI,NMI,Vmeasure
+ground_truth,kmeans,1.0,1.0,1.0,1.0
+ground_truth,gmm,1.0,1.0,1.0,1.0
