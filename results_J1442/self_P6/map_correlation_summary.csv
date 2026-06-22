@@ -1,0 +1,2 @@
+pair,cross_correlation,diff_rms,diff_map
+P6_hetero vs P6_nu09,0.8099,0.00947,diff_P6_nu09_minus_P6_hetero.mrc

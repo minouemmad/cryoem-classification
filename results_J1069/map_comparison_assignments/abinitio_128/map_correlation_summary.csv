@@ -1,0 +1,4 @@
+pair,cross_correlation,diff_rms,diff_map
+A6 vs A7,0.8514,0.01536,diff_A7_minus_A6.mrc
+A6 vs A8,0.4029,0.03147,diff_A8_minus_A6.mrc
+A7 vs A8,0.4217,0.03045,diff_A8_minus_A7.mrc

@@ -1,0 +1,2 @@
+pair,cross_correlation,diff_rms,diff_map
+P8_orig vs P8_weighted,0.5579,0.01013,diff_P8_weighted_minus_P8_orig.mrc

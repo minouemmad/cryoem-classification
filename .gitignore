@@ -1,0 +1,22 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.ipynb_checkpoints/
+
+# Virtual environments (do not commit interpreters)
+.venv/
+venv/
+env/
+cryodrgn-py310/
+
+# Large cryo-EM binaries — kept locally, not versioned (too large for GitHub)
+*.mrc
+*.mrcs
+*.cs
+*.star
+
+# OS / editor
+.DS_Store
+Thumbs.db

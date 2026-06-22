@@ -21,14 +21,16 @@ from sklearn.mixture import GaussianMixture
 from gmm_pipeline import (
     alr_transform,
     bhattacharyya_pairwise,
-    bootstrap_population_ci,
     bootstrap_population_ci_analytical,
+    bootstrap_gmm_parameters,
     class_repetition_analysis,
     deconvolve_populations,
     fit_gmm,
     gmm_diagnostics,
+    gmm_confusion_equalprior,
     analytical_pairwise_confusion,
     analytical_multiclass_confusion,
+    soft_posterior_confusion,
     hard_assignment_confusion,
     load_posteriors,
     monte_carlo_confusion,
@@ -39,8 +41,8 @@ from gmm_pipeline.plots import (
     plot_confusion,
     plot_gmm_landscape,
     plot_population_ci,
+    plot_population_comparison,
     plot_repetition,
-    plot_summary_table,
 )
 
 
@@ -108,10 +110,29 @@ def _convert_cs_to_star(cs_path: Path, passthrough_path: Path, star_path: Path,
     )
 
 
+def _sanitize_confusion(C: np.ndarray, n: int) -> np.ndarray:
+    """Make a confusion matrix safe to invert: replace all-NaN rows (classes
+    with too few particles to estimate) with the identity row so the matrix
+    stays row-stochastic and non-singular."""
+    C = np.array(C, dtype=np.float64, copy=True)
+    for i in range(n):
+        if not np.all(np.isfinite(C[i])) or C[i].sum() <= 0:
+            C[i] = 0.0
+            C[i, i] = 1.0
+    return C
+
+
 def main():
     args = parse_args()
     out = Path(args.outdir)
     out.mkdir(parents=True, exist_ok=True)
+    # Organised sub-folders (see gmm_pipeline/README.md "Outputs").
+    conf_dir = out / "confusion"
+    pop_dir = out / "populations"
+    gmm_dir = out / "gmm"
+    export_dir = out / "exports"
+    for d in (conf_dir, pop_dir, gmm_dir, export_dir):
+        d.mkdir(parents=True, exist_ok=True)
 
     print(f"[1/8] Loading {args.cs}")
     post = load_posteriors(args.cs, protein_idx=args.protein_idx,
@@ -163,6 +184,14 @@ def main():
     )
     print(f"      diag(C_analytical_multi) = {np.round(np.diag(C_analytical),4)}")
 
+    print("       GMM equal-prior confusion (geometry only, no mixing-weight bias)")
+    C_gmm_eq = gmm_confusion_equalprior(res.model, args.mc_samples, random_state=args.seed)
+    print(f"      diag(C_gmm_eq) = {np.round(np.diag(C_gmm_eq),4)}")
+
+    print("       Soft-posterior confusion (honest, no selection bias, no GMM) -- primary")
+    C_soft = soft_posterior_confusion(prot.posterior)
+    print(f"      diag(C_soft) = {np.round(np.diag(C_soft),4)}")
+
     M_empirical = hard_assignment_confusion(prot.hard_class, res.hard_labels, prot.n_protein)
 
     pi_obs_soft = prot.posterior.mean(axis=0)
@@ -170,10 +199,26 @@ def main():
     print(f"      observed (CryoSPARC-hard, argmax): {np.round(pi_obs_raw, 4)}")
 
     print("[6/8] Population deconvolution + bootstrap CIs")
-    pi_corrected = deconvolve_populations(pi_obs_raw, C)
-    pi_corrected_analytical = deconvolve_populations(pi_obs_raw, C_analytical)
-    print(f"      corrected populations  (MC,         input=CSparc-hard): {np.round(pi_corrected,4)}")
-    print(f"      corrected populations  (analytical, input=CSparc-hard): {np.round(pi_corrected_analytical,4)}")
+    # Every confusion matrix, in reporting order (primary first). The flag marks
+    # whether the matrix lives in CryoSPARC class space (honest, directly
+    # invertible against pi_obs) or in GMM-component space (diagnostic; tagged
+    # ".g" in tables/plots so the basis mismatch is explicit).
+    confusion_set = {
+        "soft": ("Soft-posterior", C_soft, True),
+        "multi": ("Analytical-multi", C_analytical, True),
+        "pair": ("Analytical-pair", C_analytical_pair, True),
+        "mc.g": ("Monte-Carlo", C, False),
+        "eq.g": ("GMM-equalprior", C_gmm_eq, False),
+    }
+    corrections, accuracies = {}, {}
+    for key, (_disp, Cm, _honest) in confusion_set.items():
+        Cm_clean = _sanitize_confusion(Cm, prot.n_protein)
+        corrections[key] = deconvolve_populations(pi_obs_raw, Cm_clean)
+        accuracies[key] = np.diag(Cm_clean)
+        print(f"      corrected populations  [{key:5s}]: {np.round(corrections[key],4)}  "
+              f"(diag acc {np.round(accuracies[key],3)})")
+    pi_corrected_soft = corrections["soft"]
+    pi_corrected_analytical = corrections["multi"]
 
     def fit_fn(Xb):
         return GaussianMixture(
@@ -183,14 +228,6 @@ def main():
             random_state=args.seed, means_init=res.model.means_,
         ).fit(Xb)
 
-    boot = bootstrap_population_ci(
-        X, fit_fn, n_boot=args.n_boot,
-        mc_samples=max(5_000, args.mc_samples // 5),
-        random_state=args.seed,
-    )
-    print(f"      corrected mean +/- std (MC boot,       GMM-refit): "
-          f"{np.round(boot['corrected_mean'],4)} +/- {np.round(boot['corrected_std'],4)}")
-
     boot_analytical = bootstrap_population_ci_analytical(
         prot.posterior, prot.hard_class, prot.n_protein,
         n_boot=max(args.n_boot, 200),
@@ -199,6 +236,19 @@ def main():
     )
     print(f"      corrected mean +/- std (analytic boot, no refit): "
           f"{np.round(boot_analytical['corrected_mean'],4)} +/- {np.round(boot_analytical['corrected_std'],4)}")
+
+    print(f"      GMM parameter bootstrap ({args.n_boot} replicates, equal-prior confusion)...")
+    boot_gmm = bootstrap_gmm_parameters(
+        X, fit_fn, n_boot=args.n_boot,
+        mc_samples=max(5_000, args.mc_samples // 5),
+        random_state=args.seed,
+    )
+    print(f"      GMM means ||std|| per component: "
+          f"{np.round(np.linalg.norm(boot_gmm['means_std'], axis=1), 4)}")
+    print(f"      GMM confusion (equal-prior) bootstrap mean diag: "
+          f"{np.round(np.diag(boot_gmm['confusion_mean']), 4)}")
+    print(f"      GMM confusion (equal-prior) bootstrap std  diag: "
+          f"{np.round(np.diag(boot_gmm['confusion_std']), 4)}")
 
     print("[7/8] Class-repetition analysis")
     rep = class_repetition_analysis(
@@ -211,83 +261,109 @@ def main():
         print(f"        r={r}: {np.round(w,4)}")
 
     labels = [f"P{int(c)}" for c in post.protein_idx]
-    np.save(out / "posterior_protein.npy", prot.posterior)
-    np.save(out / "responsibilities.npy", res.responsibilities)
-    pd.DataFrame(C, index=labels, columns=labels).to_csv(out / "confusion_montecarlo.csv")
-    pd.DataFrame(C_analytical, index=labels, columns=labels).to_csv(out / "confusion_multiclass_analytical.csv")
-    pd.DataFrame(C_analytical_pair, index=labels, columns=labels).to_csv(out / "confusion_pairwise_analytical.csv")
-    pd.DataFrame(M_empirical, index=labels, columns=labels).to_csv(out / "confusion_empirical.csv")
-    pd.DataFrame(overlap, index=labels, columns=labels).to_csv(out / "class_overlap_bhattacharyya.csv")
+    # ---- GMM model artifacts + raw arrays -> gmm/ ----
+    np.save(gmm_dir / "posterior_protein.npy", prot.posterior)
+    np.save(gmm_dir / "responsibilities.npy", res.responsibilities)
+    pd.DataFrame(boot_gmm["means_mean"], index=labels).to_csv(gmm_dir / "gmm_means_mean.csv")
+    pd.DataFrame(boot_gmm["means_std"], index=labels).to_csv(gmm_dir / "gmm_means_std.csv")
+    pd.DataFrame(boot_gmm["weights_mean"], index=labels, columns=["weight_mean"]).to_csv(gmm_dir / "gmm_weights_mean.csv")
+    pd.DataFrame(boot_gmm["weights_std"], index=labels, columns=["weight_std"]).to_csv(gmm_dir / "gmm_weights_std.csv")
+    np.save(gmm_dir / "bootstrap_gmm_means.npy", boot_gmm["raw_means"])
+    np.save(gmm_dir / "bootstrap_gmm_confusion.npy", boot_gmm["raw_confusion"])
+    if "covs_mean" in boot_gmm:
+        np.save(gmm_dir / "bootstrap_gmm_covs.npy", boot_gmm["raw_covs"])
+    pd.DataFrame(rep["mapped_weights"],
+                 index=[f"r={r}" for r in rep["r_values"]],
+                 columns=labels).to_csv(gmm_dir / "gmm_class_repetition.csv")
+    with open(gmm_dir / "gmm_diagnostics.json", "w") as f:
+        json.dump({**diag, "protein_idx": list(map(int, post.protein_idx))}, f, indent=2)
+
+    # ---- confusion matrices -> confusion/ ----
+    pd.DataFrame(C, index=labels, columns=labels).to_csv(conf_dir / "confusion_montecarlo.csv")
+    pd.DataFrame(C_gmm_eq, index=labels, columns=labels).to_csv(conf_dir / "confusion_gmm_equalprior.csv")
+    pd.DataFrame(boot_gmm["confusion_mean"], index=labels, columns=labels).to_csv(conf_dir / "confusion_gmm_equalprior_mean.csv")
+    pd.DataFrame(boot_gmm["confusion_std"], index=labels, columns=labels).to_csv(conf_dir / "confusion_gmm_equalprior_std.csv")
+    pd.DataFrame(C_analytical, index=labels, columns=labels).to_csv(conf_dir / "confusion_multiclass_analytical.csv")
+    pd.DataFrame(C_analytical_pair, index=labels, columns=labels).to_csv(conf_dir / "confusion_pairwise_analytical.csv")
+    pd.DataFrame(C_soft, index=labels, columns=labels).to_csv(conf_dir / "confusion_soft_posterior.csv")
+    pd.DataFrame(M_empirical, index=labels, columns=labels).to_csv(conf_dir / "confusion_empirical.csv")
+    pd.DataFrame(overlap, index=labels, columns=labels).to_csv(conf_dir / "class_overlap_bhattacharyya.csv")
+
+    # ---- populations -> populations/ ----
     pd.DataFrame({
         "class": labels,
         "observed_csparc_hard": pi_obs_raw,
         "observed_soft_mean_post": pi_obs_soft,
         "observed_gmm_hard": pi_obs_gmm,
-        "corrected_mc": pi_corrected,
+        "corrected_soft_posterior": pi_corrected_soft,
         "corrected_analytical": pi_corrected_analytical,
         "corrected_mean_boot": boot_analytical["corrected_mean"],
         "corrected_std_boot": boot_analytical["corrected_std"],
         "corrected_lo": boot_analytical["corrected_lo"],
         "corrected_hi": boot_analytical["corrected_hi"],
-        "corrected_mean_boot_mc": boot["corrected_mean"],
-        "corrected_std_boot_mc": boot["corrected_std"],
-    }).to_csv(out / "conformational_populations.csv", index=False)
-    pd.DataFrame(rep["mapped_weights"],
-                 index=[f"r={r}" for r in rep["r_values"]],
-                 columns=labels).to_csv(out / "gmm_class_repetition.csv")
+    }).to_csv(pop_dir / "conformational_populations.csv", index=False)
 
-    with open(out / "gmm_diagnostics.json", "w") as f:
-        json.dump({**diag, "protein_idx": list(map(int, post.protein_idx))}, f, indent=2)
+    # Corrected populations + diagonal accuracy from EVERY confusion matrix,
+    # so the effect of each inversion step is side by side.
+    all_matrix_cols = {"class": labels, "observed_csparc_hard": pi_obs_raw}
+    for key in confusion_set:
+        all_matrix_cols[f"corrected_{key}"] = corrections[key]
+        all_matrix_cols[f"accuracy_{key}"] = accuracies[key]
+    pd.DataFrame(all_matrix_cols).to_csv(
+        pop_dir / "population_corrections_all_matrices.csv", index=False)
 
-    plot_confusion(C, labels, "Monte-Carlo confusion",
-                   out / "confusion_montecarlo.png")
+    # ---- confusion plots -> confusion/ ----
+    plot_confusion(C, labels, "Monte-Carlo confusion  (GMM-component space)",
+                   conf_dir / "confusion_montecarlo.png")
+    plot_confusion(C_gmm_eq, labels,
+                   "GMM equal-prior confusion  (geometry only)",
+                   conf_dir / "confusion_gmm_equalprior.png")
+    plot_confusion(boot_gmm["confusion_mean"], labels,
+                   "GMM equal-prior confusion  (bootstrap mean)",
+                   conf_dir / "confusion_gmm_equalprior_mean.png")
+    plot_confusion(boot_gmm["confusion_std"], labels,
+                   "GMM equal-prior confusion  (bootstrap std)",
+                   conf_dir / "confusion_gmm_equalprior_std.png")
     plot_confusion(C_analytical, labels,
                    "Analytical multi-class confusion",
-                   out / "confusion_multiclass_analytical.png")
+                   conf_dir / "confusion_multiclass_analytical.png")
     plot_confusion(C_analytical_pair, labels,
                    "Analytical pairwise confusion",
-                   out / "confusion_pairwise_analytical.png")
+                   conf_dir / "confusion_pairwise_analytical.png")
+    plot_confusion(C_soft, labels,
+                   "Soft-posterior confusion  (honest, primary)",
+                   conf_dir / "confusion_soft_posterior.png")
     plot_confusion(M_empirical, labels, "Empirical CryoSPARC vs GMM hard agreement",
-                   out / "confusion_empirical.png")
+                   conf_dir / "confusion_empirical.png")
     plot_confusion(overlap, labels,
                    "Bhattacharyya overlap  (0 = distinct,  1 = identical)",
-                   out / "class_overlap_bhattacharyya.png")
-    plot_population_ci(pi_obs_raw, pi_corrected_analytical,
+                   conf_dir / "class_overlap_bhattacharyya.png")
+
+    # ---- population + GMM plots ----
+    plot_population_ci(pi_obs_raw, pi_corrected_soft,
                        boot_analytical["corrected_std"],
-                       labels=labels, out=out / "conformational_populations.png")
+                       labels=labels, out=pop_dir / "conformational_populations.png")
+    plot_population_comparison(pi_obs_raw, corrections, labels=labels,
+                               out=pop_dir / "population_corrections_all_matrices.png")
     plot_repetition(rep["r_values"], rep["mapped_weights"], labels,
-                    out / "gmm_class_repetition.png")
+                    gmm_dir / "gmm_class_repetition.png")
     plot_gmm_landscape(
         res.model, X, res.hard_labels, labels,
         title=f"Negative log-likelihood predicted by GMM  ({out.name})",
-        out=out / "gmm_nll_landscape.png",
+        out=gmm_dir / "gmm_nll_landscape.png",
     )
     plot_class_table(
         labels=labels,
         pi_obs=pi_obs_raw,
-        pi_corr=pi_corrected_analytical,
+        corrections=corrections,
+        accuracies=accuracies,
+        primary="soft",
         pi_corr_std=boot_analytical["corrected_std"],
         pi_corr_lo=boot_analytical["corrected_lo"],
         pi_corr_hi=boot_analytical["corrected_hi"],
-        confusion_mc=C,
-        confusion_analytical=C_analytical,
+        extra_metrics={"Max\noverlap": overlap.max(axis=1)},
         title=f"{out.name}  ·  K={prot.n_protein}  ·  N={len(X):,}  ·  BIC={diag['bic']:.0f}",
-        out=out / "summary_class_table.png",
-    )
-    plot_summary_table(
-        labels=labels,
-        pi_obs=pi_obs_raw,
-        pi_corr=pi_corrected_analytical,
-        pi_corr_mean=boot_analytical["corrected_mean"],
-        pi_corr_std=boot_analytical["corrected_std"],
-        pi_corr_lo=boot_analytical["corrected_lo"],
-        pi_corr_hi=boot_analytical["corrected_hi"],
-        confusion_mc=C,
-        confusion_analytical=C_analytical,
-        bhatt_overlap=overlap,
-        diag=diag,
-        title=f"{out.name}  ·  K={prot.n_protein}  ·  N={len(X):,}  ·  BIC={diag['bic']:.0f}",
-        out=out / "full_summary_table.png",
+        out=pop_dir / "summary_class_table.png",
     )
 
     print(f"[8/8] Exporting low-uncertainty particles (max resp > {args.resp_threshold})")
@@ -323,12 +399,12 @@ def main():
             print(f"        {labels[k]}: no matching UIDs in original .cs — skipping")
             continue
         subset = cs_orig[rows]
-        fname = out / f"low_uncertainty_{labels[k]}.cs"
+        fname = export_dir / f"low_uncertainty_{labels[k]}.cs"
         with open(fname, "wb") as fh:
             np.save(fh, subset)
         print(f"        {labels[k]}: saved {len(rows):,} particles -> {fname.name}")
 
-        passthrough_name = out / f"low_uncertainty_{labels[k]}_passthrough.cs"
+        passthrough_name = export_dir / f"low_uncertainty_{labels[k]}_passthrough.cs"
         if passthrough_orig is not None:
             if passthrough_uid_to_row is not None:
                 pass_rows = np.array([
@@ -347,7 +423,7 @@ def main():
                 print(f"        {labels[k]} passthrough: saved {len(pass_rows):,} rows -> {passthrough_name.name}")
 
                 if args.export_star:
-                    star_name = out / f"low_uncertainty_{labels[k]}.star"
+                    star_name = export_dir / f"low_uncertainty_{labels[k]}.star"
                     try:
                         cmd_used = _convert_cs_to_star(
                             fname, passthrough_name, star_name,
@@ -364,8 +440,8 @@ def main():
         "gmm_component": lo_gmm_class,
         "gmm_label": [labels[k] for k in lo_gmm_class],
         "max_responsibility": lo_max_resp,
-    }).to_csv(out / "low_uncertainty_particles.csv", index=False)
-    print(f"      particle list -> low_uncertainty_particles.csv")
+    }).to_csv(export_dir / "low_uncertainty_particles.csv", index=False)
+    print(f"      particle list -> exports/low_uncertainty_particles.csv")
 
     print(f"\nDone. Outputs written to {out.resolve()}")
 

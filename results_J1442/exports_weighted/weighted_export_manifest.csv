@@ -1,0 +1,13 @@
+beta,class,n_particles,effective_n,mean_weight,cs,passthrough
+1.0,P6,230396,76185.76643469854,0.3306731298924397,weighted_b1_P6.cs,weighted_b1_P6_passthrough.cs
+1.0,P7,230396,77663.57697522381,0.3370873494992266,weighted_b1_P7.cs,weighted_b1_P7_passthrough.cs
+1.0,P8,230396,76546.65659007766,0.3322395206083337,weighted_b1_P8.cs,weighted_b1_P8_passthrough.cs
+2.0,P6,230396,75753.24844024862,0.3287958490609586,weighted_b2_P6.cs,weighted_b2_P6_passthrough.cs
+2.0,P7,230396,78205.04147535202,0.3394374966377542,weighted_b2_P7.cs,weighted_b2_P7_passthrough.cs
+2.0,P8,230396,76437.71008439938,0.33176665430128727,weighted_b2_P8.cs,weighted_b2_P8_passthrough.cs
+4.0,P6,230396,75407.41110529244,0.32729479290131963,weighted_b4_P6.cs,weighted_b4_P6_passthrough.cs
+4.0,P7,230396,78455.84878927722,0.34052608894805997,weighted_b4_P7.cs,weighted_b4_P7_passthrough.cs
+4.0,P8,230396,76532.74010543038,0.33217911815062057,weighted_b4_P8.cs,weighted_b4_P8_passthrough.cs
+8.0,P6,230396,76164.29074668598,0.3305799178227312,weighted_b8_P6.cs,weighted_b8_P6_passthrough.cs
+8.0,P7,230396,77006.56329016053,0.3342356780940664,weighted_b8_P7.cs,weighted_b8_P7_passthrough.cs
+8.0,P8,230396,77225.1459631535,0.3351844040832024,weighted_b8_P8.cs,weighted_b8_P8_passthrough.cs

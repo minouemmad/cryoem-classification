@@ -1,0 +1,2 @@
+pair,cross_correlation,diff_rms,diff_map
+P8_hetero vs P8_nu09,0.8158,0.01005,diff_P8_nu09_minus_P8_hetero.mrc

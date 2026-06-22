@@ -1,0 +1,14 @@
+open "C:/Users/maemm/OneDrive/Desktop/CryoEM/data/maps/J1442_nu_r09/J3361_P6_n13211.mrc"
+open "C:/Users/maemm/OneDrive/Desktop/CryoEM/data/maps/J1442_nu_r09/J3362_P7_n65008.mrc"
+open "C:/Users/maemm/OneDrive/Desktop/CryoEM/data/maps/J1442_nu_r09/J3363_P8_n3264.mrc"
+volume resample #1 spacing 3.32 modelId #11
+volume resample #2 spacing 3.32 modelId #12
+volume resample #3 spacing 3.32 modelId #13
+fitmap #11 inMap #12 search 80 metric correlation
+volume resample #11 onGrid #12 modelId #101
+save "C:/Users/maemm/OneDrive/Desktop/CryoEM/data/maps/J1442_nu_r09_aligned/J3361_P6_n13211.mrc" model #101
+save "C:/Users/maemm/OneDrive/Desktop/CryoEM/data/maps/J1442_nu_r09_aligned/J3362_P7_n65008.mrc" model #12
+fitmap #13 inMap #12 search 80 metric correlation
+volume resample #13 onGrid #12 modelId #103
+save "C:/Users/maemm/OneDrive/Desktop/CryoEM/data/maps/J1442_nu_r09_aligned/J3363_P8_n3264.mrc" model #103
+exit

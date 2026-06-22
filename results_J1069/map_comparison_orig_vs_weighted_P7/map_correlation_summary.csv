@@ -1,0 +1,2 @@
+pair,cross_correlation,diff_rms,diff_map
+P7_orig vs P7_weighted,0.5343,0.00939,diff_P7_weighted_minus_P7_orig.mrc

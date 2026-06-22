@@ -1,0 +1,4 @@
+pair,cross_correlation,diff_rms,diff_map
+P6 vs P7,0.6854,0.00904,diff_P7_minus_P6.mrc
+P6 vs P8,0.3214,0.01404,diff_P8_minus_P6.mrc
+P7 vs P8,0.3815,0.01252,diff_P8_minus_P7.mrc

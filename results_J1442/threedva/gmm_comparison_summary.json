@@ -1,0 +1,6 @@
+{
+  "n_matched": 230396,
+  "adjusted_rand_index": 0.11313261260734547,
+  "normalized_mutual_info": 0.13746674000574688,
+  "interpretation": "ARI ~0 => the 3DVA latent partition is essentially unrelated to the CryoSPARC class-posterior partition; ARI ~1 => they agree."
+}

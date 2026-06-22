@@ -30,3 +30,24 @@ def alr_transform(p: np.ndarray, ref: int = -1, eps: float = 1e-6) -> np.ndarray
     y = np.log(np.delete(p, ref, axis=1) / ref_col)
     return y
 
+
+def inverse_alr(y: np.ndarray, ref: int = -1, n_classes: int | None = None) -> np.ndarray:
+    """Inverse additive log-ratio: map ALR coordinates back to the simplex.
+
+    Given ``y`` of shape ``(N, K-1)`` produced by :func:`alr_transform` with
+    reference column ``ref``, returns the ``(N, K)`` posterior matrix whose rows
+    sum to 1. The reference column is reinstated at position ``ref``.
+    """
+    y = np.asarray(y, dtype=np.float64)
+    K = (y.shape[1] + 1) if n_classes is None else int(n_classes)
+    ref = ref % K
+    exp_y = np.exp(y)
+    denom = 1.0 + exp_y.sum(axis=1, keepdims=True)
+    non_ref = exp_y / denom                     # (N, K-1)
+    ref_val = 1.0 / denom                        # (N, 1)
+    p = np.empty((y.shape[0], K), dtype=np.float64)
+    cols = [c for c in range(K) if c != ref]
+    p[:, cols] = non_ref
+    p[:, ref] = ref_val[:, 0]
+    return p
+

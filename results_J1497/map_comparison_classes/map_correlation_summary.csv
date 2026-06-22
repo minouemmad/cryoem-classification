@@ -1,0 +1,11 @@
+pair,cross_correlation,diff_rms,diff_map
+P6 vs P7,0.162,0.02341,diff_P7_minus_P6.mrc
+P6 vs P8,0.2857,0.02317,diff_P8_minus_P6.mrc
+P6 vs P9,0.3622,0.02026,diff_P9_minus_P6.mrc
+P6 vs P10,0.1416,0.02285,diff_P10_minus_P6.mrc
+P7 vs P8,0.1604,0.02334,diff_P8_minus_P7.mrc
+P7 vs P9,0.1859,0.02084,diff_P9_minus_P7.mrc
+P7 vs P10,0.5569,0.01494,diff_P10_minus_P7.mrc
+P8 vs P9,0.4917,0.01806,diff_P9_minus_P8.mrc
+P8 vs P10,0.1519,0.02265,diff_P10_minus_P8.mrc
+P9 vs P10,0.1754,0.02002,diff_P10_minus_P9.mrc

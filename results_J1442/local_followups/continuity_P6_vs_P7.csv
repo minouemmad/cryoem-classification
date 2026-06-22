@@ -1,0 +1,7 @@
+metric,value
+bic_1comp,-328370.2028764283
+bic_2comp,-326200.88004709553
+delta_bic_1minus2,-2169.3228293327847
+mode_separation_sd,1.5542887358421094
+min_component_weight,0.42097953014642037
+verdict,continuous (one basin / over-split)

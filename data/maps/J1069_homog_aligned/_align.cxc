@@ -1,0 +1,14 @@
+open "C:/Users/maemm/OneDrive/Desktop/CryoEM/data/maps/cryosparc_P25_J1076_010_volume_map.mrc"
+open "C:/Users/maemm/OneDrive/Desktop/CryoEM/data/maps/cryosparc_P25_J1077_010_volume_map.mrc"
+open "C:/Users/maemm/OneDrive/Desktop/CryoEM/data/maps/cryosparc_P25_J1078_011_volume_map.mrc"
+volume resample #1 spacing 3.32 modelId #11
+volume resample #2 spacing 3.32 modelId #12
+volume resample #3 spacing 3.32 modelId #13
+fitmap #11 inMap #12 search 80 metric correlation
+volume resample #11 onGrid #12 modelId #101
+save "C:/Users/maemm/OneDrive/Desktop/CryoEM/data/maps/J1069_homog_aligned/cryosparc_P25_J1076_010_volume_map.mrc" model #101
+save "C:/Users/maemm/OneDrive/Desktop/CryoEM/data/maps/J1069_homog_aligned/cryosparc_P25_J1077_010_volume_map.mrc" model #12
+fitmap #13 inMap #12 search 80 metric correlation
+volume resample #13 onGrid #12 modelId #103
+save "C:/Users/maemm/OneDrive/Desktop/CryoEM/data/maps/J1069_homog_aligned/cryosparc_P25_J1078_011_volume_map.mrc" model #103
+exit

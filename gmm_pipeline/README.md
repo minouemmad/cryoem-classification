@@ -42,7 +42,7 @@ for.
 pip install numpy pandas scipy scikit-learn matplotlib seaborn
 
 python run_pipeline.py `
-  --cs cryosparc_P25_J1442_00000_particles.cs `
+  --cs data/cryosparc_P25_J1442_00000_particles.cs `
   --n-dummies 6 `
   --transform alr `
   --covariance full `
@@ -51,6 +51,10 @@ python run_pipeline.py `
   --reps 0 1 2 3 `
   --outdir results_J1442
 ```
+
+Source `.cs` files live in `data/`; standalone utilities (diagnostics,
+sanity plots, per-CryoSPARC-class export, GMM bootstrap, re-plotting) live in
+`scripts/` and are run from the repo root, e.g. `python scripts/diagnostics/posterior_diagnostics.py`.
 
 Key CLI flags:
 
@@ -63,21 +67,59 @@ Key CLI flags:
 
 ## Outputs (in `--outdir`)
 
-* `confusion_mc.csv` / `.png` — Monte-Carlo misclassification matrix.
-* `confusion_empirical.csv` / `.png` — empirical CryoSPARC-vs-GMM hard-label agreement.
-* `bhattacharyya_overlap.csv` — `exp(-D_B)` analytic overlap.
-* `populations.csv` / `.png` — observed and corrected populations with bootstrap CIs.
-* `class_repetition.csv` / `.png` — mapped occupancies vs. number of duplicate components.
-* `gmm_diagnostics.json` — convergence, iters, BIC/AIC, weights, per-component covariance condition numbers.
-* `posterior_protein.npy`, `responsibilities.npy` — raw arrays for downstream work (e.g. selecting low-misassignment particles).
+Results are sorted into sub-folders:
+
+```
+<outdir>/
+  confusion/    all confusion matrices (.csv + .png) + Bhattacharyya overlap
+  populations/  observed vs corrected populations, per-matrix comparison, class table
+  gmm/          GMM model artifacts, bootstrap arrays, diagnostics, NLL landscape, repetition
+  exports/      low-uncertainty particle subsets (.cs/.csv) for downstream refinement
+  sanity/       Gaussian-fit sanity plots (written by scripts/diagnostics/make_gaussian_sanity_plots.py)
+  refinement/   downstream CryoSPARC refinement results (FSC/maps), added manually
+  run.log
+```
+
+**`confusion/`** — every confusion matrix (`.csv` + `.png`), ordered by how it
+should be used:
+
+* `confusion_soft_posterior` — **primary** matrix for population deconvolution.
+  Uses the CryoSPARC posteriors as soft truth; no GMM, no hard-label selection
+  bias, no component label-switching. Near rank-1 on flat posteriors (honest
+  signal that classes are barely separable).
+* `confusion_multiclass_analytical` — score-space Gaussian approximation
+  (proper K>2 extension of the erf formula); secondary / model-based estimate.
+* `confusion_pairwise_analytical` — pairwise erf rates composed into a full
+  matrix via the independence approximation.
+* `confusion_montecarlo`, `confusion_gmm_equalprior[_mean/_std]` — GMM
+  geometry/separability diagnostics only (component space; not for deconvolution).
+* `confusion_empirical` — CryoSPARC-vs-GMM hard-label agreement.
+* `class_overlap_bhattacharyya` — `exp(-D_B)` analytic overlap.
+
+**`populations/`**
+
+* `conformational_populations.csv` / `.png` — observed and corrected populations
+  with bootstrap CIs (`corrected_soft_posterior` is the primary correction).
+* `population_corrections_all_matrices.csv` / `.png` — the corrected population
+  **and** diagonal accuracy from *every* confusion matrix, side by side, so you
+  can see what each inversion step does to the fractions.
+* `summary_class_table.png` — one table per class: observed, the primary 95% CI,
+  and each matrix's corrected fraction + accuracy + max overlap.
+
+**`gmm/`**
+
+* `gmm_class_repetition.csv` / `.png` — mapped occupancies vs. duplicate components.
+* `gmm_diagnostics.json` — convergence, iters, BIC/AIC, weights, covariance condition numbers.
+* `gmm_means_*`, `gmm_weights_*`, `bootstrap_gmm_*.npy`, `gmm_nll_landscape.png`.
+* `posterior_protein.npy`, `responsibilities.npy` — raw arrays for downstream work.
 
 ## Suggested follow-up workflow
 
-1. Sanity-check `gmm_diagnostics.json` — `converged: true`, low component condition numbers, BIC stable across runs.
-2. Inspect `confusion_mc.png`. If `diag(C[i,i])` is high (~>0.9), class `i` is well separated.
-3. Compare observed vs. corrected populations in `populations.png`; the bootstrap error bars are your reported uncertainty.
-4. Use `responsibilities.npy` to pull a "low-misassignment particle set" (e.g. `max(resp) > 0.9`) and re-run downstream refinement / occupancy calculations on that subset.
-5. Look at `class_repetition.png` — a class whose occupancy stays flat as `r` grows is genuinely populated; a class that bleeds into duplicates likely contains confused particles.
+1. Sanity-check `gmm/gmm_diagnostics.json` — `converged: true`, low component condition numbers, BIC stable across runs.
+2. Inspect `confusion/confusion_soft_posterior.png` (and the analytical/MC variants). A high diagonal means the CryoSPARC posteriors for that class rarely argmax elsewhere; a near-uniform matrix means the classes are barely separable and the deconvolution will be near-identity.
+3. Compare `populations/population_corrections_all_matrices.png` and `summary_class_table.png` to see how each confusion matrix shifts the fractions; the bootstrap error bars on the soft-posterior correction are your reported uncertainty.
+4. Use `gmm/responsibilities.npy` to pull a "low-misassignment particle set" (e.g. `max(resp) > 0.9`, already exported to `exports/`) and re-run downstream refinement on that subset.
+5. Look at `gmm/gmm_class_repetition.png` — a class whose occupancy stays flat as `r` grows is genuinely populated; a class that bleeds into duplicates likely contains confused particles.
 6. Repeat on the larger `gP25W6J1497_*.cs` file to test scaling to more conformational states (Milestone 4).
 
 ## Smoke-tested result on `cryosparc_P25_J1442_00000_particles.cs`

@@ -1,0 +1,4 @@
+pair,cross_correlation,diff_rms,diff_map
+J1442_P6 vs J1442_P7,0.6867,0.01391,diff_J1442_P7_minus_J1442_P6.mrc
+J1442_P6 vs J1442_P8,0.3241,0.02162,diff_J1442_P8_minus_J1442_P6.mrc
+J1442_P7 vs J1442_P8,0.3835,0.01929,diff_J1442_P8_minus_J1442_P7.mrc

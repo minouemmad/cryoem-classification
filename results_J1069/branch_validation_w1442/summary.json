@@ -1,0 +1,14 @@
+{
+  "branch_dir": "results_J1069\\cryosparc_outputs\\with_1442_weights",
+  "gmm": {
+    "gmm_weights": [
+      0.27587779576178834,
+      0.6293165919536927,
+      0.09480561228451903
+    ],
+    "gmm_bic": -693167.8185055101,
+    "gmm_mean_maxresp": 0.8133829626465283,
+    "gmm_frac_maxresp>0.9": 0.35366499418392683,
+    "j1442_mean_maxpost": 0.36199517012739524
+  }
+}

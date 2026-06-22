@@ -21,7 +21,12 @@ def monte_carlo_confusion(
     n_samples_per_component: int = 50_000,
     random_state: int = 0,
 ) -> np.ndarray:
-    """Estimate C[i, j] = P(argmax posterior = j | x ~ component i)."""
+    """Estimate C[i, j] = P(argmax posterior = j | x ~ component i).
+
+    NOTE: uses ``gmm.predict()`` which folds in mixing-weight priors. Small
+    components with low weight can leak into large ones. Use
+    ``gmm_confusion_equalprior`` for a geometry-only (prior-free) estimate.
+    """
     rng = np.random.default_rng(random_state)
     K = gmm.n_components
     C = np.zeros((K, K))
@@ -30,6 +35,61 @@ def monte_carlo_confusion(
         cov = gmm.covariances_[i]
         samples = rng.multivariate_normal(mean, cov, size=n_samples_per_component)
         preds = gmm.predict(samples)
+        counts = np.bincount(preds, minlength=K)
+        C[i] = counts / counts.sum()
+    return C
+
+
+def gmm_confusion_equalprior(
+    gmm: GaussianMixture,
+    n_samples_per_component: int = 50_000,
+    random_state: int = 0,
+) -> np.ndarray:
+    """C[i, j] = P(argmax likelihood = j | x ~ component i).
+
+    Samples from each component's Gaussian and assigns by the highest
+    *log-likelihood* (not posterior) across all components — i.e. equal mixing
+    weights in the decision rule. This removes the prior-weight bias that
+    afflicts ``monte_carlo_confusion``: small components are no longer pushed
+    toward large ones simply because the large component has a bigger weight.
+
+    The result is a pure measure of the geometric separability of the GMM
+    components in feature space, independent of class prevalences.
+    """
+    rng = np.random.default_rng(random_state)
+    K = gmm.n_components
+
+    # Pre-compute Cholesky factors and log-det terms for each component so we
+    # can evaluate all K log-likelihoods in one vectorised pass per batch.
+    covs = gmm.covariances_  # (K, d, d) for covariance_type='full'
+    means = gmm.means_       # (K, d)
+    d = means.shape[1]
+
+    # Support full and diag covariance types; fall back to scipy for others.
+    cov_type = gmm.covariance_type
+
+    C = np.zeros((K, K))
+    for i in range(K):
+        samples = rng.multivariate_normal(means[i], covs[i], size=n_samples_per_component)
+        # (n_samples, K) log-likelihoods, equal-prior
+        log_liks = np.empty((n_samples_per_component, K))
+        for k in range(K):
+            diff = samples - means[k]           # (n, d)
+            cov_k = covs[k]
+            try:
+                L = np.linalg.cholesky(cov_k)
+                sol = np.linalg.solve(L, diff.T)  # (d, n)
+                log_liks[:, k] = (
+                    -0.5 * np.sum(sol ** 2, axis=0)
+                    - np.sum(np.log(np.diag(L)))
+                    - 0.5 * d * np.log(2 * np.pi)
+                )
+            except np.linalg.LinAlgError:
+                # Fallback: pinv
+                log_liks[:, k] = (
+                    -0.5 * np.einsum("ni,ij,nj->n", diff, np.linalg.pinv(cov_k), diff)
+                )
+        preds = log_liks.argmax(axis=1)
         counts = np.bincount(preds, minlength=K)
         C[i] = counts / counts.sum()
     return C
@@ -101,7 +161,6 @@ def analytical_pairwise_confusion(
         if mask.sum() < 10:
             continue
 
-        off_sum = 0.0
         for j in range(K):
             if i == j:
                 continue
@@ -120,9 +179,25 @@ def analytical_pairwise_confusion(
                 z = m_dot_a / np.sqrt(2.0 * var_proj)
                 C[i, j] = 0.5 - 0.5 * float(_erf(z))
 
-            off_sum += C[i, j]
-
-        C[i, i] = max(0.0, 1.0 - off_sum)
+        # Combine the pairwise error rates into a row of the confusion matrix
+        # (Hunt, "combine the pairwise uncertainties"). Treating the pairwise
+        # "j beats i" events as approximately independent, a class-i particle is
+        # correctly classified only if no competitor beats it:
+        #     C[i, i] = prod_{j != i} (1 - p_ij)
+        # The remaining error mass is split across competitors in proportion to
+        # their individual pairwise rates. This is always non-negative and the
+        # row sums to 1, unlike the naive ``1 - sum_j p_ij`` (which can go
+        # negative once the pairwise rates overlap).
+        p_row = C[i].copy()
+        p_row[i] = 0.0
+        correct = float(np.prod(1.0 - p_row[np.arange(K) != i]))
+        err_mass = 1.0 - correct
+        denom = p_row.sum()
+        if denom > 0:
+            C[i] = err_mass * p_row / denom
+        else:
+            C[i] = 0.0
+        C[i, i] = correct
 
     return C
 
@@ -159,3 +234,35 @@ def analytical_multiclass_confusion(
         preds = samples.argmax(axis=1)
         C[i] = np.bincount(preds, minlength=K) / n_samples
     return C
+
+
+def soft_posterior_confusion(posteriors: np.ndarray) -> np.ndarray:
+    """Exact confusion matrix using the CryoSPARC posteriors as soft truth.
+
+        C[i, j] = sum_n p[n, i] * 1(argmax_k p[n, k] == j) / sum_n p[n, i]
+
+    Each particle's posterior is treated as a probabilistic ground-truth label:
+    particle ``n`` contributes weight ``p[n, i]`` to "true class i" and is
+    observed in class ``j = argmax(p[n])``. This is the honest confusion matrix
+    for population deconvolution because it
+
+    * uses every particle (no hard-label selection bias, unlike the analytical
+      and pairwise estimators, which condition on ``argmax == i``),
+    * needs no Gaussian assumption and no GMM (no manufactured confidence,
+      no component label-switching), and
+    * stays in CryoSPARC's own class coordinates, so it lines up directly with
+      the observed population vector for ``pi_true = (C^T)^{-1} pi_obs``.
+
+    On near-uniform posteriors the rows approach the observed population vector,
+    so ``C`` becomes near rank-1 and the deconvolution is intentionally
+    under-determined -- that ill-conditioning is a faithful signal that the
+    classes are barely separable, not a bug.
+    """
+    posteriors = np.asarray(posteriors, dtype=np.float64)
+    K = posteriors.shape[1]
+    hard = posteriors.argmax(axis=1)
+    num = np.zeros((K, K))
+    for j in range(K):
+        num[:, j] = posteriors[hard == j].sum(axis=0)
+    den = posteriors.sum(axis=0).clip(min=1e-12)
+    return num / den[:, None]

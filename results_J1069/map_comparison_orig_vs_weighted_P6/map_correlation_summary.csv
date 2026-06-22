@@ -1,0 +1,2 @@
+pair,cross_correlation,diff_rms,diff_map
+P6_orig vs P6_weighted,0.4676,0.01114,diff_P6_weighted_minus_P6_orig.mrc

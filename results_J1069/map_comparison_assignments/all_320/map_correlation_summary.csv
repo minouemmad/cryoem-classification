@@ -1,0 +1,16 @@
+pair,cross_correlation,diff_rms,diff_map
+H6 vs H7,0.6383,0.00998,diff_H7_minus_H6.mrc
+H6 vs H8,0.2825,0.01489,diff_H8_minus_H6.mrc
+H6 vs W6,0.3678,0.01353,diff_W6_minus_H6.mrc
+H6 vs W7,0.4099,0.01261,diff_W7_minus_H6.mrc
+H6 vs W8,0.287,0.01428,diff_W8_minus_H6.mrc
+H7 vs H8,0.3691,0.01285,diff_H8_minus_H7.mrc
+H7 vs W6,0.4633,0.01129,diff_W6_minus_H7.mrc
+H7 vs W7,0.5117,0.01021,diff_W7_minus_H7.mrc
+H7 vs W8,0.4,0.01187,diff_W8_minus_H7.mrc
+H8 vs W6,0.3838,0.01319,diff_W6_minus_H8.mrc
+H8 vs W7,0.4024,0.01252,diff_W7_minus_H8.mrc
+H8 vs W8,0.481,0.01203,diff_W8_minus_H8.mrc
+W6 vs W7,0.643,0.00923,diff_W7_minus_W6.mrc
+W6 vs W8,0.3866,0.01256,diff_W8_minus_W6.mrc
+W7 vs W8,0.4293,0.01158,diff_W8_minus_W7.mrc

@@ -1,0 +1,4 @@
+pair,cross_correlation,diff_rms,diff_map
+P6w vs P7w,0.9999,9e-05,diff_P7w_minus_P6w.mrc
+P6w vs P8w,0.9999,9e-05,diff_P8w_minus_P6w.mrc
+P7w vs P8w,1.0,2e-05,diff_P8w_minus_P7w.mrc

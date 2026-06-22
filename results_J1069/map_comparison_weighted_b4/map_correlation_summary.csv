@@ -1,0 +1,4 @@
+pair,cross_correlation,diff_rms,diff_map
+P6_b4 vs P7_b4,1.0,3e-05,diff_P7_b4_minus_P6_b4.mrc
+P6_b4 vs P8_b4,1.0,3e-05,diff_P8_b4_minus_P6_b4.mrc
+P7_b4 vs P8_b4,1.0,0.0,diff_P8_b4_minus_P7_b4.mrc

@@ -1,0 +1,90 @@
+{
+  "n_particles": 230396,
+  "method4_note": "Soft (responsibility-weighted) populations differ from hard argmax most for the flat-posterior models. M2 hetero-GMM hard pop is lopsided (P7~0.68) while soft pop is ~uniform (~0.33 each): argmax manufactures imbalance the soft weights do not support.",
+  "population_stability": [
+    {
+      "model": "M1_cryosparc_post",
+      "mean_hard_std": 0.0009630447369077673,
+      "mean_soft_std": 5.484975287121189e-05,
+      "max_hard_std": 0.0009820914871813444,
+      "max_soft_std": 6.492281046046931e-05
+    },
+    {
+      "model": "M2_hetero_gmm",
+      "mean_hard_std": 0.0006990591719043129,
+      "mean_soft_std": 0.0005448146406995648,
+      "max_hard_std": 0.0008727672795526999,
+      "max_soft_std": 0.0006643336548226285
+    },
+    {
+      "model": "M3_3dva_gmm",
+      "mean_hard_std": 0.0008522947758874041,
+      "mean_soft_std": 0.0004684230127881617,
+      "max_hard_std": 0.0009640522711123189,
+      "max_soft_std": 0.0005614334374307221
+    }
+  ],
+  "confidence_calibration": [
+    {
+      "conf_bin": "[0.33,0.50)",
+      "n": 3476,
+      "frac_of_total": 0.015087067483810482,
+      "cross_model_agreement": 0.43354430379746833,
+      "mean_latent_dist": 1.388178832925538
+    },
+    {
+      "conf_bin": "[0.50,0.70)",
+      "n": 44599,
+      "frac_of_total": 0.19357540929530026,
+      "cross_model_agreement": 0.5023206798358708,
+      "mean_latent_dist": 1.3672374938242982
+    },
+    {
+      "conf_bin": "[0.70,0.90)",
+      "n": 100838,
+      "frac_of_total": 0.43767252903696247,
+      "cross_model_agreement": 0.6360201511335013,
+      "mean_latent_dist": 1.4120527487615893
+    },
+    {
+      "conf_bin": "[0.90,1.00)",
+      "n": 81483,
+      "frac_of_total": 0.35366499418392683,
+      "cross_model_agreement": 0.6268424088460169,
+      "mean_latent_dist": 1.3775500930596112
+    }
+  ],
+  "overall_cross_model_agreement": 0.603838608309172,
+  "density_model_fit": [
+    {
+      "model": "GMM_K1",
+      "test_loglik_per_particle": -4.258760819715745
+    },
+    {
+      "model": "GMM_K2",
+      "test_loglik_per_particle": -4.250075475735049
+    },
+    {
+      "model": "GMM_K3",
+      "test_loglik_per_particle": -4.244317261294744
+    },
+    {
+      "model": "GMM_K4",
+      "test_loglik_per_particle": -4.243330691870703
+    },
+    {
+      "model": "GMM_K5",
+      "test_loglik_per_particle": -4.24357311265019
+    },
+    {
+      "model": "GMM_K6",
+      "test_loglik_per_particle": -4.242705551073378
+    },
+    {
+      "model": "KDE_bw0.3",
+      "test_loglik_per_particle": -4.249434506451472
+    }
+  ],
+  "meanshift_modes": 1,
+  "reconstruction_and_biology_note": "Reconstruction quality / interpretability require CryoSPARC + maps and are NOT recomputed here. From prior verified results: beta=1 and beta=4 responsibility-weighted reconstructions collapse to ONE consensus map (CC~1.0 among classes) => soft weights cannot recover separate volumes; hard per-class volumes DO show real localized differences (P8 extra ordered density) but resolution tracks particle count, not distinctness."
+}

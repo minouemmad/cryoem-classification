@@ -1,0 +1,4 @@
+pair,cc_pearson,diff_localization_top5%,diff_rms_corenorm
+P6 vs P7,0.8227,0.7807,0.3299
+P6 vs P8,0.5862,0.8138,0.5049
+P7 vs P8,0.5996,0.7842,0.49054

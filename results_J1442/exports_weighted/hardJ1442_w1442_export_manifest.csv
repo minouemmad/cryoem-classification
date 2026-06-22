@@ -1,0 +1,4 @@
+beta,class,n_particles,effective_n,mean_weight,cs,passthrough
+1.0,P6,83843,30455.424574876586,0.36324349766678893,hardJ1442_w1442_b1_P6.cs,hardJ1442_w1442_b1_P6_passthrough.cs
+1.0,P7,67671,23957.6188613124,0.35403080878533494,hardJ1442_w1442_b1_P7.cs,hardJ1442_w1442_b1_P7_passthrough.cs
+1.0,P8,78882,28989.19578048238,0.3675007705241041,hardJ1442_w1442_b1_P8.cs,hardJ1442_w1442_b1_P8_passthrough.cs

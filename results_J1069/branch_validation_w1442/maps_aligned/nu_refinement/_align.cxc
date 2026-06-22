@@ -1,0 +1,14 @@
+open "C:/Users/maemm/OneDrive/Desktop/CryoEM/results_J1069/cryosparc_outputs/with_1442_weights/non-uniform_refinement/P6/cryosparc_P25_J3562_006_volume_map.mrc"
+open "C:/Users/maemm/OneDrive/Desktop/CryoEM/results_J1069/cryosparc_outputs/with_1442_weights/non-uniform_refinement/P7/cryosparc_P25_J3563_005_volume_map.mrc"
+open "C:/Users/maemm/OneDrive/Desktop/CryoEM/results_J1069/cryosparc_outputs/with_1442_weights/non-uniform_refinement/P8/cryosparc_P25_J3564_006_volume_map.mrc"
+volume resample #1 spacing 2.5 modelId #11
+volume resample #2 spacing 2.5 modelId #12
+volume resample #3 spacing 2.5 modelId #13
+save "C:/Users/maemm/OneDrive/Desktop/CryoEM/results_J1069/branch_validation_w1442/maps_aligned/nu_refinement/cryosparc_P25_J3562_006_volume_map.mrc" model #11
+fitmap #12 inMap #11 search 40 metric correlation
+volume resample #12 onGrid #11 modelId #102
+save "C:/Users/maemm/OneDrive/Desktop/CryoEM/results_J1069/branch_validation_w1442/maps_aligned/nu_refinement/cryosparc_P25_J3563_005_volume_map.mrc" model #102
+fitmap #13 inMap #11 search 40 metric correlation
+volume resample #13 onGrid #11 modelId #103
+save "C:/Users/maemm/OneDrive/Desktop/CryoEM/results_J1069/branch_validation_w1442/maps_aligned/nu_refinement/cryosparc_P25_J3564_006_volume_map.mrc" model #103
+exit

@@ -1,0 +1,4 @@
+class,n_particles,effective_N,mean_scale,particles_file,passthrough_file
+P6,91273,85791.30919420818,0.9399418140546293,ensembleGMM_P6.cs,ensembleGMM_P6_passthrough.cs
+P7,54032,47063.6216065277,0.8710323809321827,ensembleGMM_P7.cs,ensembleGMM_P7_passthrough.cs
+P8,85091,80397.83741044489,0.9448453703734224,ensembleGMM_P8.cs,ensembleGMM_P8_passthrough.cs

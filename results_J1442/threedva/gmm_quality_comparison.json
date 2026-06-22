@@ -1,0 +1,42 @@
+{
+  "hetero_posterior": {
+    "space": "hetero_posterior",
+    "n": 230396,
+    "dim": 2,
+    "converged": true,
+    "mean_max_resp": 0.8151495379134762,
+    "median_max_resp": 0.8650679637362213,
+    "frac_resp_gt_0.8": 0.652337714196427,
+    "frac_resp_gt_0.9": 0.36291862705949757,
+    "mean_entropy_nats": 0.47432970151999104,
+    "max_entropy_uniform": 1.0986122886681098,
+    "silhouette": 0.19983680009203758,
+    "min_separation_sd": 0.768325128182839,
+    "mean_separation_sd": 1.7577181952018641,
+    "weights": [
+      0.2771,
+      0.0914,
+      0.6315
+    ]
+  },
+  "3dva_latent": {
+    "space": "3dva_latent",
+    "n": 230396,
+    "dim": 3,
+    "converged": true,
+    "mean_max_resp": 0.6412933268520538,
+    "median_max_resp": 0.6506182820192242,
+    "frac_resp_gt_0.8": 0.12594402680602093,
+    "frac_resp_gt_0.9": 0.0066928245282036145,
+    "mean_entropy_nats": 0.8011394331954855,
+    "max_entropy_uniform": 1.0986122886681098,
+    "silhouette": 0.20346223074204553,
+    "min_separation_sd": 0.5656414015649287,
+    "mean_separation_sd": 0.9977056290478181,
+    "weights": [
+      0.3383,
+      0.389,
+      0.2728
+    ]
+  }
+}
