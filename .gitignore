@@ -17,6 +17,12 @@ cryodrgn-py310/
 *.cs
 *.star
 
+# cryoDRGN-required CryoSPARC metadata (tracked via Git LFS)
+!data/cryosparc_P25_J1442_00000_particles.cs
+!data/cryosparc_P25_J1442_passthrough_particles_all_classes.cs
+!data/J995_particles/
+!data/J995_particles/**/*.cs
+
 # OS / editor
 .DS_Store
 Thumbs.db
