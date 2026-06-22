@@ -1,0 +1,63 @@
+cmd:
+- /home/mae2183/miniconda3/envs/cryodrgn/bin/cryodrgn
+- train_vae
+- results_cryodrgn/J1442_quick/inputs/particles.64.mrcs
+- --poses
+- results_cryodrgn/J1442_quick/inputs/poses.pkl
+- --zdim
+- '4'
+- -n
+- '3'
+- --enc-dim
+- '128'
+- --enc-layers
+- '2'
+- --dec-dim
+- '128'
+- --dec-layers
+- '2'
+- -o
+- results_cryodrgn/J1442_quick/train
+- --ctf
+- results_cryodrgn/J1442_quick/inputs/ctf.pkl
+- --ind
+- results_cryodrgn/J1442_quick/inputs/ind.quick.pkl
+dataset_args:
+  ctf: /home/mae2183/cryoem-classification/results_cryodrgn/J1442_quick/inputs/ctf.pkl
+  datadir: null
+  do_pose_sgd: false
+  ind: /home/mae2183/cryoem-classification/results_cryodrgn/J1442_quick/inputs/ind.quick.pkl
+  invert_data: true
+  keepreal: false
+  norm:
+  - 0.0
+  - 57.911781311035156
+  particles: /home/mae2183/cryoem-classification/results_cryodrgn/J1442_quick/inputs/particles.64.mrcs
+  poses: /home/mae2183/cryoem-classification/results_cryodrgn/J1442_quick/inputs/poses.pkl
+  window: true
+  window_r: 0.85
+lattice_args:
+  D: 65
+  extent: 0.5
+  ignore_DC: true
+model_args:
+  activation: relu
+  domain: fourier
+  enc_mask: 32
+  encode_mode: resid
+  feat_sigma: 0.5
+  pdim: 128
+  pe_dim: null
+  pe_type: gaussian
+  players: 2
+  qdim: 128
+  qlayers: 2
+  tilt_params:
+    ntilts: 10
+    t_emb_dim: 64
+    tdim: 1024
+    tlayers: 3
+  zdim: 4
+seed: 90944
+time: 2026-06-22 10:44:30.359881
+version: 4.3.0
