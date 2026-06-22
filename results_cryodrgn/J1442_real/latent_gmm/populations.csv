@@ -1,0 +1,4 @@
+class,cryosparc_soft,cryosparc_hard,latentgmm_soft,soft_lo,soft_hi,latentgmm_corrected,corr_lo,corr_hi
+P6,0.3307,0.3639,0.4016,0.3997,0.4034,0.3639,0.3621,0.3658
+P7,0.3371,0.2937,0.2358,0.2341,0.2373,0.2936,0.2919,0.2954
+P8,0.3322,0.3424,0.3626,0.3607,0.3643,0.3425,0.3405,0.3441
