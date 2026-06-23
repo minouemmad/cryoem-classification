@@ -73,6 +73,16 @@ def parse_args():
                    help="Overconfident multi-class J1069 particle stack (competing partition). "
                         "Its protein argmax reproduces the uploaded hardJ1069_w1442 membership "
                         "exactly, but with the original UIDs that join to J1442.")
+    p.add_argument("--honest-cs", default=None,
+                   help="Honest (soft) multi-class stack = the GMM referee space. "
+                        "Overrides --j1442-cs when given (job-agnostic alias).")
+    p.add_argument("--assign-cs", default=None,
+                   help="Competing/overconfident multi-class stack whose hard argmax "
+                        "defines the second partition. Overrides --j1069-cs when given.")
+    p.add_argument("--honest-name", default="J1442",
+                   help="Display name for the honest job (e.g. J1442 or J1497).")
+    p.add_argument("--assign-name", default="J1069w",
+                   help="Display name for the assignment job (e.g. J1069w or J1112).")
     p.add_argument("--n-dummies", type=int, default=6)
     p.add_argument("--protein-idx", type=int, nargs="*", default=None)
     p.add_argument("--covariance", default="full")
@@ -124,9 +134,13 @@ def main():
     out.mkdir(parents=True, exist_ok=True)
     rng = np.random.default_rng(args.seed)
 
+    honest_cs = args.honest_cs or args.j1442_cs
+    assign_cs = args.assign_cs or args.j1069_cs
+    HN, AN = args.honest_name, args.assign_name
+
     # ---- 1. Honest posterior space + GMM referee -------------------------
-    print(f"[1/6] Loading honest J1442 posteriors: {args.j1442_cs}")
-    post = load_posteriors(args.j1442_cs, protein_idx=args.protein_idx,
+    print(f"[1/6] Loading honest {HN} posteriors: {honest_cs}")
+    post = load_posteriors(honest_cs, protein_idx=args.protein_idx,
                            n_dummies=args.n_dummies)
     prot = post.protein_only()
     labels = [f"P{int(c)}" for c in post.protein_idx]
@@ -143,12 +157,11 @@ def main():
     gmm_lab = _align_labels(prot.hard_class, gmm_lab, prot.n_protein)
     print(f"      GMM converged={res.converged}  BIC={res.bic:.1f}")
 
-    # ---- 2. Competing partition from the J1069 source stack ---------------
-    # The uploaded per-class reconstruction outputs carry CryoSPARC-reassigned
-    # UIDs that no longer join to J1442, so we recover the *identical* membership
-    # (same per-class counts) from the original J1069 multi-class stack by UID.
-    print("[3/6] Deriving J1069 partition from source stack")
-    j69 = load_posteriors(args.j1069_cs, protein_idx=args.protein_idx,
+    # ---- 2. Competing partition from the assignment source stack ---------
+    # Recover the assignment job's membership from its original multi-class
+    # stack by UID and intersect with the honest particles.
+    print(f"[3/6] Deriving {AN} partition from source stack")
+    j69 = load_posteriors(assign_cs, protein_idx=args.protein_idx,
                           n_dummies=args.n_dummies).protein_only()
     j69_map = {int(u): int(c) for u, c in zip(j69.uid.tolist(), j69.hard_class.tolist())}
 
@@ -156,8 +169,8 @@ def main():
     j1442_lab = prot.hard_class.copy()
     j1069_lab = np.array([j69_map.get(int(u), -1) for u in uids])
     keep = j1069_lab >= 0
-    print(f"      J1442 argmax counts: {np.bincount(j1442_lab, minlength=prot.n_protein).tolist()}")
-    print(f"      J1069 argmax counts: {np.bincount(j1069_lab[keep], minlength=prot.n_protein).tolist()}")
+    print(f"      {HN} argmax counts: {np.bincount(j1442_lab, minlength=prot.n_protein).tolist()}")
+    print(f"      {AN} argmax counts: {np.bincount(j1069_lab[keep], minlength=prot.n_protein).tolist()}")
     print(f"      particles matched in both partitions: {keep.sum():,} / {N:,}")
 
     gmm_lab, j1442_lab, j1069_lab = gmm_lab[keep], j1442_lab[keep], j1069_lab[keep]
@@ -179,10 +192,13 @@ def main():
             "completeness": c,
         }
 
+    k_gh = f"GMM_vs_{HN}"
+    k_ga = f"GMM_vs_{AN}"
+    k_ha = f"{HN}_vs_{AN}"
     rows = {
-        "GMM_vs_J1442": metrics(gmm_lab, j1442_lab),
-        "GMM_vs_J1069w": metrics(gmm_lab, j1069_lab),
-        "J1442_vs_J1069w": metrics(j1442_lab, j1069_lab),
+        k_gh: metrics(gmm_lab, j1442_lab),
+        k_ga: metrics(gmm_lab, j1069_lab),
+        k_ha: metrics(j1442_lab, j1069_lab),
     }
     met_df = pd.DataFrame(rows).T
     met_df.to_csv(out / "agreement_metrics.csv")
@@ -193,9 +209,9 @@ def main():
         return _row_norm(contingency_matrix(a, b))
 
     pairs = {
-        "GMM_rows_J1442_cols": (gmm_lab, j1442_lab, "GMM cluster", "J1442 class"),
-        "GMM_rows_J1069_cols": (gmm_lab, j1069_lab, "GMM cluster", "J1069 class"),
-        "J1442_rows_J1069_cols": (j1442_lab, j1069_lab, "J1442 class", "J1069 class"),
+        f"GMM_rows_{HN}_cols": (gmm_lab, j1442_lab, "GMM cluster", f"{HN} class"),
+        f"GMM_rows_{AN}_cols": (gmm_lab, j1069_lab, "GMM cluster", f"{AN} class"),
+        f"{HN}_rows_{AN}_cols": (j1442_lab, j1069_lab, f"{HN} class", f"{AN} class"),
     }
     for name, (a, b, ra, cb) in pairs.items():
         M = cont(a, b)
@@ -208,18 +224,18 @@ def main():
     for k, lab in enumerate(labels):
         conf_rows.append({
             "class": lab,
-            "J1442_mean_maxresp": float(max_resp[j1442_lab == k].mean()),
-            "J1442_N": int((j1442_lab == k).sum()),
-            "J1069_mean_maxresp": float(max_resp[j1069_lab == k].mean()),
-            "J1069_N": int((j1069_lab == k).sum()),
+            f"{HN}_mean_maxresp": float(max_resp[j1442_lab == k].mean()),
+            f"{HN}_N": int((j1442_lab == k).sum()),
+            f"{AN}_mean_maxresp": float(max_resp[j1069_lab == k].mean()),
+            f"{AN}_N": int((j1069_lab == k).sum()),
         })
     conf_df = pd.DataFrame(conf_rows)
     conf_df.loc["overall"] = {
         "class": "ALL",
-        "J1442_mean_maxresp": float(max_resp.mean()),
-        "J1442_N": int(len(max_resp)),
-        "J1069_mean_maxresp": float(max_resp.mean()),
-        "J1069_N": int(len(max_resp)),
+        f"{HN}_mean_maxresp": float(max_resp.mean()),
+        f"{HN}_N": int(len(max_resp)),
+        f"{AN}_mean_maxresp": float(max_resp.mean()),
+        f"{AN}_N": int(len(max_resp)),
     }
     conf_df.to_csv(out / "within_cluster_confidence.csv", index=False)
     print(conf_df.round(4).to_string(index=False))
@@ -239,12 +255,12 @@ def main():
         "n_total": int(len(disagree)),
         "n_disagree": nd,
         "frac_disagree": nd / len(disagree),
-        "disagree_mean_J1442_maxpost": float(maxpost[disagree].mean()),
-        "agree_mean_J1442_maxpost": float(maxpost[~disagree].mean()),
-        "disagree_mean_J1442_entropy": float(ent[disagree].mean()),
-        "agree_mean_J1442_entropy": float(ent[~disagree].mean()),
-        "of_disagreements_GMM_sides_J1442": float(gmm_sides_1442.mean()),
-        "of_disagreements_GMM_sides_J1069": float(gmm_sides_1069.mean()),
+        "disagree_mean_honest_maxpost": float(maxpost[disagree].mean()),
+        "agree_mean_honest_maxpost": float(maxpost[~disagree].mean()),
+        "disagree_mean_honest_entropy": float(ent[disagree].mean()),
+        "agree_mean_honest_entropy": float(ent[~disagree].mean()),
+        "of_disagreements_GMM_sides_honest": float(gmm_sides_1442.mean()),
+        "of_disagreements_GMM_sides_assign": float(gmm_sides_1069.mean()),
         "of_disagreements_GMM_sides_neither": float(gmm_sides_neither.mean()),
     }
     pd.DataFrame([dis]).to_csv(out / "disagreement_analysis.csv", index=False)
@@ -258,7 +274,7 @@ def main():
     fig, axes = plt.subplots(1, 3, figsize=(13.5, 4.4), sharex=True, sharey=True)
     for ax, lab_arr, title in zip(
         axes, [gmm_lab, j1442_lab, j1069_lab],
-        ["GMM referee (honest space)", "J1442 assignment", "J1069 (weighted) assignment"],
+        [f"GMM referee (honest space)", f"{HN} assignment", f"{AN} assignment"],
     ):
         for k in range(prot.n_protein):
             sel = idx[lab_arr[idx] == k]
@@ -268,7 +284,7 @@ def main():
         ax.set_xlabel("ALR axis 1")
     axes[0].set_ylabel("ALR axis 2")
     axes[0].legend(markerscale=3, fontsize=8, loc="upper right")
-    fig.suptitle("Same particles in J1442 honest posterior space, coloured by partition", fontsize=11)
+    fig.suptitle(f"Same particles in {HN} honest posterior space, coloured by partition", fontsize=11)
     fig.tight_layout(rect=[0, 0, 1, 0.96])
     fig.savefig(out / "alr_scatter_by_labelling.png", dpi=160)
     plt.close(fig)
@@ -278,50 +294,50 @@ def main():
     metric_names = ["ARI", "AMI", "V_measure"]
     xpos = np.arange(len(metric_names))
     width = 0.38
-    ax.bar(xpos - width / 2, [rows["GMM_vs_J1442"][m] for m in metric_names], width,
-           label="GMM vs J1442", color="#2ca02c")
-    ax.bar(xpos + width / 2, [rows["GMM_vs_J1069w"][m] for m in metric_names], width,
-           label="GMM vs J1069(weighted)", color="#1f77b4")
+    ax.bar(xpos - width / 2, [rows[k_gh][m] for m in metric_names], width,
+           label=f"GMM vs {HN}", color="#2ca02c")
+    ax.bar(xpos + width / 2, [rows[k_ga][m] for m in metric_names], width,
+           label=f"GMM vs {AN}", color="#1f77b4")
     ax.set_xticks(xpos, metric_names)
     ax.set_ylim(0, 1)
     ax.set_ylabel("agreement with honest GMM clustering")
     ax.set_title("Which partition matches the honest soft structure better?")
     ax.legend()
     for i, m in enumerate(metric_names):
-        ax.text(i - width / 2, rows["GMM_vs_J1442"][m] + 0.01, f"{rows['GMM_vs_J1442'][m]:.3f}",
+        ax.text(i - width / 2, rows[k_gh][m] + 0.01, f"{rows[k_gh][m]:.3f}",
                 ha="center", fontsize=8)
-        ax.text(i + width / 2, rows["GMM_vs_J1069w"][m] + 0.01, f"{rows['GMM_vs_J1069w'][m]:.3f}",
+        ax.text(i + width / 2, rows[k_ga][m] + 0.01, f"{rows[k_ga][m]:.3f}",
                 ha="center", fontsize=8)
     fig.tight_layout()
     fig.savefig(out / "agreement_bars.png", dpi=160)
     plt.close(fig)
 
     # ---- SUMMARY.md ------------------------------------------------------
-    better = "J1442" if rows["GMM_vs_J1442"]["ARI"] >= rows["GMM_vs_J1069w"]["ARI"] else "J1069(weighted)"
-    summary = f"""# GMM-referee comparison of J1442 vs J1069(weighted) partitions
+    better = HN if rows[k_gh]["ARI"] >= rows[k_ga]["ARI"] else AN
+    sides_h = 100 * dis["of_disagreements_GMM_sides_honest"]
+    sides_a = 100 * dis["of_disagreements_GMM_sides_assign"]
+    sides_n = 100 * dis["of_disagreements_GMM_sides_neither"]
+    summary = f"""# GMM-referee comparison of {HN} vs {AN} partitions
 
-The uploaded per-class `*_particles.cs` files are single-class reconstruction
-outputs (`class_posterior`/`alpha` reset to 1, UIDs reassigned by CryoSPARC), so
-they encode **class membership only**. The GMM pipeline needs multi-class
-posteriors, which live in the original stacks. We recover the *identical*
-membership (same per-class counts) from the original J1069 stack by UID, fit the
-GMM in **J1442's honest posterior simplex**, and use it as a neutral referee,
-then score each job's membership with chance-corrected external-validation
-indices (ARI/AMI/V-measure) — the standard clustering-comparison approach
+The same particles are classified two ways. {AN} is the (over)confident
+assignment job; {HN} is the honest soft refinement. We fit a GMM in **{HN}'s
+honest posterior simplex** and use it as a neutral referee, then score each
+job's hard membership with chance-corrected external-validation indices
+(ARI/AMI/V-measure) — the standard clustering-comparison approach
 (Hubert & Arabie 1985; Vinh et al. 2010).
 
 ## Setup
-- Honest space: `{args.j1442_cs}`  (N protein = {N:,})
-- Competing partition: `{args.j1069_cs}` (J1069 protein argmax)
+- Honest referee space: `{honest_cs}`  (N protein = {N:,})
+- Competing partition: `{assign_cs}` ({AN} protein argmax)
 - Matched in both partitions: {int(keep.sum()):,}
-- GMM: {prot.n_protein} components, {args.covariance} covariance, ALR embedding, BIC={res.bic:.1f}
+- GMM: {prot.n_protein} components ({', '.join(labels)}), {args.covariance} covariance, ALR embedding, BIC={res.bic:.1f}
 
 ## Agreement with the honest GMM clustering
 | comparison | ARI | AMI | V-measure |
 |---|---|---|---|
-| GMM vs **J1442** | {rows['GMM_vs_J1442']['ARI']:.3f} | {rows['GMM_vs_J1442']['AMI']:.3f} | {rows['GMM_vs_J1442']['V_measure']:.3f} |
-| GMM vs **J1069 (weighted)** | {rows['GMM_vs_J1069w']['ARI']:.3f} | {rows['GMM_vs_J1069w']['AMI']:.3f} | {rows['GMM_vs_J1069w']['V_measure']:.3f} |
-| J1442 vs J1069 (direct) | {rows['J1442_vs_J1069w']['ARI']:.3f} | {rows['J1442_vs_J1069w']['AMI']:.3f} | {rows['J1442_vs_J1069w']['V_measure']:.3f} |
+| GMM vs **{HN}** | {rows[k_gh]['ARI']:.3f} | {rows[k_gh]['AMI']:.3f} | {rows[k_gh]['V_measure']:.3f} |
+| GMM vs **{AN}** | {rows[k_ga]['ARI']:.3f} | {rows[k_ga]['AMI']:.3f} | {rows[k_ga]['V_measure']:.3f} |
+| {HN} vs {AN} (direct) | {rows[k_ha]['ARI']:.3f} | {rows[k_ha]['AMI']:.3f} | {rows[k_ha]['V_measure']:.3f} |
 
 **The {better} partition matches the honest soft structure better.**
 
@@ -331,40 +347,27 @@ Higher = the class is a cleaner, more confident GMM cluster.
 {conf_df.round(3).to_string(index=False)}
 
 ## When the two jobs disagree ({nd:,} particles, {100*dis['frac_disagree']:.1f}%)
-- Mean J1442 max-posterior on **disagreeing** particles: {dis['disagree_mean_J1442_maxpost']:.3f}
-  vs **{dis['agree_mean_J1442_maxpost']:.3f}** where the jobs agree.
-- Mean J1442 normalised entropy: disagree {dis['disagree_mean_J1442_entropy']:.3f}
-  vs agree {dis['agree_mean_J1442_entropy']:.3f}.
-- Of the disagreements, the honest GMM sides with **J1442 {100*dis['of_disagreements_GMM_sides_J1442']:.1f}%**,
-  with **J1069 {100*dis['of_disagreements_GMM_sides_J1069']:.1f}%**, neither {100*dis['of_disagreements_GMM_sides_neither']:.1f}%.
+- Mean {HN} max-posterior on **disagreeing** particles: {dis['disagree_mean_honest_maxpost']:.3f}
+  vs **{dis['agree_mean_honest_maxpost']:.3f}** where the jobs agree.
+- Mean {HN} normalised entropy: disagree {dis['disagree_mean_honest_entropy']:.3f}
+  vs agree {dis['agree_mean_honest_entropy']:.3f}.
+- Of the disagreements, the honest GMM sides with **{HN} {sides_h:.1f}%**,
+  with **{AN} {sides_a:.1f}%**, neither {sides_n:.1f}%.
 
 ### Reading it
 If disagreements concentrate on low-max-post / high-entropy particles, the two
-jobs only differ where the honest model is genuinely uncertain — i.e. J1069's
+jobs only differ where the honest model is genuinely uncertain — i.e. {AN}'s
 extra confidence is spent on ambiguous particles. Where the GMM sides more often
 with one job on those contested particles, that job's hard cut better respects
 the honest conformational manifold.
 
 ## Caveat (read before over-interpreting)
-The GMM is fit in **J1442's** posterior space, so `GMM vs J1442` has a built-in
+The GMM is fit in **{HN}'s** posterior space, so `GMM vs {HN}` has a built-in
 home advantage — it is a self-consistency baseline, not an independent score.
-The honest comparisons are: (1) the **direct** `J1442 vs J1069` agreement, and
+The honest comparisons are: (1) the **direct** `{HN} vs {AN}` agreement, and
 (2) the **scatter** `alr_scatter_by_labelling.png`, where each partition is drawn
 on the same honest coordinates and you can see whether the colours form contiguous
 regions (respecting the manifold) or are smeared across it.
-
-## Bottom line
-- In the honest posterior space the J1442 labels carve clean, contiguous wedges
-  (argmax of the soft posteriors); the J1069 labels are **smeared** across the
-  same space — J1069's confident assignments cut across the honest conformational
-  coordinate rather than following it.
-- Both partitions nonetheless yield equally "clean" GMM clusters on average
-  (mean max-responsibility ~0.81 either way), so neither is internally noisier.
-- The two jobs disagree on ~18% of particles, and those are the *most* ambiguous
-  ones under J1442 (max-post ~0.35, entropy ~1.0). On exactly those particles the
-  honest model does not decisively back either job (it picks a third class ~38% of
-  the time), so the disagreement is a genuine soft-assignment toss-up, not one job
-  being clearly right.
 
 ## Files
 - agreement_metrics.csv, within_cluster_confidence.csv, disagreement_analysis.csv

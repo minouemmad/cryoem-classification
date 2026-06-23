@@ -19,8 +19,9 @@ scripts/               Standalone tools, grouped by purpose:
   maps/                  Map comparison (CC/FSC), alignment, density diagnostics, 3DVA
   cryodrgn/              cryoDRGN driver, latent-space comparison, synthetic demo
   diagnostics/           Posterior/Gaussian sanity plots, uncertainty-model comparisons
-data/                  CryoSPARC .cs inputs, 3DVA latents, and reconstructed maps/
+data/                  CryoSPARC .cs inputs (J1112 full particle stacks, J1497 posteriors, legacy reference jobs)
 results_J1069/         Per-dataset outputs (confusion/, populations/, gmm/, exports/, ...)
+results_J1112/         Cross-job analysis: J1112 (overconfident, K=5) vs J1497 (honest, single E-step)
 results_J1442/
 results_J1497/
 results_cryodrgn/      cryoDRGN runs and demos
