@@ -52,8 +52,17 @@ def main() -> None:
     ap.add_argument("--protein-idx", type=int, nargs="+", default=[6, 7, 8],
                     help="protein class indices used during cryodrgn_latent_gmm.py run")
     ap.add_argument("--js-pct", type=float, default=33.0,
-                    help="JS divergence percentile threshold for high-confidence "
+                    help="JS divergence percentile for the STRICT high-confidence "
                          "subset (default: 33rd pct = bottom third of divergences)")
+    ap.add_argument("--js-pct-permissive", type=float, default=66.0,
+                    help="JS divergence percentile for the PERMISSIVE confidence "
+                         "subset (default: 66th pct). John: the strict >=0.9/33pct cut "
+                         "removes too many particles; this keeps roughly twice as many.")
+    ap.add_argument("--inject-alpha-weight", action="store_true",
+                    help="bake the cryoDRGN max responsibility into alignments3D/alpha "
+                         "of each exported .cs, so CryoSPARC 'Homogeneous Reconstruction "
+                         "Only' weights every particle by its cryoDRGN confidence. "
+                         "Without this flag alpha is left untouched (plain hard subset).")
     ap.add_argument("-o", "--outdir", required=True)
     args = ap.parse_args()
     os.makedirs(args.outdir, exist_ok=True)
@@ -70,10 +79,13 @@ def main() -> None:
     agreement  = d["agreement"]
 
     hard_class = drgn_post.argmax(axis=1)       # 0=class_names[0], etc.
+    max_resp = drgn_post.max(axis=1)            # cryoDRGN confidence per particle
 
-    # JS threshold for high-confidence
+    # JS thresholds (strict + permissive) for confidence subsets
     js_thresh = float(np.percentile(js_div, args.js_pct))
-    print(f"[export] JS threshold ({args.js_pct:.0f}th pct): {js_thresh:.4f}  "
+    js_thresh_perm = float(np.percentile(js_div, args.js_pct_permissive))
+    print(f"[export] strict JS threshold ({args.js_pct:.0f}th pct): {js_thresh:.4f}  "
+          f"| permissive ({args.js_pct_permissive:.0f}th pct): {js_thresh_perm:.4f}  "
           f"(median={float(np.median(js_div)):.4f})")
     print(f"[export] total particles: {len(npz_uids):,}  |  "
           f"agree: {int(agreement.sum()):,}  ({100*agreement.mean():.1f}%)")
@@ -85,44 +97,75 @@ def main() -> None:
     uid_to_row = {int(u): i for i, u in enumerate(cs_uids.tolist())}
     print(f"[export] passthrough .cs: {len(cs_uids):,} rows")
 
+    has_alpha = "alignments3D/alpha" in (cs.dtype.names or ())
+    if args.inject_alpha_weight and not has_alpha:
+        print("  WARNING: passthrough has no alignments3D/alpha field; "
+              "cannot inject weight. Exporting plain subsets instead.")
+
     # ------------------------------------------------------------------ #
-    # export per class
-    print(f"\n{'class':<8} {'full':>8} {'hc':>8}  "
-          f"({'agree&JS<{:.2f}'.format(js_thresh)})")
-    print("-" * 48)
+    # sidecar: cryoDRGN posteriors for EVERY particle, keyed by uid. Lets you
+    # join the cryoDRGN class probabilities back onto any subset in CryoSPARC
+    # (e.g. with a Custom/External job) without re-running anything.
+    sidecar = os.path.join(args.outdir, "cryodrgn_posteriors.csv")
+    import csv as _csv
+    with open(sidecar, "w", newline="") as fh:
+        w = _csv.writer(fh)
+        w.writerow(["uid"] + [f"post_{n}" for n in class_names]
+                   + ["hard_class", "max_resp", "agreement", "js_divergence"])
+        for i in range(len(npz_uids)):
+            w.writerow([int(npz_uids[i])]
+                       + [f"{drgn_post[i, j]:.6f}" for j in range(K)]
+                       + [class_names[hard_class[i]], f"{max_resp[i]:.6f}",
+                          int(agreement[i]), f"{js_div[i]:.6f}"])
+    print(f"[export] wrote posterior sidecar: {sidecar}")
+
+    # ------------------------------------------------------------------ #
+    # export per class. Four confidence tiers (John's meeting notes):
+    #   full   = ALL particles hard-assigned to the class (run NU on cryoDRGN particles)
+    #   hard   = hard-assignments only: cryoDRGN argmax == CryoSPARC argmax (no JS cut)
+    #   hcperm = permissive low-uncertainty: agree AND JS < permissive threshold
+    #   hc     = strict low-uncertainty:     agree AND JS < strict threshold
+    tag_of = {"full": "", "hard": "_hard", "hcperm": "_hcperm", "hc": "_hc"}
+    print(f"\n{'class':<8} {'full':>9} {'hard':>9} {'hcperm':>9} {'hc':>9}")
+    print("-" * 50)
 
     rows_summary = []
     for k, name in enumerate(class_names):
         mask_full = (hard_class == k)
+        mask_hard = mask_full & (agreement == 1)
+        mask_hcperm = mask_hard & (js_div < js_thresh_perm)
+        mask_hc = mask_hard & (js_div < js_thresh)
 
-        # high-confidence: CryoSPARC hard class matches cryoDRGN hard class
-        # AND JS < threshold (soft posteriors are similar, not just hard labels)
-        mask_hc = mask_full & (agreement == 1) & (js_div < js_thresh)
-
-        for label, mask in [("full", mask_full), ("hc", mask_hc)]:
+        counts = {}
+        for label, mask in [("full", mask_full), ("hard", mask_hard),
+                            ("hcperm", mask_hcperm), ("hc", mask_hc)]:
             sel_uids = npz_uids[mask]
+            sel_resp = max_resp[mask]
             rows = []
+            weights = []
             missing = 0
-            for u in sel_uids.tolist():
+            for u, wgt in zip(sel_uids.tolist(), sel_resp.tolist()):
                 r = uid_to_row.get(int(u))
                 if r is not None:
                     rows.append(r)
+                    weights.append(wgt)
                 else:
                     missing += 1
             if missing:
                 print(f"  WARNING: {missing} UIDs not found in passthrough .cs")
             rows = np.array(rows, dtype=np.intp)
-            subset = cs[rows]
+            subset = cs[rows].copy()
+            if args.inject_alpha_weight and has_alpha:
+                subset["alignments3D/alpha"] = np.asarray(weights, dtype=np.float32)
 
-            tag = "" if label == "full" else "_hc"
-            out_path = os.path.join(args.outdir, f"cryodrgn_class_{name}{tag}.cs")
+            out_path = os.path.join(args.outdir,
+                                    f"cryodrgn_class_{name}{tag_of[label]}.cs")
             _save_cs(out_path, subset)
             rows_summary.append((name, label, len(rows)))
+            counts[label] = len(rows)
 
-        n_full = sum(r[2] for r in rows_summary if r[0] == name and r[1] == "full")
-        n_hc   = sum(r[2] for r in rows_summary if r[0] == name and r[1] == "hc")
-        pct_hc = 100 * n_hc / max(n_full, 1)
-        print(f"{name:<8} {n_full:>8,} {n_hc:>8,}  ({pct_hc:.0f}% of class)")
+        print(f"{name:<8} {counts['full']:>9,} {counts['hard']:>9,} "
+              f"{counts['hcperm']:>9,} {counts['hc']:>9,}")
 
     print("\n[export] wrote .cs files to", args.outdir)
     print("\n--- CryoSPARC import + refinement instructions ---")
@@ -130,12 +173,13 @@ def main() -> None:
     print("  1. CryoSPARC > Import Particles > select the .cs file")
     print("  2. Run Ab-initio Reconstruction (K=1, default settings)")
     print("  3. Use the ab-initio map as input to NU-Refinement")
-    print("  Full class  -> gives cryoDRGN-defined class map (compare to CryoSPARC map)")
-    print("  HC subset   -> gives higher-confidence map (fewer particles, purer signal)")
+    print("  full   -> all cryoDRGN-assigned particles (run NU on cryoDRGN particles)")
+    print("  hard   -> hard assignments only (cryoDRGN argmax == CryoSPARC argmax)")
+    print("  hcperm -> permissive low-uncertainty (keeps ~2x more than strict hc)")
+    print("  hc     -> strict low-uncertainty (fewest particles, purest signal)")
     print("\nFiles:")
     for name, label, n in rows_summary:
-        tag = "" if label == "full" else "_hc"
-        fname = f"cryodrgn_class_{name}{tag}.cs"
+        fname = f"cryodrgn_class_{name}{tag_of[label]}.cs"
         print(f"  {fname:<40}  {n:>8,} particles")
 
 
