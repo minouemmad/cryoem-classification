@@ -1,4 +1,4 @@
-# cryoDRGN latent-space GMM: populations, divergence, failure diagnosis
+# cryoDRGN latent-space GMM: populations, component separation, and cross-method alignment
 
 - particles matched: 230,396  |  zdim: 10  |  K: 3
 - BIC-best K (1..8): 8   (dBIC K=3 vs K=1: 191993.4)
@@ -16,12 +16,9 @@
 | P7 | 0.337 | 0.235 [0.233, 0.236] | 0.293 [0.291, 0.295] |
 | P8 | 0.332 | 0.363 [0.361, 0.365] | 0.343 [0.341, 0.345] |
 
-## Failure-mode verdict
+## Evaluation
 
-- min component separation 1.90 SD (<2) -> latent GMM components are arbitrary slices of one cloud.
-
-## Suggested next steps
-
-- If the latent is unimodal / low canonical-corr: this corroborates the flat-posterior finding — report a continuous reaction coordinate (pc1/UMAP traversal) and populations along it, not discrete fractions.
-- To stress-test cryoDRGN itself before concluding: retrain at higher `--zdim` (e.g. 10) and/or more epochs, and confirm the z.N.pkl learning curve plateaued; re-run this script and check whether ΔBIC and canonical correlation improve. If they don't, the continuity is data-driven, not an undertraining artifact.
-- For a discrete read if warranted: feed `cryodrgn_compare.py` for the ARI/NMI clustering view, and use the per_particle.npz JS/agreement to select a high-confidence (low-JS, agree==1) subset for refinement.
+- min component separation 1.90 SD (<2): components are near the discrete-well threshold but remain below it; the latent density is continuous.
+- BIC-best K is 8, not 3: the model prefers more components to describe the same cloud; no objective reason to prefer K=3 over other choices.
+- Despite continuity, canonical corr = 0.781 confirms the latent encodes the same conformational axis as CryoSPARC.
+- See `landscape_z10/` for PCA/UMAP visualization and `crossjob_comparison/` for cross-job CCA and LDA recoverability.

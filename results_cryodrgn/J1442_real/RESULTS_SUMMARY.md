@@ -184,19 +184,19 @@ the two methods' soft posteriors are most similar.
 
 ---
 
-## Next Steps (per PI feedback)
+## Recommended downstream analyses
 
-**1. Ab-initio + NU on all cryoDRGN classes** *(PI-requested)*  
+**1. Ab-initio + NU on all cryoDRGN classes**  
 Run ab-initio + NU-refinement on the 3 full-class `.cs` files. This gives maps defined
 by cryoDRGN's classification — compare them to the original CryoSPARC P6/P7/P8 maps
 to see whether the different particle assignment (~19% of particles reassigned) produces
 structurally different maps.
 
-**2. NU on high-confidence subsets** *(PI-confirmed, user-proposed)*  
+**2. NU on high-confidence subsets**  
 Run NU-refinement on the 3 `_hc.cs` files. Fewer particles but purer signal — expected
 to give sharper maps by removing the borderline/ambiguous particles from each class.
 
-**3. Peak volumes from cryoDRGN decoder** *(run on cluster)*  
+**3. Peak volumes from cryoDRGN decoder** *(cluster GPU required)*  
 Run `eval_vol` with `z_gmm_peaks.txt` to get the three decoder-predicted structures.
 Compare to the refined maps as a sanity check that the decoder learned real density.
 

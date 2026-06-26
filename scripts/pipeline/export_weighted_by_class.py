@@ -22,7 +22,7 @@ class separation:
 
     w_nk = r_nk^beta / sum_j r_nj^beta
 
-    beta = 1   -> John's exact unbiased soft weighting (consensus-collapsing here)
+    beta = 1   -> unbiased soft weighting (equal-weight consensus)
     beta -> inf -> recovers hard argmax assignment
     beta = 2..8 -> separation sweet spot for near-degenerate mixtures
 
@@ -104,7 +104,7 @@ def parse_args():
                         "(default alignments3D/alpha; ctf/scale also plausible)")
     p.add_argument("--combine", choices=["replace", "multiply", "none"],
                    default="replace",
-                   help="replace = set scale := weight (John's plan); "
+                   help="replace = set scale := weight (unbiased soft); "
                         "multiply = keep original scale * weight (amplitude-preserving); "
                         "none = leave scale untouched (CryoSPARC auto-weighting "
                         "reference; use with --assign-cs for plain hard subsets)")

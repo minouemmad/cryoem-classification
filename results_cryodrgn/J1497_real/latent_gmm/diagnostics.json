@@ -1,0 +1,29 @@
+{
+  "n_particles": 230396,
+  "zdim": 10,
+  "k": 5,
+  "bic_best_k": 10,
+  "delta_bic_k_vs_1": 268202.5455764467,
+  "latent_gmm_mean_max_responsibility": 0.9015230036582543,
+  "latent_gmm_frac_resp_gt_0.9": 0.6830500529523083,
+  "latent_gmm_min_separation_sd": 0.8834358483752748,
+  "latent_gmm_mean_separation_sd": 1.9518245441367565,
+  "latent_gmm_silhouette": 0.04378927364453158,
+  "canonical_correlations_z_vs_cryosparc": [
+    0.7608792044363195,
+    0.2881095022374785,
+    0.14435744223875452,
+    0.03457326990137572
+  ],
+  "max_canonical_correlation": 0.7608792044363195,
+  "hard_agreement_cryosparc_vs_latentgmm": 0.5606347332418966,
+  "mean_js_divergence_nats": 0.34817697318673485,
+  "median_js_divergence_nats": 0.37161969922054283,
+  "component_to_class_permutation": [
+    4,
+    3,
+    1,
+    0,
+    2
+  ]
+}

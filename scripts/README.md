@@ -4,7 +4,7 @@ Standalone tools, grouped by purpose. Run from the repo root, e.g.
 `python scripts/maps/compare_maps.py ...`. Scripts that import `gmm_pipeline`
 add the repo root to `sys.path` automatically.
 
-`make_proposal.py` (repo-root one-off) generates the Amgen proposal document.
+`generate_proposal_doc.py` (repo-root one-off) generates the Amgen proposal document as a Word file via python-docx.
 
 ## pipeline/ — GMM pipeline & particle exports
 
@@ -35,7 +35,12 @@ add the repo root to `sys.path` automatically.
 | Script | Purpose |
 |--------|---------|
 | `cryodrgn_run.py` | Full cryoDRGN workflow: parse -> downsample -> train_vae -> analyze |
-| `cryodrgn_compare.py` | Cluster latent z; score vs. CryoSPARC / GMM labels (ARI/NMI/...) |
+| `cryodrgn_latent_gmm.py` | BIC sweep, K-component full-cov GMM, population bootstrap, CryoSPARC alignment, JS divergence, per_particle.npz |
+| `cryodrgn_landscape.py` | PCA/UMAP landscape visualization, GMM ellipses, PC1 marginal density, z_gmm_peaks.txt for eval_vol |
+| `cryodrgn_overfit_check.py` | Overfitting diagnostics: confidence-vs-separation paradox, imaging-confound correlation, PC1 epoch stability, train-loss convergence |
+| `cryodrgn_pc1_classify.py` | PC1 tertile and 1-D GMM classification, ARI/AMI/NMI vs CryoSPARC, .cs exports per class |
+| `export_cryodrgn_subsets.py` | Export confidence-tiered particle subsets (full/hard/hcperm/hc) with cryodrgn/class_posterior field injected |
+| `cryodrgn_crossjob_compare.py` | Cross-job latent comparison: CCA, BIC/silhouette, LDA supervised recoverability, HDBSCAN/KMeans/GMM |
 | `make_synthetic_cryodrgn_demo.py` | Synthetic 2-conformation demo (CPU toolchain test) |
 
 ## diagnostics/ — Posterior & model diagnostics
@@ -44,7 +49,7 @@ add the repo root to `sys.path` automatically.
 |--------|---------|
 | `posterior_diagnostics.py` | Max-posterior histograms, entropy, per-class violins |
 | `make_gaussian_sanity_plots.py` | 1D/2D GMM Gaussian-fit sanity plots |
-| `local_followups.py` | Class/dummy occupancy, soft effective-N, continuity test |
+| `class_occupancy_diagnostics.py` | Class/dummy occupancy, soft effective-N per class, P6/P7 continuity test (1D GMM BIC) |
 | `compare_gmm_spaces.py` | GMM quality: 3DVA-latent vs. hetero-posterior space |
 | `compare_uncertainty_models.py` | Five-method uncertainty-model comparison |
 | `gmm_referee_compare.py` | Referee/cross-job GMM comparison |

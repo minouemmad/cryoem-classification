@@ -1,6 +1,7 @@
 """Posterior quality diagnostic figures for J1442 (K=3) and J1497 (K=5).
 
-Generates all figures needed to present the posterior flatness problem to a PI.
+Generates figures for diagnosing posterior flatness, class separability,
+and per-class entropy distribution.
 Run:
     python posterior_diagnostics.py
 Outputs written to:  diagnostics/

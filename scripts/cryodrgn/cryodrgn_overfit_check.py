@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 r"""Overfitting / over-confidence diagnostics for the cryoDRGN latent (PC1 axis).
 
-John: "cryoDRGN's PC1 axis is too confident and suspects overfitting is involved.
-       Make sure the model isn't overfitting."
+The concern: cryoDRGN's PC1 axis is statistically over-confident — the discrete
+GMM assigns near-100% responsibilities while components sit only ~1.9 SD apart.
 
 cryoDRGN's train_vae does NOT hold out a validation set, so the textbook
 train-vs-validation-loss gap is unavailable. Instead we run four independent,
@@ -12,8 +12,8 @@ workflow-doable checks that each probe a different overfitting signature:
       A K-component GMM on the latent reports near-100% responsibilities while
       its components sit only ~1.9 SD apart. For real Gaussians that close, the
       expected max-responsibility is far below 1.0. We quantify the gap: a large
-      gap = the discrete model is MANUFACTURING confidence on a continuous cloud
-      (the "too confident" John noticed), not finding real wells.
+      gap = the discrete model is MANUFACTURING confidence on a continuous cloud,
+      not finding real wells.
 
   (2) IMAGING-CONFOUND correlation.
       If PC1 is conformation it should be (largely) uncorrelated with imaging

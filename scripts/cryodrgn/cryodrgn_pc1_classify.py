@@ -1,17 +1,12 @@
 #!/usr/bin/env python
 """Classify particles along the cryoDRGN PC1 axis and export sets for ab-initio/NU.
 
-John's plan (meeting notes):
-  * "Ab-initio - initial res at 12, final resolution at 4 -> do on crude division
-     along the pc1 values."                              -> RUN 1 (pc1_crude)
-  * "If you could fit a 3 component gaussian, could also try limiting to the most
-     confidently assigned particles."                    -> RUN 2 (pc1_gmm / pc1_gmm_conf)
-  * "Once you do classification based on pc1, can do particle overlap there too."
-                                                          -> overlap_metrics.json + confusion PNGs
-  * "There should be 3 different ab-initio-NU runs to do."
-       RUN 1 = crude PC1 tertile division
-       RUN 2 = 1-D K-component GMM on PC1, confident particles only
-       RUN 3 = full latent-space GMM (already exported by export_cryodrgn_subsets.py)
+Two PC1-based partitions are produced:
+  RUN 1 (pc1_crude)       -- equal-population tertile cut along PC1
+                             (Ab-initio: initial_res=12, final_res=4 -> NU-Refinement)
+  RUN 2 (pc1_gmm / pc1_gmm_conf) -- 1-D K-component GMM on PC1;
+                             confident variant keeps particles with responsibility >= 0.8
+  RUN 3 (full latent GMM) -- already exported by export_cryodrgn_subsets.py
 
 This script reduces the (already converged) cryoDRGN latent to its dominant axis
 (PC1) and produces TWO PC1-based partitions plus all the overlap/confusion metrics

@@ -42,6 +42,25 @@ def _save_cs(path: str, arr: np.ndarray) -> None:
         np.save(fh, arr)
 
 
+def _inject_cryodrgn_posterior(subset: np.ndarray,
+                               posteriors: np.ndarray) -> np.ndarray:
+    """Append a 'cryodrgn/class_posterior' field (K float32 per particle).
+
+    Manually builds a new structured dtype to avoid numpy version differences
+    in rfn.append_fields with sub-array dtypes.
+    CryoSPARC's Import Particle Stack preserves unknown field groups, so the
+    values survive round-trip through CryoSPARC and can be queried later.
+    """
+    k = posteriors.shape[1]
+    new_field = ("cryodrgn/class_posterior", np.float32, (k,))
+    new_dtype = np.dtype(subset.dtype.descr + [new_field])
+    out = np.empty(len(subset), dtype=new_dtype)
+    for name in subset.dtype.names:
+        out[name] = subset[name]
+    out["cryodrgn/class_posterior"] = posteriors.astype(np.float32)
+    return out
+
+
 def main() -> None:
     ap = argparse.ArgumentParser(description=__doc__,
                                  formatter_class=argparse.RawDescriptionHelpFormatter)
@@ -56,8 +75,8 @@ def main() -> None:
                          "subset (default: 33rd pct = bottom third of divergences)")
     ap.add_argument("--js-pct-permissive", type=float, default=66.0,
                     help="JS divergence percentile for the PERMISSIVE confidence "
-                         "subset (default: 66th pct). John: the strict >=0.9/33pct cut "
-                         "removes too many particles; this keeps roughly twice as many.")
+                         "subset (default: 66th pct; keeps ~2x more particles than "
+                         "the strict 33rd-pct threshold).")
     ap.add_argument("--inject-alpha-weight", action="store_true",
                     help="bake the cryoDRGN max responsibility into alignments3D/alpha "
                          "of each exported .cs, so CryoSPARC 'Homogeneous Reconstruction "
@@ -102,6 +121,9 @@ def main() -> None:
         print("  WARNING: passthrough has no alignments3D/alpha field; "
               "cannot inject weight. Exporting plain subsets instead.")
 
+    # build uid -> cryoDRGN posterior row lookup (K-vector per particle)
+    uid_to_drgn_post = {int(u): i for i, u in enumerate(npz_uids.tolist())}
+
     # ------------------------------------------------------------------ #
     # sidecar: cryoDRGN posteriors for EVERY particle, keyed by uid. Lets you
     # join the cryoDRGN class probabilities back onto any subset in CryoSPARC
@@ -120,7 +142,7 @@ def main() -> None:
     print(f"[export] wrote posterior sidecar: {sidecar}")
 
     # ------------------------------------------------------------------ #
-    # export per class. Four confidence tiers (John's meeting notes):
+    # export per class. Four confidence tiers:
     #   full   = ALL particles hard-assigned to the class (run NU on cryoDRGN particles)
     #   hard   = hard-assignments only: cryoDRGN argmax == CryoSPARC argmax (no JS cut)
     #   hcperm = permissive low-uncertainty: agree AND JS < permissive threshold
@@ -155,6 +177,19 @@ def main() -> None:
                 print(f"  WARNING: {missing} UIDs not found in passthrough .cs")
             rows = np.array(rows, dtype=np.intp)
             subset = cs[rows].copy()
+
+            # --- inject cryoDRGN GMM posterior as a new field -----------------
+            # Look up each selected particle's uid in the npz posterior array.
+            # Particles whose uid wasn't in the npz get a uniform (1/K) prior.
+            sel_uids_for_post = cs_uids[rows]
+            post_block = np.full((len(rows), K), 1.0 / K, dtype=np.float32)
+            for out_i, u in enumerate(sel_uids_for_post.tolist()):
+                npz_i = uid_to_drgn_post.get(int(u))
+                if npz_i is not None:
+                    post_block[out_i] = drgn_post[npz_i].astype(np.float32)
+            subset = _inject_cryodrgn_posterior(subset, post_block)
+            # ------------------------------------------------------------------
+
             if args.inject_alpha_weight and has_alpha:
                 subset["alignments3D/alpha"] = np.asarray(weights, dtype=np.float32)
 

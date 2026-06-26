@@ -1,0 +1,2005 @@
+===== PAGE 1 =====
+Articles
+https:/ / doi.org/10.1038/s41592-020-01049-4
+1Computational and Systems Biology, Massachusetts Institute of T echnology, Cambridge, MA, USA. 2Computer Science and Artificial Intelligence 
+Laboratory, Massachusetts Institute of T echnology, Cambridge, MA, USA. 3Department of Mathematics, Massachusetts Institute of T echnology, 
+Cambridge, MA, USA. 4Department of Biology, Massachusetts Institute of T echnology, Cambridge, MA, USA. ✉e-mail: bab@mit.edu; jhdavis@mit.edu
+P
+roteins and their complexes are dynamic macromolecular 
+machines that carry out the essential biological processes 
+responsible for life. Although the mechanism of these macro
+-
+molecular machines is often deduced from a static 3D structure, a 
+more complete understanding could be achieved if one could ana
+-
+lyze the full distribution of conformations relevant to function.
+Single-particle cryo-EM is a rapidly maturing method for 
+determining high-resolution structure of large macromolecular 
+complexes1,2. Major advances in hardware 3–5 and software 4–9 have 
+streamlined the collection and analysis of cryo-EM datasets, such 
+that structures of rigid macromolecules can routinely be solved at 
+near-atomic resolution10,11. Increasingly, cryo-EM has been applied 
+to study heterogeneous complexes, as the experimental procedure 
+is less sensitive to sample heterogeneity than other methods for 
+structure determination 12,13. Additionally, because single-particle 
+cryo-EM can capture millions of snapshots of the molecule of inter-
+est, each carrying a unique molecule in its own conformational 
+state14, cryo-EM holds promise in revealing the conformational 
+landscape of dynamic macromolecular complexes. However, recon-
+structing ensembles of 3D volumes from such snapshots remains a 
+major computational challenge.
+Existing tools for heterogeneous reconstruction often make lim
+-
+iting assumptions on the observed structural heterogeneity. Most 
+commonly, heterogeneity is modeled as though it originates from a 
+small number of independent, discrete states, implemented as ‘3D 
+classification’ or ‘heterogeneous refinement’ in many cryo-EM soft
+-
+ware packages15–18. However, these discrete classification approaches 
+require specifying initial models for refinement, and because the 
+number and nature of the underlying structural states is unknown 
+a priori, this approach is error prone and often results in the omis -
+sion of potentially relevant structures. More critically, such discrete 
+approaches are ill-suited for reconstructing structures undergoing 
+continuous conformational changes.
+Advanced methods for heterogeneous reconstruction seek to 
+more closely model the continuous nature of flexible molecules. 
+Multibody refinement, available in RELION, models the structure 
+as the sum of user-defined rigid bodies that are allowed to rotate rel
+-
+ative to one another, placing structural assumptions on the observed 
+heterogeneity19. Continuous heterogeneity was also described using 
+principal component analysis (PCA)-based approaches20–22, includ-
+ing the recent 3D Variability Analysis (3DV A) algorithm avail -
+able in cryoSPARC23. Although the linear subspace model of these 
+approaches can provide a summary of the overall variability within 
+the dataset, the visualized heterogeneity contains artifacts when a 
+molecule’s conformational deformations are poorly approximated 
+by linear interpolations along basis volumes. In the manifold 
+embedding approach proposed in refs. 
+24,25, heterogeneous struc -
+tures are recovered by binning particles along the data manifold, 
+followed by traditional homogeneous reconstruction. Additional 
+algorithms for continuous heterogeneous reconstruction were dem
+-
+onstrated on synthetic datasets26,27.
+Here, we present cryoDRGN (Deep Reconstructing Generative 
+Networks), a method for heterogeneous cryo-EM reconstruction 
+based on deep neural networks. We hypothesized that neural net -
+works, which are known for their ability to model complex, nonlin-
+ear functions28, could learn heterogeneous ensembles of cryo-EM 
+density maps. We first show that our neural network representa -
+tion of structure can model single-density maps at high resolution, 
+before demonstrating the full cryoDRGN framework for unsuper -
+vised heterogeneous reconstruction.
+We find that cryoDRGN is a powerful and general approach 
+for analyzing structural heterogeneity in macromolecular com -
+plexes of varying size and expected sources of heterogeneity. We 
+show that the cryoDRGN approach can uncover residual hetero
+-
+geneity in ‘homogeneous’ datasets of the recombination-activating 
+gene RAG1–RAG2 complex and the 80S ribosome and model large 
+compositional changes of the assembling 50S ribosome and con
+-
+tinuous conformational changes of the pre-catalytic spliceosome. 
+Remarkably, cryoDRGN’s unsupervised approach for representa
+-
+tion learning can readily identify and filter impurities in the dataset 
+CryoDRGN: reconstruction of heterogeneous 
+cryo-EM structures using neural networks
+Ellen D. Zhong   1,2, T ristan Bepler   1,2, Bonnie Berger   2,3 ✉ and Joseph H. Davis   1,4 ✉
+Cryo-electron microscopy (cryo-EM) single-particle analysis has proven powerful in determining the structures of rigid mac-
+romolecules. However, many imaged protein complexes exhibit conformational and compositional heterogeneity that poses a 
+major challenge to existing three-dimensional reconstruction methods. Here, we present cryoDRGN, an algorithm that lever -
+ages the representation power of deep neural networks to directly reconstruct continuous distributions of 3D density maps and 
+map per-particle heterogeneity of single-particle cryo-EM datasets. Using cryoDRGN, we uncovered residual heterogeneity 
+in high-resolution datasets of the 80S ribosome and the RAG complex, revealed a new structural state of the assembling 50S 
+ribosome, and visualized large-scale continuous motions of a spliceosome complex. CryoDRGN contains interactive tools to 
+visualize a dataset’s distribution of per-particle variability, generate density maps for exploratory analysis, extract particle 
+subsets for use with other tools and generate trajectories to visualize molecular motions. CryoDRGN is open-source software 
+freely available at http:/ / cryodrgn.csail.mit.edu.
+NaTuRE METHoDs | VOL 18 | FeBrUArY 2021 | 176–185 | www.nature.com/ naturemethods176
+===== PAGE 2 =====
+ArticlesNAtURE MEtHoDS
+and can identify rare structural states containing as few as ~1,000 
+particles. CryoDRGN is distributed as an open-source tool that can 
+be easily integrated into existing pipelines and is freely available at 
+cryodrgn.csail.mit.edu.
+Results
+The cryoDRGN method. CryoDRGN performs heterogeneous 
+reconstruction by learning a deep generative model of 3D struc -
+ture from single-particle cryo-EM images. The method consists of 
+a specialized image-encoder–volume-decoder architecture, which 
+learns an encoding of two-dimensional (2D) particle images into 
+a continuous vector space described by the latent variable 
+z 2 Rn
+I
+ 
+(that is, the latent space), and the concomitant reconstruction of 3D 
+cryo-EM density maps from this latent space representation (Fig. 
+1a). This choice of model assumes that the heterogeneous structures 
+can be embedded within a continuous, low-dimensional manifold 
+in the latent space, where the dimensionality of the latent space is 
+defined by the user. The model is specified in the Fourier domain to 
+relate 2D images as planar slices of the 3D volume
+29, the orientation 
+of which is previously determined from a consensus reconstruction. 
+The neural networks are jointly trained from random initializa -
+tion using stochastic gradient descent on an objective function that 
+seeks to maximize (a variational lower bound on) the data likeli
+-
+hood as in standard variational autoencoders (V AEs)30. Additional 
+architectural and training details of cryoDRGN are provided in the 
+Methods.
+After training, the output of cryoDRGN analysis includes (1) 
+per-particle latent encodings, z
+i, describing the dataset’s heteroge -
+neity and (2) a neural network model of 3D density maps that can 
+directly reconstruct a density map given z
+i. Specifically, the encoder 
+network encodes particle images into the continuous latent space, 
+which allows for visualization and inspection of particle distribu
+-
+tion (Fig. 1b, center). The trained decoder network can then gener-
+ate 3D density maps given arbitrary values of the latent variable. For 
+example, representative structures can be generated from regions 
+of latent space with high particle density, and continuous confor
+-
+mational trajectories can be reconstructed by sampling points 
+along a trajectory through latent space (Fig. 1b, right). Notably, any 
+cryoDRGN-generated volume can be orthogonally validated by tra
+-
+ditional reconstruction approaches 15 using nearby particles in the 
+latent space (Fig. 1b, left). Lastly, any regions of the latent space that 
+are enriched in impurities or imaging artifacts may be selected, and 
+the encompassed particles may be filtered from subsequent analysis 
+(Fig. 1b, left).
+Neural networks can represent cryo-EM density maps. We first 
+evaluated the ability of the cryoDRGN volume decoder to represent 
+high-resolution cryo-EM density maps. To learn the homogeneous 
+Encode
+ /uni03D5i
+Particle density mapParticle image Latent variable
+/uni03D5i
+Training and architectureHeterogeneity analysis
+Latent space
+representation
+zi
+Vi
+Continuous trajectories
+Representative samples
+Decode
+Validation with 
+traditional tools
+Particle selection
+Dataset
+filtering
+a
+b
+zj
+zk
+zi
+Vi Vj Vk
+XkXi Xj
+Xi
+Encoder
+Image pose
+Decoder
+Fig. 1 | The cryoDRGN method for heterogeneous single-particle cryo-EM reconstruction. a, The cryoDrGN model consists of two neural networks 
+structured in an image-encoder–volume-decoder architecture with a continuous latent variable representation of heterogeneity. During training, each 
+particle image is encoded into the low-dimensional latent space and then reconstructed as its corresponding model slice based on the Fourier slice 
+theorem. Image and volume data are depicted in real space for visual clarity. b, Once a cryoDrGN model is trained, the full dataset of particle images is 
+encoded into the latent space, which is visualized here as a contour map with darker regions corresponding to higher particle density (center).  
+The decoder, which represents an ensemble of 3D density maps, can directly generate density maps from arbitrary values of the latent variable (right).  
+The particle stack may also be filtered using the latent space representation for validation of specific structures with traditional tools or to remove 
+impurities from the dataset (left). example images are from eMPIAr-10180 (ref. 
+36).
+NaTuRE METHoDs | VOL 18 | FeBrUArY 2021 | 176–185 | www.nature.com/ naturemethods 177
+===== PAGE 3 =====
+Articles NAtURE MEtHoDS
+structure of the RAG1–RAG2 signal-end complex (RAG, 369 kDa)31 
+and the Plasmodium falciparum 80S ribosome (Pf80S, 4.2 MDa)32, we 
+trained the volume-decoder network with no latent variable input, 
+using image poses obtained from C1 homogeneous refinements 
+in cryoSPARC16 (Methods). Trained on full-resolution images, the 
+cryoDRGN decoder produced structures that correlated with the 
+traditional, voxel-based reconstruction (Fig. 2a) at resolutions up 
+to 3.6 Å for RAG and 3.9 Å for Pf80S at a threshold of Fourier shell 
+correlation (FSC) = 0.5 (Fig. 2b), demonstrating the efficacy of this 
+neural network-based representation of 3D structure.
+As neural networks have a fixed capacity for representation that 
+is constrained by their architecture, we next compared decoder 
+architectures of different sizes to evaluate the tradeoff between rep-
+resentation power and training speed. We found that larger architec-
+tures, which have more trainable parameters, result in density maps 
+that correlate with the traditionally reconstructed map at higher 
+resolutions (Fig. 2b). The networks were trained by multiple passes 
+through the dataset (that is, epochs) (Fig. 2c), with lower values 
+of the objective function (Fig. 2d) as training progressed. Notably, 
+while the resolution of the learned structure increased with neural 
+network size, we found that larger models were slower to train (Fig. 
+2e). These tradeoffs suggest that the architecture and image size 
+should be tuned to suit the desired balance of speed and achievable 
+resolution. Lastly, we found that the cryoDRGN architecture was 
+capable of learning density maps at sufficiently high resolution to 
+visualize structural features, such as bulky side chains, that were 
+consistent with our FSC-based resolution estimates (Fig. 2f).
+CryoDRGN models both discrete and continuous structural het
+-
+erogeneity. We next sought to evaluate the complete cryoDRGN 
+framework for heterogeneous reconstruction using simulated 
+datasets (Fig. 3a,b). Datasets modeling continuous heterogeneity 
+were produced by rotating a single dihedral angle of a hypotheti -
+cal protein complex to simulate a conformational transition along a 
+one-dimensional (1D) reaction coordinate. Single-particle cryo-EM 
+images were then simulated uniformly along this reaction coordi
+-
+nate (‘uniform’), with bias toward particular conformations exem -
+plary of cooperative transitions (‘cooperative’) or with strong bias 
+leading to unobserved transition states (‘noncontiguous’). A dataset 
+simulating discrete compositional heterogeneity was produced by 
+mixing particles of the bacterial 30S, 50S and 70S ribosome (‘com
+-
+positional’). We then provided each of these four simulated datas -
+ets and their corresponding poses to cryoDRGN and trained a 1D 
+latent variable model (Methods).
+We found that cryoDRGN was capable of reconstructing both 
+continuous and discrete heterogeneous ensembles (Fig. 3c–h). On 
+1/resolution (Å−1)
+a
+Neural network representation Voxel-based representation
+RAG1–RAG2
+EMPIAR-10049
+80S ribosome
+EMPIAR-10028
+b
+c
+e
+D = 192
+D = 360
+FSC
+FSC
+EMPIAR-10028EMPIAR-10049
+FSC
+EMPIAR-10049, 1,024 × 3
+Epoch
+Loss
+EMPIAR-10028d
+3.6 Å GSFSC
+C1 symmetry
+3.2 Å GSFSC
+Heptamer DNA
+ID domain RNH domain
+815
+834
+617
+621
+644
+639
+681
+677A2
+G5
+f
+RAG complex local regions, cryoDRGN
+50 Å 
+50 Å 
+Architecture Parameters
+Training speed
+(min per 105 particles; 1 GPU)
+D = 128 D = 256 D = 360
+128 × 3
+256 × 3
+512 × 3
+1,024 × 3
+148,226
+394,757
+1,182,722
+3,938,306
+2.9
+3.5
+4.1
+6.7
+16.2
+5.1
+6.8
+10.5
+21.0
+56.1
+10.9
+14.3
+22.3
+43.7
+112.11,024 × 10 11,285,506
+1.0
+0.8
+0.6
+0.4
+0.2
+0
+1/12.3 1/6.2 1/4.1
+1/resolution (Å
+−1)
+1/resolution (Å−1)
+1/3.1 1/2.5
+1.0
+0.8
+0.6
+0.4
+0.2
+0
+1/12.3 1/6.2 1/4.1 1/3.1 1/2.5 0
+1.22
+1.23
+1.24
+5 10 15 20 25
+Epoch
+1
+2
+3
+5
+10
+20
+30
+40
+50
+1.0
+0.8
+0.6
+0.4
+0.2
+0
+1/13.4 1/6.7 1/4.5 1/3.4 1/2.7
+1,024 × 10
+512 × 3
+256 × 3
+128 × 3
+Architecture
+Architecture
+1,024 × 3
+1,024 × 10
+512 × 3
+256 × 3
+128 × 3
+1,024 × 3
+Fig. 2 | Neural network representation of cryo-EM density maps. a, Density maps of the rAG1–rAG2 complex (eMPIAr-10049)31 and of the eukaryotic 
+Pf80S ribosome (eMPIAr-10028)32 reconstructed by cryoDrGN’s decoder neural network (left) and a traditional, voxel-based reconstruction in 
+cryoSPArC (right). The cryoDrGN volumes were generated from decoder networks with three hidden layers and 1,024 nodes per hidden layer (denoted as 
+1,024 × 3) trained for 25 epochs. b, FSC curves between density maps produced by the cryoDrGN decoder with varying architectures and the traditional 
+reconstruction in a. c,d, evolution of the FSC curve in b and the training curve over multiple epochs of cryoDrGN model training. e, T raining speed in min per 
+105 images for cryoDrGN decoder networks of different architectures on different image sizes (d, in pixels) on a single Nvidia V100 graphics processing  
+unit (GPU). The number of trainable parameters is specified for decoder networks trained on D = 256 images. f, representative regions (insertion  
+domain (ID), rNase H-like domain (rNH)) of the rAG1–rAG2 density map from cryoDrGN in a superimposed with the published atomic model  
+(Protein Data Bank (PDB) 3JBX).
+NaTuRE METHoDs | VOL 18 | FeBrUArY 2021 | 176–185 | www.nature.com/ naturemethods178
+===== PAGE 4 =====
+ArticlesNAtURE MEtHoDS
+the uniform conformational heterogeneity dataset, cryoDRGN 
+reconstructed density maps that reproduced the ground-truth 
+continuous motion of the complex (Fig. 3c). When trained on the 
+ 
+compositional dataset, cryoDRGN reconstructed density maps 
+of the 30S, 50S and 70S ribosomes at distinct values of the latent 
+ 
+variable (Fig. 3d).
+In addition to reconstructing heterogeneous density maps, 
+cryoDRGN produces a latent encoding for each particle that can be 
+compared to the ground-truth reaction coordinate (Fig. 3e–h). For 
+the datasets with continuous conformational changes, the latent 
+encoding of each image correlated with the position along the reac
+-
+tion coordinate given by the dihedral angle of the underlying model 
+(Spearman r = −0.996, 0.992 and 0.988 for uniform,  cooperative 
+and noncontiguous, respectively) (Fig. 3e). We observed that the 
+qualitative features of the distribution of latent encodings matched 
+the ground truth, with three modes in the latent encoding distri
+-
+bution for the cooperative dataset (Fig. 3f ) and distinct clusters 
+for the noncontiguous and compositional datasets (Fig. 3g,h). We 
+note that, in general, the parameterization of a reaction coordinate 
+is non-unique (for example, when described by the learned latent 
+variable or by the dihedral angle, leading to different marginal 
+distributions in Fig. 3e). To quantitatively assess whether cryo
+-
+DRGN learned the correct distribution of structures, we computed 
+a ‘per-image’ FSC, which compares reconstructed density maps 
+with the ground truth on images across the reaction coordinate 
+(Methods), and found that the reconstructed structures of all four 
+datasets correlated well with the ground-truth distribution (Fig. 3c  
+and Extended Data Fig. 1).
+CryoDRGN uncovers residual heterogeneity from ‘homoge
+-
+neous’ cryo-EM datasets. We next evaluated cryoDRGN’s ability to 
+perform heterogeneous reconstruction on real cryo-EM datasets of 
+the RAG complex
+31 and the Pf80S32 ribosome from above. Ru et al. 
+reported RAG complex structures from two distinct datasets: the 
+‘signal-end complex’ , which failed to resolve the distal ends of the 
+12-recombination signal sequence (RSS) and 23-RSS DNA elements 
+or the nonamer binding domain (NBD) of RAG1, and the ‘paired 
+complex’ , which resolved these elements at sufficient resolution 
+for atomic model building (Fig. 4a). To test whether cryoDRGN 
+could newly uncover heterogeneity of these distal elements in the 
+‘signal-end complex’ , we trained a cryoDRGN ten-dimensional 
+(10D) latent variable model on the deposited particle images 
+(EMPIAR-10049)
+31. We found that cryoDRGN revealed substantial 
+heterogeneity of the 12-RSS, 23-RSS and NBD (Fig. 4b). In addi -
+tion to maps that only resolve the symmetric core (light gray in 
+Fig. 4b), cryoDRGN revealed structures with RSS positioning that 
+aligned with the canonical conformation found in the ‘paired com
+-
+plex’ atomic model 31 (dark blue), tilting of the RSS strands (light 
+blue), linear 23-RSS DNA (purple), as well as the presence (yellow) 
+and absence (coral) of the NBD. These representative maps were 
+selected out of a large ensemble of generated structures (Methods) 
+from different regions of the latent space (Fig. 4c). A trajectory 
+ 
+50 density maps
+Ground-truth map
+Latent z
+Ground-truth map Ground-truth map
+Uniform Cooperative Noncontiguous Compositional
+30 S 50 S 70 S
+Ground-truth map
+10
+4
+ particles 1.5 × 10
+4
+ particles 2.5 × 10
+4
+ particles
+z = –2.11
+z = –0.61
+z = 1.18
+z = (5.38,
+2.05,
+0.48,
+–0.76,
+–2.41,
+–5.88)
+FSC
+1/resolution (Å
+1
+)1/resolution (Å
+1
+)
+FSC
+Particles
+Map
+UniformCooperativeNoncontiguous
+a
+b
+c
+e
+d
+f g h
+Latent z
+Latent z
+Latent z
+30S 50S 70S
+1,000
+500
+0
+2,000
+1,000
+0
+4,000
+2,000
+0
+1 50
+100 ‘per-image’ FSCs
+0.8
+1.0
+0.6
+0.4
+0.2
+0
+1/60 1/30 1/20 1/15 1/12
+0.8
+1.0
+0.6
+0.4
+0.2
+0
+1/30 1/15
+30S
+50S
+70S
+1/10 1/7.5 1/6
+10
+5
+0
+–5
+–10
+0 10 20 30 40
+–10.0
+–7.5
+–5.0
+–2.5
+0
+25
+5.0
+7.5
+0 10 20 30 40 0
+–6
+–4
+–2
+0
+2
+4
+6 2
+1
+0
+–1
+–2
+–3
+10 20 30 40
+Fig. 3 | CryoDRGN heterogeneous reconstruction of simulated datasets. a, Ground-truth density maps simulating continuous heterogeneity generated by 
+sampling conformations along a 1D conformational transition from the leftmost to the rightmost structure (left). Particles along this conformation transition 
+were sampled uniformly (top) or from a mixture of Gaussian distributions of varying widths (middle, bottom) to simulate various degrees of cooperative 
+transitions between three states. b, Compositional heterogeneity simulated by mixing particles of the 30S, 50S and 70S bacterial ribosomal complexes. 
+c, Density maps reconstructed by cryoDrGN trained on the uniformly sampled dataset in a. Six structures were sampled from the specified values of the 
+latent variable (top). ‘Per-image’ FSC curves are shown, where for 100 images equally spaced along the reaction coordinate, we computed the FSC between 
+a map generated by cryoDrGN at the predicted latent encoding for each image and the ground-truth density map for that image (bottom). See Methods 
+for description of the ‘per-image’ FSC approach. d, Density maps reconstructed by cryoDrGN from the compositional dataset in b and their FSCs to the 
+corresponding ground-truth density map. e–h, Predicted latent space encoding for each particle image of different simulated datasets versus the ground-truth 
+reaction coordinate describing the motion (e–g) or the ground-truth class assignment (h). All cryoDrGN reconstructions use a 1D latent variable model.
+NaTuRE METHoDs | VOL 18 | FeBrUArY 2021 | 176–185 | www.nature.com/ naturemethods 179
+===== PAGE 5 =====
+Articles NAtURE MEtHoDS
+sampling from the continuous distribution modeled by cryoDRGN 
+is shown in Supplementary Video 1. To validate the presence of 
+these heterogeneous states in the dataset, we performed heteroge
+-
+neous 3D refinement in cryoSPARC16 using the cryoDRGN density 
+maps as initial models, which reproduced the heterogeneity of the 
+RSS elements (Extended Data Fig. 2). Subsequent work by Ru et al. 
+suggested that the conformational dynamics and asymmetric posi
+-
+tioning of the 12- and 23-RSS by the NBD in the pre-cleavage form 
+are fundamental to the structural mechanism underlying the 12-23 
+rule of variable, diversity, and joining gene segment (V(D)J) recom
+-
+bination33. Our results newly demonstrate that such heterogeneity 
+was also present in the post-cleavage ‘signal-end’ RAG complex.
+While analyzing a homogeneous reconstruction of the Pf80S 
+ribosome, Wong et al. observed flexibility in the small subunit (SSU) 
+head region and missing density for peripheral rRNA expansion 
+segment elements
+32. To explore if this unresolved density resulted 
+from residual heterogeneity, we trained a cryoDRGN 10D latent 
+variable model on their deposited dataset (EMPIAR-10028)
+32 and 
+reconstructed an ensemble of density maps that not only contained 
+structures consistent with the homogeneous reconstruction but also 
+revealed rotation of the 40S SSU (Fig. 4d), heterogeneity within the 
+SSU head (Extended Data Fig. 3) and motion of many peripheral 
+rRNA expansion segments (Supplementary Video 2). By visualizing 
+representative 40S-rotated and unrotated density maps, we found 
+that cryoDRGN was able to simultaneously capture the large-scale 
+intersubunit rotation and coordinated smaller-scale structural rear
+-
+rangements, including motion of the L1 stalk, disappearance of 
+an rRNA helix and the disappearance of the intersubunit bridge 
+b
+40S
+SSU head
+40S
+60S
+SSU head
+c e
+Rotated state
+RAG complex Pf 80S ribosome
+Rotated 40S
+50 Å 
+|z| = 10 |z| = 10
+a
+EMPIAR-10049
+RAG signal-end complex RAG paired complex
+EMD-6489
+C1 symmetry
+EMD-6487
+C2 symmetry
+23-RSS
+NBD
+12-RSS
+CryoDRGN of the RAG signal-end complex
+90°
+10
+5
+0
+–5
+–10
+15
+10
+5
+0
+–5
+PC2 (EV, 0.12)
+PC2 (EV, 0.11)
+–15
+–10
+–10 –5 0
+PC1 (EV, 0.13) PC1 (EV, 0.16)
+5 10 –10 0 10 20
+d
+50 Å 
+Fig. 4 | Discovery of residual heterogeneity in ‘homogeneous’ datasets. a, Published density maps of the 369-kDa rAG1–rAG2 complex. The signal-end 
+complex (left) shows the C2 symmetric core, and the paired complex (right) resolves additional asymmetric 12- and 23-rSS DNA elements and the rAG1 
+NBD that extend below the core. b, representative density maps of the rAG signal-end complex (eMPIAr-10049)
+31 reconstructed by cryoDrGN. Density 
+maps resolve variable conformations of the 12- and 23-rSS DNA elements and the NBD, which are missing from the homogeneous refinement. The docked 
+atomic model (PDB 3JBW) of the rAG paired complex includes an asymmetric conformation of the rSS and NBD elements that extend from the core rAG 
+complex. c, Latent space representation of particle images from the eMPIAr-10049 dataset (ref. 
+31), visualized using PCA with explained variance (eV) 
+noted. Structures from b are marked with the corresponding color. d, Density map of the 4.2-MDa Pf80S ribosome (eMPIAr-10028)32 in an unrotated 
+(blue) and rotated (purple) state reconstructed by cryoDrGN. Arrows indicate rotation of the 40S subunit relative to the 60S subunit (top) and motion 
+of the L1 stalk (bottom). Circles indicate differential occupancy of the C-terminal helix of eL8 and an rrNA helix between the two states. e, Latent space 
+representation of particle images from the eMPIAr-10028 dataset (ref. 
+32), visualized using PCA with explained variance noted. Structures from d are 
+marked with the corresponding color. A cluster of particles separated along PC1 of d that corresponds to the rotated state of the Pf80S ribosome is noted. 
+Additional density maps from these datasets are shown in extended Data Fig. 3 and Supplementary Videos 1 and 2.
+NaTuRE METHoDs | VOL 18 | FeBrUArY 2021 | 176–185 | www.nature.com/ naturemethods180
+===== PAGE 6 =====
+ArticlesNAtURE MEtHoDS
+L1 stalk
+LSU assembly class B LSU assembly class D LSU assembly class ELSU assembly class C
+CP
+B
+C
+E
+D
+UMAP2
+UMAP1
+|z| = 10
+A
+Published 3D 
+A (70S)
+B
+C
+D
+E
+c d
+UMAP2
+UMAP1
+|z| = 10
+1.32 × 105 particles z
+Filtered
+ba
+e
+f
+LSU assembly class E5LSU assembly class C4
+1,113 particles
+C4
+h
+50S
+30S CP
+UMAP2
+UMAP1
+B
+AD1
+D2 D3
+D4
+E3
+E1
+E2 E4
+E5
+C1
+C2
+C3
+LSU assembly minor states
+g
+i
+j
+UMAP2
+UMAP1
+Filtered
+LSU assembly major states
+|z| Architecture Image size Training speed Total runtime
+(min per 105 particles) (50 epochs, 1 GPU)
+Filtering 1 256  ×3
+256 × 3
+1,024 × 3
+128 5.7 6.3 h
+Filtering 10 128 5.7 6.3 h
+Final 10 256 43.9 31.9 h
+EMPIAR-10076
+Particles
+Particles
+1.32 × 105 particles
+EMPIAR-10076
+8.7 × 104 particles
+|z| = 1 Published 3D
+A (70S)
+B
+C
+D
+E
+F (30S)
+Unassigned
+0.6
+0.4
+0.2
+0
+–4 –2
+z
+0 2 –4
+0
+2,000
+4,000
+6,000
+8,000
+10,000
+–2 0 2
+classification
+classification
+Fig. 5 | CryoDRGN heterogeneous reconstruction of the assembly landscape of the bacterial Lsu. a,b, Latent space representation of particle images 
+of the assembling LSU (eMPIAr-10076)12 as a normalized histogram or UMAP embeddings after training a cryoDrGN 1D or 10D latent variable model, 
+respectively. c,d, Latent space representation of particles colored by major LSU assembly state assigned from the 3D classification in Davis et al.12. 
+Impurities in the dataset were assigned and subsequently filtered based on a cutoff of z = −1 in the 1D case (dotted line) and cluster assignment from a 
+five-component Gaussian mixture model (GMM) in the 10D case. The dashed line in d indicates a rough outline of cluster assignment, shown in extended 
+Data Fig. 5. e, Density maps of the four major assembly states of the LSU reconstructed by cryoDrGN after training on the filtered dataset. Dashed lines 
+indicate outlines of the fully mature 50S ribosome, with the central protuberance (CP) noted. f,g, Latent space representation of the filtered dataset, colored 
+by major and minor assembly states assigned from the 3D classification in Davis et al.
+12. Points denote cluster centers for the corresponding assembly state. 
+Major assembly state labels correspond to the structures from e. Inset shows a magnified view of the state C cluster and a population of particles originally 
+misclassified into state e. h,i, CryoDrGN reconstruction of additional density maps, showing the 70S ribosome, an impurity during purification and LSU 
+minor states C4 and e5. The newly identified C4 state resembles major state C in maturation but contains rrNA helix 68, previously present only in mature 
+assembly states e4 and e5. j, Hyperparameters and runtime of the initial pilot experiments for particle filtering (a–d) and the final cryoDrGN model (e–i) 
+trained on the assembling LSU dataset. Additional density maps are shown in extended Data Fig. 6 and Supplementary Video 3.
+NaTuRE METHoDs | VOL 18 | FeBrUArY 2021 | 176–185 | www.nature.com/ naturemethods 181
+===== PAGE 7 =====
+Articles NAtURE MEtHoDS
+formed by the C-terminal helix of eL8, which is consistent with Sun 
+et al. ’s characterization of Pf80S dynamics34 (Fig. 4d).
+We then visualized the 10D latent space representation of the 
+Pf80S particles with PCA (Fig. 4e) and with uniform manifold 
+approximate and projection (UMAP) 35 (Extended Data Fig. 4). 
+The 40S-rotated density map originated from a region of the par -
+ticle distribution separated along the first PC of the latent space. 
+To validate the presence of this state, we extracted 4,889 particles 
+constituting the outlying cluster (Methods). Traditional homoge
+-
+neous reconstruction of these particles in cryoSPARC produced a 
+6.4-Å reconstruction of the rotated 40S state that was consistent 
+with the cryoDRGN structure (Extended Data Fig. 4). Additionally, 
+by sampling many density maps from the latent space, we observed 
+that structures with density missing from the SSU head group were 
+located within a subregion of the main cluster of the UMAP visual
+-
+ization (Extended Data Fig. 3). We hypothesize that the 40S-rotated 
+state appears as a visually distinct cluster because more mass 
+changes to rotate the entire 40S subunit, as opposed to the missing 
+SSU head group state, which involves changes in a smaller region of 
+the 40S subunit.
+CryoDRGN automatically partitions assembly states of the 
+bacterial ribosome. Next, we sought to evaluate cryoDRGN on a 
+highly heterogeneous cryo-EM dataset of the Escherichia coli  large 
+ribosomal subunit (LSU) undergoing assembly (EMPIAR-10076)
+12. 
+This dataset is known to contain substantial compositional and 
+conformational heterogeneity; in the original analysis, multiple 
+expert-guided rounds of hierarchical 3D classification resulted in 
+13 discrete structures that were grouped into four major assem
+-
+bly states. Here, we aimed to assess if cryoDRGN could auto -
+matically reveal these heterogeneous states without user-guided  
+3D classification.
+As initial pilot experiments, we first trained 1D and 10D latent 
+variable models on downsampled images of the dataset (Methods). 
+The dataset’s latent space representation exhibited distinct peaks 
+in the 1D case or clusters in the 10D case when visualized with 
+UMAP
+35 (Fig. 5a,b) that corresponded to the major assembly states 
+when grouped by the published 3D classification labels (Fig. 5c,d). 
+As the particles were obtained by crudely fractionating a lysate to 
+capture the full ensemble of cellular assembly intermediates, a sub
+-
+stantial fraction of the published particle stack corresponds to 30S 
+or non-ribosomal impurities. These unassigned particles were out-
+liers in the latent representation (Fig. 5c and Extended Data Fig. 5), 
+and neither 2D class averages nor a traditional 3D reconstruction of 
+these particles produced structures consistent with assembling LSU 
+ribosomes (Extended Data Fig. 5). As we did not wish to devote 
+representation capacity of the cryoDRGN neural networks to mod
+-
+eling these impurities, we used the latent representation to filter the 
+dataset before further analysis, taking the intersection of the particle 
+stack after filtering based on the 1D and 10D latent variable model 
+(Methods).
+To explore the heterogeneity within the LSU assembly states, we 
+trained a cryoDRGN 10D latent variable model on the remaining 
+images at higher resolution (Methods). The decoder network recon
+-
+structed density maps that matched the reported major (Fig. 5e)  
+and minor (Extended Data Fig. 6) assembly states of the LSU. We visu-
+alized the encodings of particle images in the 10D latent space with 
+UMAP and observed clusters corresponding to the major (Fig. 5f ) 
+ 
+and minor states (Fig. 5g and Supplementary Fig. 6) of LSU assem-
+bly after coloring by the published 3D classification. From the latent 
+representation, we also noted a clearly separated cluster of parti
+-
+cles assigned to class A, and structures sampled from this region 
+of latent space reconstructed the 70S ribosome, an impurity in the 
+dataset (Fig. 5h). Finally, we identified a small cluster of ~1,100 
+particles adjacent to the class C cluster, the particles of which were 
+originally classified into class E (Fig. 5f , inset). The density map 
+reconstructed by the decoder from this region revealed a previously 
+unreported assembly intermediate that we newly define as class C4 
+(Fig. 5i). Like the other class C structures, class C4 lacked the cen
+-
+tral protuberance but possessed clearly resolved density for rRNA 
+helix 68, which was only present in the mature E4 and E5 classes 
+from Davis et al.
+12. Traditional homogeneous reconstruction of 
+the particle images constituting this cluster reproduced a similar, 
+albeit lower-resolution structure, which confirmed the existence of 
+this structural state in the original dataset (Extended Data Fig. 7). 
+ 
+We found that the cryoDRGN latent representation was highly 
+reproducible across replicates (Extended Data Fig. 8). CryoDRGN 
+experiments and runtimes are summarized in Fig. 5j. In addition to 
+illustrating cryoDRGN’s ability to model extremely heterogeneous 
+datasets without user-driven classification, this analysis further 
+demonstrated that cryoDRGN can identify novel and rare (~1% of 
+all particles) structural classes that would likely be overlooked by 
+traditional hierarchical classification.
+CryoDRGN reveals dynamic continuous motions in the 
+pre-catalytic spliceosome. Finally, to assess cryoDRGN’s ability to 
+model large continuous conformational changes, we reanalyzed a 
+dataset of the pre-catalytic spliceosome (EMPIAR-10180)
+36. Using 
+expert-guided focused classifications, Plaschka et al. reconstructed 
+a composite map for this complex and suggested that the complex 
+sampled a continuum of conformations with large motions of the 
+SF3b subcomplex36. In our analysis, we first trained a 10D latent 
+variable model on the downsampled images using image poses 
+derived from a consensus reconstruction (Methods). Multiple clus
+-
+ters were observed in the latent space encodings of the dataset’s par-
+ticle images (Fig. 6a). In sampling structures from the latent space, 
+the generated density maps revealed expected spliceosome confor
+-
+mations from the largest cluster, poorly resolved structures (likely 
+due to imaging artifacts from the leftmost cluster), structures lack
+-
+ing density for the SF3b subcomplex from a third cluster and extra 
+density of the U2 core, which is thought to be highly dynamic
+13, 
+from the uppermost cluster (Fig. 6b). To focus our analysis on bona 
+fide pre-catalytic spliceosome particles, we leveraged the latent 
+space representation to eliminate any particles that mapped to the 
+undesired clusters from two replicate runs (Methods).
+With the filtered particle stack, we trained a 10D model on higher 
+resolution images and visualized the dataset’s latent encodings in 2D 
+using PCA (Fig. 6c). The visualized data manifold was unfeatured, 
+consistent with a molecule undergoing non-cooperative conforma
+-
+tional changes. By generating structures along the first principal 
+component (PC) of the latent space encodings, we reconstructed 
+a trajectory of the SF3b and helicase subcomplexes in motion, 
+smoothly transitioning from an elongated state to one compressed 
+against the body of the spliceosome (Fig. 6d). This large-scale motion 
+was consistent with motions derived from the first PC of rigid-body 
+orientations from multibody analysis (Extended Data Fig. 9) and in 
+the first PC of the linear subspace model from 3DV A (Extended Data 
+Fig 10). A similar traversal along the second PC produced a con
+-
+tinuous trajectory of the SF3b and helicase subcomplexes moving 
+in opposition (Supplementary Fig. 1 and Supplementary Video 4). 
+The anticorrelated motion of the SF3b and helicase subcomplexes in 
+PC2, together with their correlated motion in PC1, suggests that the 
+two domains move independently in the imaged ensemble. Finally, 
+although trajectories along latent space PCs provide a summary of 
+the extent of variability in the structure, cryoDRGN can also gener
+-
+ate structures at arbitrary points from the latent space. By traversing 
+along the nearest neighbor graph of the latent encodings and gener
+-
+ating structures at the visited nodes, cryoDRGN generated a plau -
+sible trajectory of the conformations adopted by the pre-catalytic 
+spliceosome (Supplementary Video 4), highlighting the potential of 
+single-particle cryo-EM to uncover the conformational dynamics of 
+molecular machines.
+NaTuRE METHoDs | VOL 18 | FeBrUArY 2021 | 176–185 | www.nature.com/ naturemethods182
+===== PAGE 8 =====
+ArticlesNAtURE MEtHoDS
+Discussion
+This work introduces cryoDRGN, a method using neural networks 
+to reconstruct 3D density maps from heterogeneous single-particle 
+cryo-EM datasets. The power of this approach lies in its ability to 
+represent heterogeneous structures without simplifying assump
+-
+tions on the type of heterogeneity. In principle, cryoDRGN is able 
+to represent any distribution of structures that can be approxi -
+mated by a deep neural network, a broad class of function approxi-
+mators for continuous, nonlinear functions 28. This flexibility 
+contrasts with existing methods that impose limiting assumptions 
+on the types of structural heterogeneity present in the sample. For 
+example, 3D classification assumes a mixture of discrete structural 
+classes, multibody refinement assumes conformational changes 
+are composed of user-defined rigid-body motions, and 3DV A 
+assumes that heterogeneity is generated from linear combinations 
+of density maps. Although these approaches have proven useful, 
+their model for heterogeneity is often mismatched with the true 
+structural heterogeneity in many systems and thus can introduce 
+bias into reconstructions. By contrast, we empirically show that 
+the cryoDRGN architecture can model both discrete composi
+-
+tional heterogeneity and continuous conformational changes 
+without the aforementioned structural assumptions. For example, 
+we discovered heterogeneous states of the RAG complex and Pf80S 
+ribosome that were originally averaged out of the homogeneous 
+reconstruction. When analyzing the dataset of the assembling E. 
+coli LSU, cryoDRGN learned an ensemble of LSU assembly states 
+without a priori specification of the number of states or initial 
+models as is required for 3D classification. Finally, when analyz
+-
+ing the pre-catalytic spliceosome, we found that the continuous 
+conformational changes reconstructed by cryoDRGN lacked the 
+rigid-body boundary artifacts from the mask-based multibody 
+refinement approach
+19 (Extended Data Fig. 9) or linear interpola -
+tion artifacts from the linear subspace 3DV A model 23 (Extended 
+Data Fig. 10).
+Interpretation of the latent space. A key feature of cryoDRGN is its 
+ability to provide a low-dimensional representation of the dataset’s 
+heterogeneity given by each particle’s latent encoding. Subject to 
+optimization, cryoDRGN organizes the latent space such that struc
+-
+turally related particles are in close proximity. In simulated and real 
+datasets, we find that continuous motions are embedded along a 
+continuum in latent space (Figs. 3e–g and 6c) and that composi
+-
+tionally distinct states manifest as clusters (Figs. 3h and 5f ). These 
+empirical results demonstrate that visualization of the distribution 
+of latent encodings can be informative in exploring the structural 
+heterogeneity within the imaged ensemble and even suggest a pos
+-
+sible interpretation of the latent space as a pseudo-conformational 
+landscape. However, we note that cryoDRGN’s objective function 
+aims only to reproduce the distribution of structures and does not 
+guarantee that the latent space layout (or its 2D visualization) will 
+produce interpretable features of the underlying energy landscape. 
+Furthermore, structures reconstructed from unoccupied regions 
+of the latent space will not in general correspond to true physical 
+structures, as cryoDRGN optimizes the likelihood of the observed 
+data, and these structures are not observed.
+Finally, in real datasets, there may exist images that do not origi
+-
+nate from the standard single-particle image formation model, for 
+example, false positives encountered during particle picking. We 
+demonstrated the utility of the latent space representation in iden
+-
+tifying such impurities, ice artifacts and other out-of-distribution 
+particle images that may be filtered out in subsequent analyses 
+(Figs. 5a–d and 6a).
+Body
+SF3b
+Helicase
+Foot
+UMAP2
+UMAP1
+|z| = 10 Selected
+Body
+SF3b
+Foot
+Helicase
+PC1 = –4.22PC1 = –2.10PC1 = –0.02PC1 = 2.14PC1 = 4.26
+EMPIAR-10180
+|z| = 10
+1.39 × 105 particles3.27 × 105 particles
+PC1 (EV, 0.16) 
+PC2 (EV, 0.14)
+a b c
+d
+i ii iii iv v
+i
+ii
+iii
+iv
+v
+15
+EMPIAR-10180 filtered
+10
+5
+0
+–5
+–10
+–5 0 5 10–10
+Fig. 6 | CryoDRGN heterogeneous reconstruction of the pre-catalytic spliceosome. a, UMAP visualization of the latent space representation of particle 
+images of the pre-catalytic spliceosome (eMPIAr-10180)36 after training a 10D latent variable model with cryoDrGN. b, representative structures 
+generated at points shown in a that depict the expected structures of the pre-catalytic spliceosome (i,ii), structures likely corrupted by imaging artifacts 
+(iii), the complex lacking the SF3b subcomplex (iv) and the complex with the U2 core (v). Density maps are shown at identical isosurface levels except 
+for (v), which required a lower value to highlight the U2 core. c, PCA projection of latent space encodings after training a 10D latent variable model on the 
+dataset filtered for the selected region in a. d, Structures generated by traversing along PC1 of the latent space representation at the points shown in c. 
+Additional density maps are shown in Supplementary Fig. 1 and Supplementary Video 4.
+NaTuRE METHoDs | VOL 18 | FeBrUArY 2021 | 176–185 | www.nature.com/ naturemethods 183
+===== PAGE 9 =====
+Articles NAtURE MEtHoDS
+We emphasize that different datasets have diverse sources of 
+heterogeneity, and thus the interpretation of the cryoDRGN latent 
+space is highly dataset dependent. We provide interactive analy -
+sis tools in the cryoDRGN software for exploring the learned  
+latent space.
+Visualizing structural trajectories. In addition to encoding par -
+ticles in an unsupervised manner, cryoDRGN can reconstruct 3D 
+density maps from user-defined positions in latent space. Because 
+cryoDRGN learns a generative model for structure, an unlim
+-
+ited number of structures can be generated and analyzed, thus 
+enabling visualization of structural trajectories. By leveraging 
+the latent encodings of the particle images, users can directly tra
+-
+verse the data manifold and only sample structures from regions 
+of latent space with substantial particle occupancy. Indeed, we 
+applied a well-established graph-traversal algorithm
+37 to visual -
+ize data-supported motions in the RAG complex, the Pf80S ribo -
+some, bL17-independent assembly of the bacterial ribosome and 
+the pre-catalytic spliceosome (Supplementary Videos 1–4). We note 
+that while this approach is useful in visualizing potential structural 
+changes linking one state to another, they do not necessarily reveal 
+the kinetically preferred path.
+Practical considerations in choosing training hyperparameters. 
+Although this method emphasizes an unsupervised approach for 
+analyzing structural heterogeneity, cryoDRGN does require that the 
+user define the dimensionality of the latent space and the architec
+-
+ture of both the encoder and decoder networks. We find that, in 
+practice, training a smaller architecture on downsampled images 
+is effective at distinguishing bona fide particles from contaminants 
+and imaging artifacts (Figs. 5a–d and 6a), and we recommend 
+users initially employ such pilot experiments to filter their dataset. 
+Additionally, we find that, in our tested datasets, a 10D latent space 
+provides sufficient representation capacity to effectively model 
+structural heterogeneity and that this 10D space can be readily visu
+-
+alized with PCA or UMAP . Notably, we recommend the use of such 
+a 10D latent space instead of lower-dimensional space, as we found 
+that 10D spaces result in much more rapid overall training, which 
+is consistent with similar observations of related overparameterized 
+neural network architectures
+38. Finally, users must specify the num-
+ber of nodes and layers in the neural networks, hyperparameters 
+that limit the complexity of the learned function. Here, we find an 
+inverse relationship between neural network size and the achievable 
+resolution of a given structure (Fig. 2b). Training larger networks on 
+larger images is substantially slower (Fig. 2e), and we recommend 
+that users perform an initial assessment using downsampled images 
+and relatively small networks before proceeding to high-resolution 
+reconstructions. We note that use of excessively complex models 
+(that is, large architectures or latent variable dimensions) can lead 
+to overfitting, which may be alleviated by standard neural network 
+regularization techniques, such as early stopping or using a simpler 
+model
+38. We provide recommended training settings in the cryo -
+DRGN software.
+Discovering new states using cryoDRGN. CryoDRGN can be used 
+to identify novel clusters of structurally related particles, which can 
+then be visualized by generating density maps from that region of 
+latent space. Indeed, in analyzing the LSU assembly dataset, we 
+noted a new structural state, C4, that was missed in traditional 
+hierarchical classification. C4 provides structural evidence that a 
+functionally critical intersubunit helix (h68) can dock in a native 
+conformation in the absence of the central protuberance (Fig. 5i). 
+Notably, we could validate the existence of this state by performing 
+traditional homogeneous refinement using ~1,000 particles from 
+this cluster in the cryoDRGN latent space (Extended Data Fig. 7). 
+Although we were able to identify this state from a distinct cluster 
+present in the UMAP visualization (Fig. 5g), in general, the defini
+-
+tion of distinct ‘states’ may not be as readily apparent (for example, 
+the ‘missing SSU head’ state in Extended Data Fig. 3), and we view 
+the unsupervised identification of states from the cryoDRGN struc
+-
+tural ensemble as an exciting area to pursue.
+In future work, we envision using cryoDRGN to reveal the num-
+ber of discrete classes and their constituent particles and to pro -
+duce initial 3D models that could be used as inputs for a traditional 
+3D reconstruction. Given the mature state of such tools
+39,40, this 
+data-driven classification approach, followed by traditional homo -
+geneous reconstruction, particle polishing and higher-order image 
+aberration correction, has the potential to produce high-resolution 
+structures of the full spectrum of discrete structural states.
+De novo pose estimation. As implemented, cryoDRGN uses pose 
+estimates resulting from a traditional consensus 3D reconstruc
+-
+tion. In analyzing four publicly available datasets, we found that 
+such consensus pose estimates were sufficiently accurate to gen
+-
+erate meaningful latent space encodings and to produce interpre -
+table density maps of distinct structures. It is clear, however, that 
+this approach will fail if the degree of structural heterogeneity in the 
+dataset results in inaccurate pose estimates. For example, a mixture 
+of structurally unrelated complexes will align poorly to a consen
+-
+sus structure, and thus produce poor pose estimates. Notably, our 
+framework is differentiable with respect to pose variables, which, in 
+principle, could allow on-the-fly pose refinement or de novo pose 
+estimation. Future work will explore the efficacy of incorporating 
+such features to enable fully unsupervised reconstruction of hetero
+-
+geneous distributions of protein structure from cryo-EM images.
+online content
+Any methods, additional references, Nature Research report -
+ing summaries, source data, extended data, supplementary infor -
+mation, acknowledgements, peer review information; details of 
+author contributions and competing interests; and statements of 
+data and code availability are available at https://doi.org/10.1038/
+s41592-020-01049-4.
+Received: 25 March 2020; Accepted: 18 December 2020;  
+Published online: 4 February 2021
+References
+ 1. Nogales, E. The development of cryo-EM into a mainstream structural 
+biology technique. Nat. Methods 13, 24–27 (2015).
+ 2. Cheng, Y . Single-particle cryo-EM—how did it get here and where will it go. 
+Science 361, 876–880 (2018).
+ 3. Bammes, B. E., Rochat, R. H., Jakana, J., Chen, D.-H. & Chiu, W . Direct 
+electron detection yields cryo-EM reconstructions at resolutions beyond 3/4 
+Nyquist frequency. J. Struct. Biol. 177, 589–601 (2012).
+ 4. Suloway, C. et al. Automated molecular microscopy: the new Leginon system. 
+J. Struct. Biol. 151, 41–60 (2005).
+ 5. Li, X. et al. Electron counting and beam-induced motion correction enable 
+near-atomic-resolution single-particle cryo-EM. Nat. Methods 10, 584–590 
+(2013).
+ 6. Zhang, K. Gctf: real-time CTF determination and correction. J. Struct. Biol.  
+193, 1–12 (2016).
+ 7. Brubaker, M. A., Punjani, A. & Fleet, D. J. Building proteins in a day: efficient 
+3D molecular reconstruction. In Proceedings of the IEEE Computer Society 
+Conference on Computer Vision and Pattern Recognition, 3099–3108 (CVPR, 
+2015).
+ 8. Scheres, S. H. W . A Bayesian view on cryo-EM structure determination. J. 
+Mol. Biol. 415, 406–418 (2012).
+ 9. Bepler, T. et al. Positive-unlabeled convolutional neural networks for particle 
+picking in cryo-electron micrographs. Nat. Methods  16, 1153–1160 (2019).
+ 10. Ahmed, T., Yin, Z. & Bhushan, S. Cryo-EM structure of the large subunit of 
+the spinach chloroplast ribosome. Sci. Rep. 6, 35793 (2016).
+ 11. Wrapp, D. et al. Cryo-EM structure of the 2019-nCoV spike in the prefusion 
+conformation. Science 367, 1260–1263 (2020).
+ 12. Davis, J. H. et al. Modular assembly of the bacterial large ribosomal subunit. 
+Cell 167, 1610–1622 (2016).
+NaTuRE METHoDs | VOL 18 | FeBrUArY 2021 | 176–185 | www.nature.com/ naturemethods184
+===== PAGE 10 =====
+ArticlesNAtURE MEtHoDS
+ 13. Haselbach, D. et al. Structure and conformational dynamics of the human 
+spliceosomal Bact complex. Cell 172, 454–464 (2018).
+ 14. Sigworth, F . J. Principles of cryo-EM single-particle image processing. 
+Microscopy 65, 57–67 (2016).
+ 15. Scheres, S. H. W . RELION: implementation of a Bayesian approach  
+to cryo-EM structure determination. J. Struct. Biol.  180,  
+519–530 (2012).
+ 16. Punjani, A., Rubinstein, J. L., Fleet, D. J. & Brubaker, M. cryoSPARC: 
+algorithms for rapid unsupervised cryo-EM structure determination.  
+Nat. Methods 14, 290–296 (2017).
+ 17. Lyumkis, D., Brilot, A. F ., Theobald, D. L. & Grigorieff, N. Likelihood-based 
+classification of cryo-EM images using FREALIGN. J. Struct. Biol.  183, 
+377–388 (2013).
+ 18. Grant, T., Rohou, A. & Grigorieff, N. cisTEM, user-friendly software for 
+single-particle image processing. eLife  7, e14874 (2018).
+ 19. Nakane, T., Kimanius, D., Lindahl, E. & Scheres, S. H. Characterisation of 
+molecular motions in cryo-EM single-particle data by multi-body refinement 
+in RELION. eLife 7, e36861 (2018).
+ 20. Liu, W . & Frank, J. Estimation of variance distribution in three-dimensional 
+reconstruction. I. Theory. J. Opt. Soc. Am. A 12, 2615–2627 (1995).
+ 21. Penczek, P . A., Kimmel, M. & Spahn, C. M. T. Identifying conformational 
+states of macromolecules by eigen-analysis of resampled cryo-EM images. 
+Structure 19, 1582–1590 (2011).
+ 22. Tagare, H. D., Kucukelbir, A., Sigworth, F . J., Wang, H. & Rao, M. Directly 
+reconstructing principal components of heterogeneous particles from 
+cryo-EM images. J. Struct. Biol.  191, 245–262 (2015).
+ 23. Punjani, A. & Fleet, D. J. 3D Variability Analysis: directly resolving 
+continuous flexibility and discrete heterogeneity from single particle cryo-EM 
+images. Preprint at bioRxiv https://doi.org/10.1101/2020.04.08.032466 (2020).
+ 24. Dashti, A. et al. Trajectories of the ribosome as a Brownian nanomachine. 
+Proc. Natl Acad. Sci. USA 111, 17492–17497 (2014).
+ 25. Frank, J. & Ourmazd, A. Continuous changes in structure mapped by 
+manifold embedding of single-particle data in cryo-EM. Methods  100,  
+61–67 (2016).
+ 26. Moscovich, A., Halevi, A., Andén, J. & Singer, A. Cryo-EM reconstruction of 
+continuous heterogeneity by Laplacian spectral volumes. Inverse Probl . 36, 
+024003 (2020).
+ 27. Lederman, R. R. & Singer, A. Continuously heterogeneous hyper-objects in 
+cryo-EM and 3-D movies of many temporal dimensions. Preprint at https://
+arxiv.org/abs/1704.02899 (2017).
+ 28. Hornik, K., Stinchcombe, M. B. & White, H. Multilayer feedforward networks 
+are universal approximators. Neural Netw. 2, 359–366 (1989).
+ 29. Bracewell, R. N. Strip integration in radio astronomy. Aust. J. Phys. 9, 
+198–217 (1956).
+ 30. Kingma, D. P . & Welling, M. Auto-encoding variational Bayes. In 
+International Conference on Learning Representations (ICLR, 2014).
+ 31. Ru, H. et al. Molecular mechanism of V(D)J recombination from synaptic 
+RAG1–RAG2 complex structures. Cell 163, 1138–1152 (2015).
+ 32. Wong, W . et al. Cryo-EM structure of the Plasmodium falciparum 80S 
+ribosome bound to the anti-protozoan drug emetine. eLife  3, e01963 (2014).
+ 33. Ru, H., Zhang, P . & Wu, H. Structural gymnastics of RAG-mediated DNA 
+cleavage in V(D)J recombination. Curr. Opin. Struct. Biol. 53, 178–186 (2018).
+ 34. Sun, M. et al. Dynamical features of the Plasmodium falciparum  ribosome 
+during translation. Nucleic Acids Res . 43, 10515–10524 (2015).
+ 35. McInnes, L., Healy, J. & Melville, J. UMAP: Uniform Manifold Approximation 
+and Projection for dimension reduction. Preprint at https://arxiv.org/
+abs/1802.03426 (2018).
+ 36. Plaschka, C., Lin, P .-C. & Nagai, K. Structure of a pre-catalytic spliceosome. 
+Nature 546, 617–621 (2017).
+ 37. Cormen, T. H., Leiserson, C. E., Rivest, R. L. & Stein, C. Introduction to 
+Algorithms. 595–601 (MIT Press and McGraw-Hill, 2009).
+ 38. Zhang, C., Bengio, S., Hardt, M., Recht, B. & Vinyals, O. Understanding deep 
+learning requires rethinking generalization. In International Conference on 
+Learning Representations (ICLR, 2017).
+ 39. Zivanov, J., Nakane, T. & Scheres, S. H. W . Estimation of high-order 
+aberrations and anisotropic magnification from cryo-EM data sets in 
+RELION-3.1. IUCrJ 7, 253–267 (2020).
+ 40. Punjani, A., Zhang, H. & Fleet, D. J. Non-uniform refinement: adaptive 
+regularization improves single particle cryo-EM reconstruction. Nat. Methods  
+17, 1214–1221 (2020).
+Publisher’s note Springer Nature remains neutral with regard to jurisdictional claims in 
+published maps and institutional affiliations.
+© The Author(s), under exclusive licence to Springer Nature America, Inc. 2021
+NaTuRE METHoDs | VOL 18 | FeBrUArY 2021 | 176–185 | www.nature.com/ naturemethods 185
+===== PAGE 11 =====
+Articles NAtURE MEtHoDS
+Methods
+The cryoDRGN method. Coordinate-based networks to represent 3D structure. The 
+cryoDRGN method performs heterogeneous cryo-EM reconstruction by learning a 
+neural network representation of 3D structure. In particular, we use a positionally 
+encoded multilayer perceptron (MLP) to approximate the function 
+V : R3þn ! R
+I
+, 
+which models structures as generated from an n-dimensional continuous latent 
+space. We refer to this architecture as a ‘coordinate-based neural network’ (refs. 
+41,42), as we explicitly model the volume V as a function of Cartesian coordinates.
+Without loss of generality, we model volumes on the domain (−0.5, 0.5)3. 
+Instead of directly supplying the 3D Cartesian coordinates k to the deep coordinate 
+network, each coordinate is featurized with a fixed positional encoding function
+43 
+consisting of D sinusoids with wavelengths following a geometric progression from 
+1 to the Nyquist limit:
+pe 2iðÞ kj
+�
+¼ sin kjDπ 2
+D
+ i
+D
+2 �1
+ !
+; i ¼ 0; ¼ ; D
+2 � 1; kj 2 k
+pe 2iþ1ðÞ kj
+�
+¼ cos kjDπ 2
+D
+ i
+D
+2 �1
+ !
+; i ¼ 0; ¼ ; D
+2 � 1; kj 2 k
+where D is set to the image size (number of pixels along one dimension of the 
+image, that is, a D × D image) used in training. Empirically, we found that excluding 
+the highest frequencies of the positional encoding led to better performance when 
+training on noisy data, and we provide an option to modify the positional encoding 
+function by increasing all wavelengths by a factor of 2π.
+Training system. This neural representation of 3D structure is learned via an 
+image-encoder–volume-decoder architecture based on the V AE
+30,44. We followed 
+the standard image formation model in single-particle cryo-EM, in which 
+observed images are generated from projections of a volume at a random unknown 
+orientation, 
+R 2 SO 3ðÞ
+I
+. We used an additive Gaussian white noise model. Volume 
+heterogeneity is generated from a continuous latent space, modeled by the latent 
+variable z, where the dimension of z is a hyperparameter of the model.
+Given an image X, the variational encoder 
+qξ zjXðÞ
+I
+ produces a mean and 
+variance, μz|X and ΣzjX
+I
+, statistics that parameterize a Gaussian distribution with 
+diagonal covariance, as the variational approximation to the true posterior p(z|X). 
+The prior on the latent variable is a standard normal distribution 
+N 0; IðÞ
+I
+. The 
+positionally encoded MLP is used as the probabilistic decoder, pθ(V|k, z) and 
+models structures in frequency space. Given Cartesian coordinate k 2 R3
+I
+ and 
+latent variable z, the probabilistic decoder predicts a Gaussian distribution over 
+V(k, z). The encoder and decoder are parameterized with fully connected neural 
+networks with parameters ξ and θ, respectively.
+Because 2D projection images can be related to volumes as 2D central slices 
+in Fourier space
+29, oriented 3D coordinates for a given image can be obtained by 
+rotating a D × D lattice spanning (−0.5, 0.5)2 originally on the x–y plane by R, the 
+orientation of the volume during imaging. Then, given a sample out of qξ(z|X) and 
+the oriented coordinates, an image can be reconstructed pixel by pixel through the 
+decoder. The reconstructed image is then translated by the image’s in-plane shift 
+and multiplied by the contrast transfer function (CTF) before it is compared to 
+the input image. The negative log likelihood of a given image under our model is 
+computed as the mean square error between the reconstructed image and the input 
+image. Following the standard V AE framework, the optimization objective is a 
+variational lower bound of the model evidence:
+L X; ξ; θð Þ¼ Eqξ zjXðÞ log pX jzð ÞðÞ � βKL q ξ zjXð Þjjp zð ÞðÞ
+where the first term is the reconstruction error estimated with one Monte Carlo 
+sample, the second Kullback–Leibler (KL) divergence term is a regularization term 
+on the latent representation, and β is an additional hyperparameter, which we set by 
+default to 1/|z|. By training on many 2D slices with sufficiently diverse orientations, 
+the 3D volume can be learned through feedback from the 2D views. For further 
+details, we refer the reader to a preliminary version of the method described in the 
+proceedings of the International Conference for Learning Representations
+41. The 
+results presented here employ the training regime described by Zhong et al. using 
+previously determined poses from a consensus reconstruction
+41.
+Datasets. Simulated compositionally heterogeneous dataset generation. To generate 
+the compositionally heterogeneous dataset, the 30S, 50S and 70S subunits of 
+the E. coli ribosome were extracted from PDB 4YBB in PyMOL
+45. A density 
+map of each subunit was generated from the atomic model using the molmap46 
+command in Chimera47 at a grid spacing of 1.5 Å per pixel and a resolution of 
+4.5 Å. The resulting volume was padded to a box size of D = 256, where D is the 
+width in pixels along one dimension. Simulated particle images were generated 
+with a custom Python script available in the cryoDRGN software by rotating the 
+density map with a random rotation sampled uniformly from SO(3), projecting 
+along the z axis and shifting the image with an in-plane translation sampled 
+uniformly from (−20, 20)
+2 pixels. Images were then downsampled to D = 128 by 
+Fourier clipping using a custom Python script, corresponding to a Nyquist limit 
+of 6 Å. Projection images were multiplied with the CTF in Fourier space, where 
+the CTF was computed from defocus values randomly sampled from those given 
+in the EMPIAR-10028 dataset (ref. 32), no astigmatism, an accelerating voltage of 
+300 kV , a spherical aberration of 2 mm and an amplitude contrast ratio of 0.1. An 
+envelope function with a B factor of 100 Å2 was applied. Noise was added with 
+a signal-to-noise ratio of 0.1, where the noise-free signal images were defined 
+as the entire D × D image. After performing this procedure for each subunit, 
+10,000, 15,000 and 25,000 simulated particles of the 30S, 50S and 70S ribosome, 
+respectively, were combined.
+Simulated conformationally heterogeneous dataset generation. To simulate 
+continuous conformational heterogeneity, 50 density maps were generated along a 
+1D reaction coordinate defined by rotating a dihedral angle in an atomic model of a 
+hypothetical protein complex. Each model was generated at 0.03-radian increments 
+of the bond rotation, leading to a total range of 1.5 radians. Density maps were 
+generated using the molmap
+46 command in Chimera47 at a grid spacing of 6 Å per 
+pixel and resolution of 12 Å and padded to a box size of D = 128. For the uniform 
+dataset, 1,000 projection images were generated for each density map at random 
+orientations, and in-plane translations were sampled from (−10, 10)
+2 pixels. For 
+the nonuniform datasets, particles were generated along the reaction according to 
+a three-component GMM with means at the 10th, 25th and 40th density map and 
+standard deviations of 0.09 and 0.03 radians for the cooperative and noncontiguous 
+datasets, respectively. Sampled reaction coordinate values were binned to convert 
+into a particle distribution among the 50 generated density maps and clipped at 
+values of the reaction coordinate beyond the 50 maps. A total of 50,000 particles 
+were generated for each dataset. CTF and noise at a signal-to-noise ratio of 0.1 were 
+added to all datasets using the same procedure described above with CTF defocus 
+values randomly sampled from the EMPIAR-10028 dataset (ref. 
+32).
+Real cryo-EM datasets. Picked particles and the star file containing CTF parameters 
+were downloaded from the Electron Microscopy Public Image Archive (EMPIAR)
+48 
+for datasets EMPIAR-10049, EMPIAR-10028, EMPIAR-10076 and EMPIAR-10180. 
+Particle images were downsized to the image size used in training by clipping in 
+Fourier space with a custom Python script available in the cryoDRGN software.
+Consensus reconstructions. Homogeneous 3D reconstruction of the Pf80S 
+ribosome (EMPIAR-10028) was performed in cryoSPARC version 2.4 (ref. 
+16) using 
+the ab initio reconstruction job followed by the homogeneous refinement job with 
+default parameters. The final reconstruction reported a gold-standard (GS)FSC0.143 
+(ref. 49) resolution of 3.1 Å with a tight mask and 4.1 Å when unmasked.
+Homogeneous 3D reconstruction of the bL17-depleted ribosome assembly 
+intermediates (EMPIAR-10076) was performed as above, leading to a final 
+structure with a GSFSC
+0.143 resolution of 3.2 Å with a tight mask and 4.8 Å when 
+unmasked.
+Homogeneous 3D reconstruction of the RAG complex (EMPIAR-10049) was 
+performed as a ‘Homogeneous Refinement (NEW!)’ job in cryoSPARC version 
+2.15 with all default settings, including C1 symmetry. The asymmetric PC map of 
+the RAG complex was used as an initial model (EMDB-6489) low-pass filtered by 
+30 Å. The final structure had a GSFSC
+0.143 resolution of 3.6 Å with a tight mask and 
+4.6 Å when unmasked.
+Poses from a consensus reconstruction of the pre-catalytic spliceosome were 
+obtained from the star file deposited in the EMPIAR-10180 dataset.
+CryoDRGN homogeneous reconstruction. CryoDRGN decoder networks with 
+no input latent variable were trained for 50 epochs on full-resolution images of the 
+RAG complex (D = 192, 1.23 Å per pixel) and the Pf80S ribosome (D = 360, 1.34 Å 
+per pixel). The tested architectures were MLPs with ReLU activations, where the 
+network size was three hidden layers with a width of 128 nodes (denoted 128 × 3), 
+256 × 3, 512 × 3, 1,024 × 3 or 1,024 × 10. Image poses were set to poses obtained 
+from a consensus reconstruction in cryoSPARC, as described above
+16. Networks 
+were trained on minibatches of eight images using the Adam optimizer with a 
+learning rate of 0.0001. Once training was complete, the decoder network was 
+evaluated on the 3D coordinates of a D × D × D voxel array spanning (−0.5, 0.5)
+3, 
+where D is the image size in pixels along one dimension. For visualization in Fig. 
+2, the RAG complex density maps were sharpened by −54 Å
+2 and −127.4 Å2 for 
+the cryoDRGN and cryoSPARC maps, respectively, based on a Guinier analysis49 
+performed in a custom Python script; both the cryoSPARC and cryoDRGN 
+density maps of the Pf80S ribosome were sharpened using the published B factor 
+of −80.1 Å
+2.
+Map-to-map FSC. FSC curves were computed between the cryoSPARC density 
+maps and the cryoDRGN density maps using a custom Python script available in 
+the cryoDRGN software. Real-space masks were defined by first thresholding the 
+cryoDRGN volume at half of the 99.99th percentile density value. The mask was 
+then dilated by 25 Å from the original boundary, and a soft cosine edge was used to 
+taper the mask to 0 at 15 Å from the dilated boundary.
+CryoDRGN heterogeneous reconstruction. Model training. A summary of 
+the datasets, hyperparameters and runtimes for all cryoDRGN heterogeneous 
+NaTuRE METHoDs | www.nature.com/ naturemethods
+===== PAGE 12 =====
+ArticlesNAtURE MEtHoDS
+reconstruction experiments is given in Supplementary Table 1. CryoDRGN 
+encoder–decoder networks were trained from their randomly initialized values for 
+each single-particle cryo-EM dataset. Image poses used for training were either 
+the ground-truth poses for simulated datasets or poses obtained from a consensus 
+reconstruction as described above. All networks were trained on minibatches 
+of eight images using the Adam optimizer with a learning rate of 0.0001. After 
+training, the dataset images were evaluated through the encoder to obtain the 
+latent encoding for each image. We define the latent encoding as the maximum 
+a posteriori value of q
+ξ(z|X) predicted by the encoder.
+Latent space visualization. For latent spaces with dimension greater than 2, the 
+distribution of latent encodings were visualized with standard dimensionality 
+reduction techniques, such as PCA and UMAP
+35. PCA projections of latent space 
+particle distributions were computed using the implementation provided by 
+scikit-learn
+50. Two-dimensional UMAP35 embeddings were computed using version 
+0.4.1 of the Python implementation (https://github.com/lmcinnes/umap) with 
+the default settings of k = 15 for the k-nearest neighbors graph and a minimum 
+distance parameter of 0.1. Automated tools to analyze and visualize the latent space 
+given the outputs of model training are provided in the cryoDRGN software.
+Density map generation. Density maps were generated for a given value of the 
+latent variable z by evaluating the trained decoder on z and the 3D coordinates of 
+a D × D × D voxel array spanning (−0.5, 0.5)
+3. To generate representative samples 
+from different regions of the latent space for higher dimensional latent spaces 
+(|z| > 1), we performed k-means clustering of the dataset’s latent encodings to 
+partition the latent space into k regions. A representative density map for each 
+region was generated at the ‘on-data’ cluster center; the latent encoding closest in 
+Euclidean distance to the k-means cluster center was defined as the ‘on-data’ cluster 
+center. Automated tools to generate k representative density maps following this 
+procedure are provided in the cryoDRGN software.
+Heterogeneous reconstruction of simulated datasets. For each simulated 
+heterogeneous dataset, a 1D latent variable model was trained for 100 epochs. The 
+encoder architecture was 256 × 3, and the decoder architecture was 512 × 5. The 
+image poses used for training were the ground-truth image poses. After training 
+on the uniform simulated dataset, structures shown in Fig. 3c were generated at the 
+5th, 23rd, 41st, 59th, 77th and 95th percentile values of the latent encodings and 
+sharpened by a B factor of −100 Å
+2. After training on the compositional simulated 
+dataset, the structures shown in Fig. 3d were generated at the k-means cluster 
+centers after performing k-means clustering with k = 3 on the latent encodings and 
+sharpened by a B factor of −100 Å
+2. Spearman correlation was computed using the 
+implementation provided in the scipy version 1.5.2 Python package (https://www.
+scipy.org).
+Per-image FSC. For simulated datasets for which the ground-truth distribution 
+of structures is known, ‘per-image’ FSC curves can be computed between 
+cryoDRGN-reconstructed density maps and the ground-truth density maps to 
+quantitatively evaluate the reconstructed ensemble. To compute a per-image FSC, 
+an FSC curve was computed between the density map generated by the cryoDRGN 
+decoder at the value of the latent variable predicted for a given particle image and 
+the ground-truth density map used to generate the image. One hundred images, 
+randomly sampled according to the ground-truth distribution of structures, were 
+used in the assessment of each of the simulated datasets. No real-space mask was 
+used to compute the FSC.
+Heterogeneous reconstruction of the RAG complex (EMPIAR-10049). A 10D 
+latent variable model was trained on full-resolution particle images from the 
+EMPIAR-10049 dataset (D = 192, 1.23 Å per pixel) and their consensus reconstruction 
+poses for 25 epochs. The encoder and decoder architectures were 1,024 × 3.
+Density map generation. After training, k-means clustering with k = 100 was 
+performed on the predicted latent encodings for the dataset, and volumes 
+were generated at the ‘on-data’ cluster centers using the decoder network. 
+Six structurally diverse representative structures were manually selected for 
+visualization in Fig. 4a.
+Traditional heterogeneous refinement. To validate the heterogeneous RSS and NBD 
+conformations observed in cryoDRGN, the six selected density maps, low-pass 
+filtered by 20 Å, were used as initial models for a heterogeneous refinement job in 
+cryoSPARC version 2.15.
+Heterogeneous reconstruction of the 80S ribosome (EMPIAR-10028). Pilot 
+experiments. A 10D latent variable model was trained on downsampled images 
+(D = 128, 3.78 Å per pixel) from the EMPIAR-10028 dataset and their consensus 
+reconstruction poses for 50 epochs. The encoder and decoder architectures were 
+256 × 3.
+Particle filtering. After training, k-means clustering with k = 20 was performed on the 
+predicted latent encodings for the dataset. One cluster contained 860 particles that 
+were outliers when viewing the projected encodings along the first and second PCs. 
+This observation was reproducible, and the particles belonging to the outlier cluster 
+from either of two replicates (960 particles in total) were removed from the dataset.
+High-resolution training. After particle filtering, a 10D latent variable model was 
+trained on a random 90% of the remaining 104,280 images (D = 256, 1.88 Å per 
+pixel) for 25 epochs. The encoder and decoder architectures were 1,024 × 3.
+Density map generation. After training, k-means clustering with k = 50 was 
+performed on the predicted latent encodings for the dataset, and volumes were 
+generated at the ‘on-data’ cluster centers using the decoder network. Representative 
+structures of the rotated state and the unrotated state were manually selected for 
+visualization in Fig. 4b. A representative structure of the missing head group state 
+was manually selected for visualization in Extended Data Fig. 3. The numbered 
+k-means cluster centers shown in Extended Data Fig. 3a, originally arbitrarily 
+ordered, were reordered based on hierarchical clustering of the latent encodings 
+with Euclidean distance metric and average linkage.
+Validation with traditional reconstruction. To validate the 40S-rotated state, we 
+selected 4,889 particles as the cluster from k-means clustering with k = 20 that was 
+separated along PC1 (Extended Data Fig. 4). These particles were then input to a 
+homogeneous refinement job in cryoSPARC version 2.15. The cryoDRGN density 
+map, low-pass filtered by 30 Å, was used as the initial model.
+Heterogeneous reconstruction of the assembling 50S ribosome 
+(EMPIAR-10076). Pilot experiments. A 1D and a 10D latent variable model 
+were trained on downsampled images (D = 128, 3.3 Å per pixel) from the 
+EMPIAR-10076 dataset with poses from a consensus reconstruction for 50 epochs. 
+The encoder and decoder architectures were 256 × 3.
+Particle filtering. For the 1D experiment, particles with z ≤ −1 were removed from 
+subsequent analysis. For the 10D experiment, a five-component, full-covariance 
+GMM was fit to the latent encodings using scikit-learn
+50, and particles from the 
+outlier cluster were removed. The outlier cluster was identified by visualizing the 
+magnitude of the latent encodings (Extended Data Fig. 4). The intersection of 
+both filtered particles stacks was used for subsequent analysis. Two-dimensional 
+classification of the kept and removed particles was performed in cryoSPARC 
+version 2.4 (ref. 
+16) using all default options except for the number of 2D classes, 
+which was set to 20. Ab initio reconstruction of the kept and removed particles was 
+performed in cryoSPARC version 2.4 (ref. 
+16) using all default options.
+High-resolution training. A 10D latent variable model was trained on a random 
+90% of the remaining 97,031 images (D = 256, 1.7 Å per pixel) for 50 epochs. The 
+encoder and decoder architectures were 1,024 × 3. Two additional replicates were 
+run, one with the exact settings from a different random initialization and a second 
+with latent variable dimension of |z| = 8.
+Density map generation. After training, the dataset’s latent encodings were viewed 
+in 2D with UMAP
+35. Density maps corresponding to the major and minor 
+assembly states were generated at the ‘on-data’ mean latent encoding for each class, 
+that is, 
+^zM ¼ 1
+Mjj
+P
+i2M
+zi
+I
+, where M is the set of particles assigned to a given class in 
+the published 3D classification.
+Map-to-map FSC. The map-to-map FSC was computed between the cryoDRGN 
+and published density map for each minor class. Density maps were aligned in 
+Chimera, and a loose real-space mask (obtained as described above) was applied 
+before computing an FSC curve.
+Reproducibility analysis. For each replicate, a five-component, full-covariance 
+GMM was fit to the UMAP embeddings using scikit-learn
+50. UMAP axes were 
+negated to facilitate visual comparison. Label assignments were permuted to ensure 
+consistent assignments between replicates. Clustering consistency was computed as 
+the percentage of particles with identical GMM labels.
+New assembly state C4. Particles corresponding to the new assembly state were 
+manually selected from the UMAP embeddings with an interactive lasso tool in 
+a custom visualization script available in the cryoDRGN software, the outline of 
+which is shown in the Fig. 5f inset. The mean latent encoding of the resulting 1,113 
+selected particles was used to generate the structure representative for this new 
+assembly state.
+Validation of C4 with traditional refinement. The particles associated with class 
+C4 (D = 128, 3.3 Å per pixel) were then input to a homogeneous refinement job in 
+cryoSPARC version 2.15. The cryoDRGN density map, low-pass filtered to 30 Å, 
+was used as the initial model.
+Heterogeneous reconstruction of the pre-catalytic spliceosome 
+(EMPIAR-10180). Pilot experiments. A 10D latent variable model was trained on 
+NaTuRE METHoDs | www.nature.com/ naturemethods
+===== PAGE 13 =====
+Articles NAtURE MEtHoDS
+downsampled images (D = 128, 4.25 Å per pixel) from the EMPIAR-10180 dataset 
+for 50 epochs. The encoder and decoder architectures were 256 x 3. Poses were 
+obtained from the consensus reconstruction values given in the consensus_data.
+star deposited in EMPIAR-10180.
+Particle filtering. The UMAP embeddings showed multiple clusters where the 
+largest cluster corresponded to fully formed pre-catalytic spliceosomes. Particles 
+corresponding to other clusters were removed from subsequent analyses by 
+first performing k-means clustering with k = 20 on the latent encodings, and by 
+removing k-means clusters for which the structure did not resemble the fully 
+formed pre-catalytic spliceosome (11 of 20 k-means clusters in one replicate, and 
+ten of 20 clusters in a second replicate).
+High-resolution training. A 10D latent variable model was trained on a random 
+90% of the remaining 155,247 images (D = 256, 2.1 Å per pixel) for 50 epochs. The 
+encoder and decoder architectures were 1,024 × 3.
+Density map generation. After training, the dataset’s latent encoding was viewed 
+in 2D with UMAP and PCA. Density maps in Fig. 6d were generated at the latent 
+encoding values along the PC1 axis at five equally spaced points between the 5th 
+and 95th percentile of PC1 values. Density maps in Supplementary Fig. 1 were 
+generated at the latent encoding values along the PC2 axis at five equally spaced 
+points between the 5th and 95th percentile of PC2 values. Density map generation 
+along PC axes was implemented with a custom script in the cryoDRGN software.
+Latent space graph traversal for generating trajectories. Trajectories were generated 
+by first creating a nearest-neighbors graph from the latent encodings of the images, 
+in which a neighbor was defined if the Euclidean distance was below a threshold 
+computed from the statistics of all pairwise distances. We chose a value for each 
+dataset such that the average number of neighbors across all nodes was five. Edges 
+were then pruned such that a given node did not have more than ten neighbors. 
+Then, Djikstra’s algorithm
+37 was used to find the shortest path along the graph 
+connecting a series of anchor points, and density maps were generated at the z value 
+of the visited nodes. Anchor points were either defined manually or set to be the 
+‘on-data’ cluster centers after performing k-means clustering of the latent encodings.
+For the graph traversal of the RAG complex in Supplementary Video 1, we 
+used the latent encodings of the six density maps shown in Fig. 4a as the anchor 
+points. For the graph traversal of the Pf80S ribosome in Supplementary Video 
+2, we used ten randomly chosen latent encodings as the anchor points out of the 
+k-means cluster centers with k = 20 that are shown before the graph traversal. 
+For the graph traversal of the assembling ribosome in Supplementary Video 3, 
+we used the latent encodings of the minor assembly states following the three 
+assembly pathways given in Fig. 7 of Davis et al.
+12. For the graph traversal of the 
+pre-catalytic spliceosome in Supplementary Video 4, we used the latent encodings 
+of the k-means cluster centers with k = 20 as the anchor points. All density map 
+figures and trajectories were prepared with ChimeraX
+51 and are viewed at identical 
+isosurface levels for a given model unless otherwise specified. CryoDRGN’s 
+graph-traversal algorithm is provided in the cryoDRGN software.
+3D Variability Analysis. 3 DVA
+23 was performed in cryoSPARC version 2.15 
+on the 139,722 particles and their consensus poses comprising the filtered 
+EMPIAR-10180 dataset used in cryoDRGN analysis. Three variability modes were 
+solved with all default options, and the low-pass filter resolution was set to 7 Å. 
+3DV A ’s per-particle latent encodings were extracted from the cryoSPARC metadata 
+file. Spearman correlation was computed using the implementation provided in 
+the scipy version 1.5.2 Python package (https://www.scipy.org). To visualize the 
+3DV A component 1 trajectory in Extended Data Fig. 10, the consensus density 
+map was combined with the component 1 eigen-volume at five equally spaced 
+points between the first and 99th percentile value of the 3DV A component 1 latent 
+encoding distribution.
+Reporting Summary. Further information on research design is available in the 
+Nature Research Reporting Summary linked to this article.
+Data availability
+Trained cryoDRGN models and generated volumes were deposited in 
+Zenodo at https://doi.org/10.5281/zenodo.4355284
+52. Input files for training 
+(excluding particle stacks) were deposited in Zenodo at https://doi.org/10.5281/
+zenodo.4412072 and are also available at https://www.github.com/zhonge/
+cryodrgn_empiar
+53. We used the following publicly available datasets: 
+EMPIAR-10049 (cryo-EM structures of a synaptic RAG1–RAG2 complex), 
+EMPIAR-10028 (cryo-EM structure of a P . falciparum 80S ribosome bound to the 
+anti-protozoan drug emetine), EMPIAR-10076 (modular assembly of the large 
+bacterial ribosome) and EMPIAR-10180 (structure of a pre-catalytic spliceosome). 
+The simulated heterogeneous datasets were deposited in Zenodo at https://doi.
+org/10.5281/zenodo.4355284
+52.
+Code availability
+CryoDRGN software and analysis scripts are implemented in custom software 
+deposited in Zenodo at https://doi.org/10.5281/zenodo.4355743 and are also 
+available at https://www.github.com/zhonge/cryodrgn
+54.
+References
+ 41. Zhong, E. D., Bepler, T., Davis, J. H. & Berger, B. Reconstructing continuous 
+distributions of 3D protein structure from cryo-EM images. In International 
+Conference of Learning Representations (ICLR, 2020).
+ 42. Bepler, T., Zhong, E., Kelley, K., Brignole, E. & Berger, B. Explicitly 
+disentangling image content from translation and rotation with spatial-V AE. 
+In Advances in Neural Information Processing Systems (NeurIPS, 2019).
+ 43. Vaswani, A. et al. Attention is all you need. In Advances in Neural Information 
+Processing Systems (NIPS, 2017).
+ 44. Rezende, D. J., Mohamed, S. & Wierstra, D. Stochastic backpropagation and 
+approximate inference in deep generative models. In International Conference 
+on Machine Learning (ICML, 2014).
+ 45. The PyMOL Molecular Graphics System, version 2.3 (Schrodinger, 2019).
+ 46. Tang, G. et al. EMAN2: an extensible image processing suite for electron 
+microscopy. J. Struct. Biol. 157, 38–46 (2007).
+ 47. Pettersen, E. F . et al. UCSF Chimera—a visualization system for exploratory 
+research and analysis. J. Comput. Chem. 25, 1605–1612 (2004).
+ 48. Iudin, A., Korir, P . K., Salavert-Torres, J., Kleywegt, G. J. & Patwardhan, A. 
+EMPIAR: a public archive for raw electron microscopy image data. Nat. 
+Methods 13, 387–388 (2016).
+ 49. Rosenthal, P . B. & Henderson, R. Optimal determination of particle 
+orientation, absolute hand, and contrast loss in single-particle electron 
+cryomicroscopy. J. Mol. Biol. 333, 721–745 (2003).
+ 50. Pedregosa, F . et al. Scikit-learn: machine learning in Python. J. Mach. Learn. 
+Res. 12, 2825–2830 (2011).
+ 51. Goddard, T. D. et al. UCSF ChimeraX: meeting modern challenges in 
+visualization and analysis. Protein Sci. 27, 14–25 (2018).
+ 52. Zhong, E. D. Data for "CryoDRGN: Reconstruction of heterogeneous 
+cryo-EM structures using neural networks". Zenodo  https://doi.org/10.5281/
+zenodo.4355284 (2021).
+ 53. Zhong, E. D. zhonge/cryodrgn_empiar: initial release. Zenodo  https://doi.
+org/10.5281/zenodo.4412072 (2021).
+ 54. Zhong, E. D. zhonge/cryodrgn: version 0.3.0. Zenodo  https://doi.org/10.5281/
+zenodo.4355743 (2020).
+acknowledgements
+We thank A. Lerer, R. Lederman, B. Demeo, A. Narayan, K. Kelley, B. Sauer, P . Sharp, S. 
+Rodriques and D. Haselbach for helpful discussions and feedback. We are grateful to the 
+MIT-IBM Satori team for GPU computing resources and support. This work was funded 
+by the National Science Foundation Graduate Research Fellowship Program to E.D.Z., 
+NIH grant R01-GM081871 to B.B., NIH grant R00-AG050749 to J.H.D., NVIDIA-GPU 
+grant to J.H.D. and a grant from the MIT J-Clinic for Machine Learning and Health to 
+J.H.D. and B.B.
+author contributions
+All authors conceived of the work and developed the method. E.D.Z. implemented the 
+software and performed the experiments. E.D.Z., B.B. and J.H.D. wrote the manuscript.
+Competing interests
+The authors declare no competing interests.
+additional information
+Extended data is available for this paper at https://doi.org/10.1038/s41592-020-01049-4.
+Supplementary information The online version contains supplementary material 
+available at https://doi.org/10.1038/s41592-020-01049-4.
+Correspondence and requests for materials should be addressed to B.B. or J.H.D.
+Peer review information Arunima Singh was the primary editor on this article and 
+managed its editorial process and peer review in collaboration with the rest of the 
+editorial team.
+Reprints and permissions information is available at www.nature.com/reprints.NaTuRE METHoDs | www.nature.com/ naturemethods
+===== PAGE 14 =====
+ArticlesNAtURE MEtHoDS
+evitarepooCmrofinU
+lanoitisopmoCsuougitnocnoN
+1/resolution (1/ )
+FSC
+1/resolution (1/ )
+FSC
+1/resolution (1/ )
+FSC
+1/resolution (1/ )
+FSC
+Extended Data Fig. 1 | Per-image FsC curves between ground-truth maps and density maps from cryoDRGN trained on simulated heterogeneous 
+datasets. For each dataset, we compute 100 ‘per-image FSC curves’ between generated and ground-truth density maps (Methods). Images are sampled 
+at equally spaced percentiles along the reaction coordinate for the Uniform, Cooperative, and Noncontiguous datasets. For the Compositional dataset, the 
+per-image FSC for 20, 30, and 50 randomly sampled images of the 30S, 50S, and 70S ribosome, respectively, are shown. No mask is used in computing 
+the FSC.
+NaTuRE METHoDs | www.nature.com/ naturemethods
+===== PAGE 15 =====
+Articles NAtURE MEtHoDS
+180o
+12-RSS
+23-RSS
+180o
+7.0 
+16,225 particles
+6.8 
+27,122 particles
+6.9 
+19,777 particles
+7.0 
+26,683 particles
+6.6 
+16,038 particles
+11.0 
+2,699 particles
+A
+B
+C
+12-RSS
+23-RSS
+12-RSS
+23-RSS
+45o
+Extended Data Fig. 2 | RaG complex density maps reconstructed by cryoDRGN and by heterogeneous refinement in cryosPaRC. a, Front (top) and 
+back (bottom) view of the six cryoDrGN density maps of the rAG complex from Fig. 4b. b, Density maps from 3D classification in cryoSPArC using the 
+cryoDrGN density maps in (a) as initial models. Gold-standard FSC resolution and number of particles used in reconstruction are noted. c) T wo side views 
+of the density maps from 3D classification in (b), focusing on the rSS and NBD.
+NaTuRE METHoDs | www.nature.com/ naturemethods
+===== PAGE 16 =====
+ArticlesNAtURE MEtHoDS
+Missing head group
+40S rotated
+A
+B
+60S
+40S
+40S head region
+Extended Data Fig. 3 | Missing head group of the Pf80s ribosome. a, UMAP visualization of latent space encodings of eMPIAr-10028 particles with 
+50 sampled points shown in black. Sampled points are ordered according to distances in latent space (Methods). Visual inspection of the 50 volumes 
+generated at the depicted points reveals 3 volumes with the 40S in a rotated state (purple) and 6 volumes with portions of the 40S head region missing 
+(pink). b, Density map of the 80S ribosome with the missing head group reconstructed by cryoDrGN (pink) compared with the density maps from Fig. 
+4c showing the canonical (blue) and 40S-rotated (purple) forms of the 80S ribosome. The density maps are generated from points 32, 4, and 1 in panel A 
+from left to right.
+NaTuRE METHoDs | www.nature.com/ naturemethods
+===== PAGE 17 =====
+Articles NAtURE MEtHoDS
+Homogeneous re nement
+4,889 particles
+90 
+6.4  GSFSC
+1/resolution (1/ )
+FSC
+UMAP1
+UMAP2
+PC1 (EV: 0.16)
+PC2 (EV: 0.12)
+BA
+C
+|z| = 10
+|z| = 10
+Extended Data Fig. 4 | Validation of Pf80s rotated state with cryosPaRC. a, PCA and UMAP visualization of the cryoDrGN latent space representation 
+of Pf80S particle images with 4,889 particles separated along PC1, selected with k-means clustering, colored in purple (Methods). b, Density map from 
+cryoSPArC homogeneous refinement (purple) using the 4,889 particles selected in (a). The density map is also shown superimposed with the cryoDrGN 
+unrotated state (blue) and annotated as in Fig. 4c. c, Gold standard FSC (GSFSC) curve between independent half-maps of the cryoSPArC refinement of 
+the Pf80S rotated state and map-to-map FSC between the cryoDrGN and cryoSPArC density map of the Pf80S rotated state. Dotted lines indicate 0.5 
+and 0.143 cutoffs.
+NaTuRE METHoDs | www.nature.com/ naturemethods
+===== PAGE 18 =====
+ArticlesNAtURE MEtHoDS
+||z||>10
+B C
+UMAP2
+UMAP1
+GMM clustering
+A
+|z| Kept Particles
+1 101604
+10 99388
+Intersection 97031
+D
+UMAP2
+UMAP1
+||z|| 
+UMAP2
+E F
+G H
+Extended Data Fig. 5 | Filtering of particles from the assembling ribosome dataset. a, UMAP visualization of the 10-D latent encodings from cryoDrGN as 
+in Fig. 5b, colored by cluster after fitting a 5-component Gaussian mixture model. The cluster that was removed from subsequent analysis is colored orange. 
+b, UMAP visualization of (a), colored by the magnitude of the latent encodings, ||z||. c, Nine randomly sampled particle images from eMPIAr-10076 with 
+latent encoding magnitude ||z|| > 10 as predicted from cryoDrGN training in (a,b). each image is 419.2 Å along each side. d, T able summarizing dataset 
+filtering. e,f, 2D classification and ab initio reconstruction of the 34,868 removed particles. g,h, 2D classification and ab initio reconstruction of the 97,031 
+kept particles.
+NaTuRE METHoDs | www.nature.com/ naturemethods
+===== PAGE 19 =====
+Articles NAtURE MEtHoDS
+3C2C1C
+4D3D2D1D
+5E4E3E2E1E
+1/resolution (1/ )
+FSC
+B
+C
+A
+D
+UMAP2
+UMAP1
+B
+A
+D1
+D2 D3
+D4
+E3
+E1 E2 E4
+E5
+C1
+C2
+C3
+UMAP2
+UMAP1
+A B C1 C2 C3 D1 D2
+D3 D4 E1 E2 E3 E4 E5
+Published 3D classi cation labels, minor states
+Extended Data Fig. 6 | Minor Lsu assembly states reconstructed by cryoDRGN. a, Density maps of the LSU minor assembly states reconstructed by 
+cryoDrGN. each cryoDrGN structure is generated at mean of the latent encoding of particles with the corresponding class assignment from Davis et al.12. 
+b, Map-to-map FSC curves between the generated cryoDrGN density maps and the published density map from Davis et al.12. Published resolutions for 
+assembly states B-e ranged between ~4-5 Å. Dotted lines indicate 0.5 and 0.143 cutoffs. c,d, reproduction of the cryoDrGN latent space shown in Fig. 5g, 
+colored by minor assembly state (c), or viewed in separate panels (d).
+NaTuRE METHoDs | www.nature.com/ naturemethods
+===== PAGE 20 =====
+ArticlesNAtURE MEtHoDS
+CryoDRGN Homogeneous reconstruction
+1113 particles 1/resolution (1/ )
+FSC
+LSU assembly class C4
+GSFSC 7.6 
+A B
+Extended Data Fig. 7 | Validation of Lsu class C4 with cryosPaRC. a, Density map from cryoSPArC homogeneous refinement of the 1,113 particles 
+selected from the cryoDrGN latent representation that constitute class C4 (right), compared with the density map generated by cryoDrGN (left) 
+from Fig. 5i. rrNA helix 68 is circled in red. b, Gold standard FSC (GSFSC) curve between independent half-maps of the cryoSPArC reconstruction and 
+map-to-map FSC between the cryoDrGN and cryoSPArC maps shown in (a). Dotted lines indicate 0.5 and 0.143 cutoffs.
+NaTuRE METHoDs | www.nature.com/ naturemethods
+===== PAGE 21 =====
+Articles NAtURE MEtHoDS
+Replicate 1 vs. 2 GMM labels Replicate 1 vs. 3 GMM labels
+# Particles
+3 etacilpeR2 etacilpeR
+Replicate 1
+Replicate 1
+Published 3D 
+Classi cation
+A (70S)
+B
+C
+D
+E
+Replicate 1 Replicate 2 Replicate 3
+UMAP2
+UMAP1
+UMAP2
+UMAP1
+UMAP2
+UMAP1
+GMM cluster
+0
+1
+2
+3
+4
+UMAP2
+UMAP1
+UMAP2
+UMAP1
+UMAP2
+UMAP1
+B
+D
+A
+Replicates GMM 
+Consistency
+1 vs 2 94.5%
+1 vs 3 94.1%
+2 vs 3 94.0%
+C
+8 = |z|01 = |z|01 = |z|
+Extended Data Fig. 8 | Reproducibility of cryoDRGN’s latent space representation of the assembling ribosome. a, UMAP visualization of the latent 
+encodings from replicate runs of cryoDrGN trained on the filtered particles of eMPIAr-10076. Particle embeddings are colored by major assembly state 
+assigned from 3D classification in Davis et al12. b, UMAP visualization of (a), colored by cluster after fitting a 5-component Gaussian mixture model on 
+the UMAP embeddings. c,d, Consistency of the GMM labeling between replicates reported as the percentage of particles with identical labels (c) and the 
+confusion matrix of GMM cluster assignments (d).
+NaTuRE METHoDs | www.nature.com/ naturemethods
+===== PAGE 22 =====
+ArticlesNAtURE MEtHoDS
+body
+SF3b
+foot
+helicase
+A
+B
+Multi-body re nement
+cryoDRGN
+Extended Data Fig. 9 | Comparison of multi-body refinement and cryoDRGN of the pre-catalytic spliceosome. a, Visualization of a rigid-body trajectory 
+from multibody refinement of the pre-catalytic spliceosome. Snapshots are extracted from the trajectory along PC1 of rigid-body orientations, showing 
+a large-scale motion of the SF3b subcomplex. The masks that define the rigid-body decomposition of the complex are shown on the right. The circle 
+highlights a helix that breaks at the boundary between bodies where the rigid-body assumption no longer holds. Adapted from Video 3 of Nakane et al.
+19 
+and density maps and masks deposited in eMPIAr-10180. b, Alternate view of cryoDrGN’s PC1 traversal in Fig. 6. CryoDrGN learns the same overall 
+motion of the SF3b subcomplex, however its neural network representation lacks the helix-breaking artifact.
+NaTuRE METHoDs | www.nature.com/ naturemethods
+===== PAGE 23 =====
+Articles NAtURE MEtHoDS
+A
+B
+D
+3DVA component 2
+3DVA component 3
+3DVA component 1
+3DVA component 2
+3DVA component 1
+C
+cryoDRGN PC1E
+3DVA component 1
+cryoDRGN PC1
+r = -0.61
+3 tnenopmoc AVD32 tnenopmoc AVD31 tnenopmoc AVD3
+0.12
+-0.12
+0.00
+0.16
+-0.16
+0.00
+0.12
+-0.12
+0.00
+body
+SF3b
+foot
+helicase
+3DVA consensus
+Extended Data Fig. 10 | See next page for caption.
+NaTuRE METHoDs | www.nature.com/ naturemethods
+===== PAGE 24 =====
+ArticlesNAtURE MEtHoDS
+Extended Data Fig. 10 | Comparison of cryosPaRC’s 3D variability analysis and cryoDRGN. a, Density map of the consensus reconstruction and 2D 
+projections of the top three 3DVA variability components (that is, eigen-volumes) that form a linear basis describing structural heterogeneity of the 
+pre-catalytic spliceosome. b, 3DVA latent encodings of particles from the filtered eMPIAr-10180 dataset. c, Comparison of 3DVA component 1 latent 
+encodings and PC1 of the cryoDrGN 10D latent encodings from Fig. 6c. Correlation indicates Spearman correlation. d, 3DVA component 1 trajectory at the 
+depicted points in (b). e, Alternate view of the density maps from the cryoDrGN PC1 trajectory in Fig. 6d.
+NaTuRE METHoDs | www.nature.com/ naturemethods
+===== PAGE 25 =====
+
+===== PAGE 26 =====

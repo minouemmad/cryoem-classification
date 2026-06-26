@@ -1,4 +1,4 @@
-"""Class-repetition analysis (John Hunt's second uncertainty strategy).
+"""Class-repetition analysis: a second uncertainty estimation strategy.
 
 We progressively add ``r`` extra components to the GMM beyond the
 biologically expected ``K`` protein classes. Confused / ambiguous particles

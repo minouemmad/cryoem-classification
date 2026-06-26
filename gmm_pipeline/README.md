@@ -4,7 +4,7 @@ Implements the GCER classification-uncertainty plan from
 `hCFTRCryoEMPipeline05302025a.pdf`,
 `Flatiron-cCFTR-HierarchicalUnfoldingPoster07242025b.pdf`, and
 `HSHuntScoreClassificationProblem10252024a.pdf`. Built on scikit-learn's
-`GaussianMixture` (the implementation John recommended).
+`GaussianMixture`.
 
 ## What it needs
 

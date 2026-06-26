@@ -1,0 +1,76 @@
+[
+  {
+    "label": "J1442",
+    "n_particles": 230396,
+    "zdim": 10,
+    "protein_idx": [
+      6,
+      7,
+      8
+    ],
+    "pc1_explained_var": 0.1546154084754858,
+    "pc2_explained_var": 0.11922547008322294,
+    "n_wells": 3,
+    "well_positions": [
+      -1.218020558009123,
+      0.037105077378092766,
+      1.2705906156034596
+    ],
+    "barriers": [
+      {
+        "pos": -0.5363574974108936,
+        "F_barrier_kt": 2.1406863766664506,
+        "depth_from_shallower_well_kt": 1.8686192126065189,
+        "left_well_pos": -1.218020558009123,
+        "right_well_pos": 0.037105077378092766
+      },
+      {
+        "pos": 0.5997476035861551,
+        "F_barrier_kt": 1.3711411800166657,
+        "depth_from_shallower_well_kt": 1.0075982457336115,
+        "left_well_pos": 0.037105077378092766,
+        "right_well_pos": 1.2705906156034596
+      }
+    ],
+    "max_barrier_kt": 1.8686192126065189,
+    "verdict": "3 METASTABLE BASINS (max barrier 1.87 kT)"
+  },
+  {
+    "label": "J1497",
+    "n_particles": 230396,
+    "zdim": 10,
+    "protein_idx": [
+      6,
+      7,
+      8,
+      9,
+      10
+    ],
+    "pc1_explained_var": 0.15500072509519866,
+    "pc2_explained_var": 0.11185904485995611,
+    "n_wells": 3,
+    "well_positions": [
+      -1.1977645692739256,
+      0.014551960739255687,
+      1.2007971675263476
+    ],
+    "barriers": [
+      {
+        "pos": -0.5329458270086325,
+        "F_barrier_kt": 1.2445716540817608,
+        "depth_from_shallower_well_kt": 0.9016391242192985,
+        "left_well_pos": -1.1977645692739256,
+        "right_well_pos": 0.014551960739255687
+      },
+      {
+        "pos": 0.5620497484871438,
+        "F_barrier_kt": 0.8698068944238457,
+        "depth_from_shallower_well_kt": 0.5268743645613834,
+        "left_well_pos": 0.014551960739255687,
+        "right_well_pos": 1.2007971675263476
+      }
+    ],
+    "max_barrier_kt": 0.9016391242192985,
+    "verdict": "3 METASTABLE BASINS (max barrier 0.90 kT)"
+  }
+]
