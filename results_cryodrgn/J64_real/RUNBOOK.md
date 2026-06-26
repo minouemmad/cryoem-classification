@@ -1,220 +1,298 @@
 # J64 cryoDRGN runbook — following Zhong et al. (Nat. Methods 2021)
 
-This reproduces the heterogeneity workflow from **"CryoDRGN: reconstruction of
-heterogeneous cryo-EM structures using neural networks"** (Zhong, Bepler,
-Berger & Davis, *Nature Methods* **18**, 176–185, 2021), specifically the
-**Fig. 5 / EMPIAR-10076 assembly-state pipeline** — the direct analog of J64:
-a large, junky multi-class set that is filtered in latent space and then
-re-trained at high resolution to resolve discrete states.
+Follows the **Fig. 5 / EMPIAR-10076 assembly-state** workflow from Zhong et al.
+(*Nature Methods* **18**, 176–185, 2021): pilot low-res runs to filter junk,
+then a high-res final run to resolve states.
 
-- **Input set:** `data/J64/cryosparc_P25_J64_00102_particles.cs`
-  (702,919 particles; the 17-class hetero-refinement input that precedes
-  J1442/J1497; Apix = 0.83 Å).
-- **Outputs:** `results_cryodrgn/J64_real/`
+- **Cluster:** `mae2183@hudson`, repo root `/home/mae2183/cryoem-classification/`,
+  conda env `cryodrgn` (`/home/mae2183/miniconda3/envs/cryodrgn/bin/cryodrgn`)
+- **Local workspace:** `C:\Users\maemm\OneDrive\Desktop\CryoEM\` (this repo,
+  synced via git push/pull)
+- **J64 particles:** 702,919 particles, box 320, 0.83 Å/pix
 
 ---
 
-## 0. Prerequisite — what you have vs. what is still missing
+## File inventory — what you have
 
-Three J64 files are now in `data/J64/`:
+All three J64 `.cs` files are in `data/J64/`:
 
-| file | rows | provides | usable for |
-|---|---|---|---|
-| `cryosparc_P25_J64_00102_particles.cs` | 702,919 | `uid` + `alignments3D_multi/*` (17-class poses/posteriors) | the existing CryoSPARC classification only |
-| `cryosparc_P25_J64_passthrough_particles_all_classes_blob.cs` | 702,919 | `blob/path,idx,shape,psize,sign` (image pointers, box **320**, **0.83 Å/pix**) + full `ctf/*` | **images + CTF** |
-| `cryosparc_P25_J64_passthrough_particles_all_classes_ctf.cs`  | 702,919 | same `blob/*` + `ctf/*` | **CTF** |
+| file | rows | has blob | has 3D poses | has CTF |
+|---|---|---|---|---|
+| `cryosparc_P25_J64_00102_particles.cs` | 702,919 | ✗ | ✗ (only `alignments3D_multi/*`, 17-class) | ✗ |
+| `cryosparc_P25_J64_passthrough_particles_all_classes_blob.cs` | 702,919 | ✓ `J21/extract/…_particles.mrc`, D=320, 0.83 Å | ✗ (only `alignments2D/*`) | ✓ |
+| `cryosparc_P25_J64_passthrough_particles_all_classes_ctf.cs` | 702,919 | ✓ | ✗ | ✓ |
 
-> **What is present:** the raw-image POINTERS (`blob/path` → `J21/extract/<uid>_..._particles.mrc`, 320² @ 0.83 Å) and the full **CTF**. CTF and downsampling can be parsed straight from the passthrough `.cs` below.
->
-> **What is still missing — 3D consensus poses.** The passthrough files carry only `alignments2D/*` (2D-class in-plane poses), and `..._particles.cs` carries only `alignments3D_multi/*` (the 17-class hetero poses). cryoDRGN `train_vae` needs ONE consensus 3D orientation per particle, which comes from a **C1 homogeneous / NU-refinement** of these same 702,919 particles. Export that consensus job's `*_particles.cs` (it will have `alignments3D/pose` + `alignments3D/shift`) and use it for `parse_pose_csparc` in step 1.
->
-> **What is not in the workspace — the actual pixels.** `blob/path` points at `J21/extract/*.mrc` on the CryoSPARC box. Copy that `J21/extract/` tree to the cluster (or run cryoDRGN on the CryoSPARC server) and set `--datadir` to the directory that makes `J21/extract/...mrc` resolve.
+**What is still needed before running cryoDRGN:**
+
+1. **3D consensus poses** — the passthrough files only have 2D-class poses. You
+   need to export the **C1 homogeneous/NU-refinement** of these 702,919 particles
+   from CryoSPARC. That job's `*_particles.cs` will carry `alignments3D/pose` and
+   `alignments3D/shift` (single orientation per particle). Call that file
+   `$CONSENSUS_CS` in the commands below.
+
+   > Compare to J1442/J1497: their passthrough
+   > `data/cryosparc_P25_J1442_passthrough_particles_all_classes.cs` is a single
+   > file with blob + `alignments3D/` consensus poses + CTF all in one — the
+   > standard output of a CryoSPARC hetero-refinement passthrough. J64's passthrough
+   > is split across field-group files and was exported from the **2D classification**
+   > job, so 3D poses are absent.
+
+2. **Raw particle pixels** — `blob/path` resolves to
+   `J21/extract/<uid>_…_particles.mrc` on the CryoSPARC server. Rsync or copy the
+   `J21/extract/` directory to the cluster so cryoDRGN can read the images. Set
+   `--datadir` to the directory that makes `J21/extract/…mrc` resolve (i.e. the
+   directory *above* `J21/`).
 
 In the commands below:
-- `CONSENSUS_CS` = the C1 consensus refinement `*_particles.cs` (for 3D poses) — **the one file you still need to export**
-- `IMAGES_DIR`   = base dir that resolves `J21/extract/<...>.mrc`
-- box `D = 320`, `APIX = 0.83`
+- `$CONSENSUS_CS` = path to the C1 consensus `*_particles.cs` (for 3D poses)
+- `$IMAGES_DIR` = directory above `J21/` that makes `blob/path` entries resolve
+- All commands run from the repo root: `cd /home/mae2183/cryoem-classification`
 
 ---
 
-## 1. Parse poses + CTF
+## Step 1 — Parse poses and CTF
+
+Poses come from the consensus `.cs`; CTF and image layout come from the J64
+passthrough blob `.cs` (already in the repo):
 
 ```bash
-# 3D consensus poses (from the C1 refinement you export)
-cryodrgn parse_pose_csparc $CONSENSUS_CS -D 320 \
+# 3D consensus poses — from the C1 refinement you export
+cryodrgn parse_pose_csparc \
+    $CONSENSUS_CS \
+    -D 320 \
     -o results_cryodrgn/J64_real/inputs/poses.pkl
 
-# CTF — straight from the J64 passthrough already in data/J64/
+# CTF — from the J64 passthrough blob file
 cryodrgn parse_ctf_csparc \
-    data/J64/cryosparc_P25_J64_passthrough_particles_all_classes_ctf.cs \
+    data/J64/cryosparc_P25_J64_passthrough_particles_all_classes_blob.cs \
     -D 320 --Apix 0.83 \
     -o results_cryodrgn/J64_real/inputs/ctf.pkl
 ```
 
-## 2. Downsample the images (paper: D=128 for pilots, D=256 for final)
-
-The passthrough `_blob.cs` has the `blob/path` image pointers, so downsample
-reads it directly (with `--datadir` pointing at the `J21/extract/` parent):
+Verify both parsed correctly (should each print 702,919 particles):
 
 ```bash
-# pilot / filtering resolution (paper Fig. 5)
+python -c "import pickle; z=pickle.load(open('results_cryodrgn/J64_real/inputs/poses.pkl','rb')); print('poses:', len(z[0]))"
+python -c "import pickle; z=pickle.load(open('results_cryodrgn/J64_real/inputs/ctf.pkl','rb')); print('ctf:', len(z))"
+```
+
+---
+
+## Step 2 — Downsample images
+
+Use the passthrough blob `.cs` (it has `blob/path`) with `--datadir $IMAGES_DIR`:
+
+```bash
+# Pilot resolution D=128 (~3.3 Å/pix) — paper Fig. 5 filtering stage
 cryodrgn downsample \
     data/J64/cryosparc_P25_J64_passthrough_particles_all_classes_blob.cs \
-    -D 128 --datadir $IMAGES_DIR \
+    -D 128 \
+    --datadir $IMAGES_DIR \
     -o results_cryodrgn/J64_real/inputs/particles.128.mrcs
 
-# high-resolution final-training resolution (paper Fig. 5)
+# Final high-res D=256 (~1.7 Å/pix) — paper Fig. 5 high-res stage
+# (can run this after step 4 once you know filtering will proceed)
 cryodrgn downsample \
     data/J64/cryosparc_P25_J64_passthrough_particles_all_classes_blob.cs \
-    -D 256 --datadir $IMAGES_DIR \
+    -D 256 \
+    --datadir $IMAGES_DIR \
     -o results_cryodrgn/J64_real/inputs/particles.256.mrcs
 ```
 
 ---
 
-## 3. Pilot/filtering runs — train BOTH a 1D and a 10D model (paper Fig. 5a,b)
+## Step 3 — Pilot training: 1D + 10D latent at D=128
 
-Paper pilot architecture: encoder = decoder = **256 × 3**, **50 epochs**,
-minibatch 8, Adam lr 1e-4 (cryoDRGN defaults). Run on a GPU node.
+Run both pilots on a GPU node. Architecture: encoder = decoder = **256 × 3**,
+**50 epochs** (paper Fig. 5). These match the J1442/J1497 pilot architecture
+exactly (the same 256×3/50ep setting was used for the real J1442 run).
 
 ```bash
-# 1-D latent (Fig. 5a histogram; junk = the z<=-1 tail)
-cryodrgn train_vae results_cryodrgn/J64_real/inputs/particles.128.mrcs \
-    --ctf   results_cryodrgn/J64_real/inputs/ctf.pkl \
+# --- 1-D latent pilot ---
+# Used for: Fig. 5a-style z histogram; junk = the z <= -1 tail
+cryodrgn train_vae \
+    results_cryodrgn/J64_real/inputs/particles.128.mrcs \
     --poses results_cryodrgn/J64_real/inputs/poses.pkl \
-    --zdim 1  -n 50 \
-    --enc-dim 256 --enc-layers 3 --dec-dim 256 --dec-layers 3 \
+    --ctf   results_cryodrgn/J64_real/inputs/ctf.pkl \
+    --zdim 1 \
+    -n 50 \
+    --enc-dim 256 --enc-layers 3 \
+    --dec-dim 256 --dec-layers 3 \
     -o results_cryodrgn/J64_real/pilot_z1
 
-# 10-D latent (Fig. 5b UMAP; junk = outlier GMM component)
-cryodrgn train_vae results_cryodrgn/J64_real/inputs/particles.128.mrcs \
-    --ctf   results_cryodrgn/J64_real/inputs/ctf.pkl \
+# --- 10-D latent pilot ---
+# Used for: UMAP embedding; junk = outlier 5-component GMM cluster
+cryodrgn train_vae \
+    results_cryodrgn/J64_real/inputs/particles.128.mrcs \
     --poses results_cryodrgn/J64_real/inputs/poses.pkl \
-    --zdim 10 -n 50 \
-    --enc-dim 256 --enc-layers 3 --dec-dim 256 --dec-layers 3 \
+    --ctf   results_cryodrgn/J64_real/inputs/ctf.pkl \
+    --zdim 10 \
+    -n 50 \
+    --enc-dim 256 --enc-layers 3 \
+    --dec-dim 256 --dec-layers 3 \
     -o results_cryodrgn/J64_real/pilot_z10
 
-cryodrgn analyze results_cryodrgn/J64_real/pilot_z10 49     # UMAP + PCA + kmeans
+# Built-in analysis for the 10-D pilot (UMAP, PCA, kmeans20 volumes)
+cryodrgn analyze results_cryodrgn/J64_real/pilot_z10 49
 ```
 
-> The one-shot wrapper `scripts/cryodrgn/cryodrgn_run.py` assumes a single `.cs`
-> that carries blob + 3D poses + CTF together. Here poses live in a *separate*
-> consensus file from blob/CTF, so run the explicit `parse_* / downsample /
-> train_vae` steps above (or pass the consensus `.cs` as `--particles` and the
-> passthrough blob as `--datadir` source only if they share uid order).
+Output files in `results_cryodrgn/J64_real/pilot_z10/`:
+- `z.49.pkl` — latent encodings (702,919 × 10)
+- `weights.49.pkl` + `config.yaml` — model checkpoint
+- `analyze.49/` — UMAP, PCA plots, `kmeans20/centers.txt`, Jupyter notebooks
 
 ---
 
-## 4. Filter junk (paper Fig. 5c,d — the reason to run J64 at all)
+## Step 4 — Inspect and filter junk
 
-The paper removes impurities in latent space, then keeps the **intersection** of
-the 1D and 10D kept sets:
-
-1. **1-D model:** remove particles with **z ≤ −1** (the low tail of the Fig. 5a
-   histogram).
-2. **10-D model:** fit a **five-component, full-covariance GMM** (scikit-learn)
-   to the latent encodings and remove the **outlier component** (largest mean
-   `|z|`).
-3. Keep `kept_1D ∩ kept_10D`. (Optional QC: 2D-classify the *removed* particles —
-   they should be ice/edge/junk.)
-
-This repo automates the latent inspection + 5-component GMM + |z| outlier flag:
+**4a. Visualize the junk filter (run locally on the already-synced z.pkl):**
 
 ```bash
-# writes fig_junk_filter.png and reports the junk component + its particle %
 python scripts/cryodrgn/cryodrgn_paper_figures.py \
     --z results_cryodrgn/J64_real/pilot_z10/z.49.pkl \
     -o results_cryodrgn/J64_real/pilot_z10/paper_figures
 ```
 
-Build the kept-index `.pkl` (intersection of the two criteria) with the cryoDRGN
-filtering notebook (`cryodrgn_filtering.ipynb`, auto-written into each train dir)
-or `cryodrgn_utils select_clusters`, and save it as
-`results_cryodrgn/J64_real/inputs/ind_keep.pkl`.
+This writes `fig_junk_filter.png` (5-component GMM + `|z|` magnitude, flags
+the outlier cluster) and `fig_pc1_histogram.png` (check for the z ≤ −1 tail).
+
+**4b. Build the kept-particle index (run on the cluster):**
+
+Open the `cryoDRGN_filtering.ipynb` notebook auto-generated in
+`results_cryodrgn/J64_real/pilot_z10/analyze.49/` and apply both criteria:
+
+1. **1-D criterion** — load `results_cryodrgn/J64_real/pilot_z1/z.49.pkl` and
+   keep indices where `z > -1.0`:
+   ```python
+   import pickle, numpy as np
+   z1 = np.array(pickle.load(open('results_cryodrgn/J64_real/pilot_z1/z.49.pkl','rb')))
+   kept_1d = np.where(z1.ravel() > -1.0)[0]
+   ```
+2. **10-D criterion** — fit a 5-component GMM, identify the outlier component by
+   largest mean `|z|`, keep all others:
+   ```python
+   from sklearn.mixture import GaussianMixture
+   z10 = np.array(pickle.load(open('results_cryodrgn/J64_real/pilot_z10/z.49.pkl','rb')))
+   gmm = GaussianMixture(5, covariance_type='full', n_init=3, random_state=0).fit(z10)
+   labels = gmm.predict(z10)
+   zmag = np.linalg.norm(z10, axis=1)
+   junk_comp = np.argmax([zmag[labels==c].mean() for c in range(5)])
+   kept_10d = np.where(labels != junk_comp)[0]
+   ```
+3. **Intersection** and save:
+   ```python
+   kept = np.intersect1d(kept_1d, kept_10d)
+   print(f"Kept {len(kept):,} / 702919 = {len(kept)/702919:.1%}")
+   pickle.dump(kept, open('results_cryodrgn/J64_real/inputs/ind_keep.pkl','wb'))
+   ```
+
+Optional QC: 2D-classify the *removed* particles in CryoSPARC — they should be
+ice, edge hits, and other junk.
 
 ---
 
-## 5. Final high-resolution 10-D training (paper Fig. 5e–g)
+## Step 5 — Final high-resolution 10-D training
 
-Train a 10-D model on the kept particles at **D=256**, encoder = decoder =
-**1024 × 3**, 50 epochs. (The paper trains on a random 90% of the kept set; add a
-held-out 10% index if you want the same train/val split.)
+Train on the **kept particles only** at D=256 with the larger 1024×3 architecture
+(paper Fig. 5e–g). Matches J1497 in training length (100 epochs).
 
 ```bash
-cryodrgn train_vae results_cryodrgn/J64_real/inputs/particles.256.mrcs \
-    --ctf   results_cryodrgn/J64_real/inputs/ctf.pkl \
+cryodrgn train_vae \
+    results_cryodrgn/J64_real/inputs/particles.256.mrcs \
     --poses results_cryodrgn/J64_real/inputs/poses.pkl \
+    --ctf   results_cryodrgn/J64_real/inputs/ctf.pkl \
     --ind   results_cryodrgn/J64_real/inputs/ind_keep.pkl \
-    --zdim 10 -n 50 \
-    --enc-dim 1024 --enc-layers 3 --dec-dim 1024 --dec-layers 3 \
+    --zdim 10 \
+    -n 100 \
+    --enc-dim 1024 --enc-layers 3 \
+    --dec-dim 1024 --dec-layers 3 \
     -o results_cryodrgn/J64_real/train_final
 
-cryodrgn analyze results_cryodrgn/J64_real/train_final 49 --pc 2 --ksample 20
+# Built-in analysis
+cryodrgn analyze results_cryodrgn/J64_real/train_final 99
 ```
+
+Output files in `results_cryodrgn/J64_real/train_final/`:
+- `z.99.pkl` — final latent encodings
+- `analyze.99/` — UMAP, PCA, kmeans20, `cryoDRGN_filtering.ipynb`
 
 ---
 
-## 6. Classify into 3 or 5 states + representative maps (paper Fig. 5f,g)
+## Step 6 — Classify into 3 or 5 states + generate representative maps
 
-The paper generates representative maps at **on-data k-means cluster centres**.
-To force the 3 or 5 discrete classes you asked for, cluster the final latent at
-k=3 or k=5 and render volumes at those centres:
+**6a. Re-run analysis with k=5 cluster centres:**
 
 ```bash
-# k=5 representative volumes at on-data cluster centres
-cryodrgn analyze results_cryodrgn/J64_real/train_final 49 --pc 2 --ksample 5
-
-# OR drive it from the paper-figures script, which also writes kmeans_centers.txt
-# (--passthrough-cs = the stack you TRAINED on, so its uid order matches z)
-python scripts/cryodrgn/cryodrgn_paper_figures.py \
-    --z  results_cryodrgn/J64_real/train_final/z.49.pkl \
-    --cs data/J64/cryosparc_P25_J64_00102_particles.cs \
-    --passthrough-cs data/J64/cryosparc_P25_J64_passthrough_particles_all_classes_blob.cs \
-    --run-log results_cryodrgn/J64_real/train_final/run.log \
-    -o results_cryodrgn/J64_real/train_final/paper_figures
-
-# render the 5 representative maps from the centres file
-cryodrgn eval_vol results_cryodrgn/J64_real/train_final/weights.49.pkl \
-    --config results_cryodrgn/J64_real/train_final/config.yaml \
-    --zfile  results_cryodrgn/J64_real/train_final/paper_figures/kmeans_centers.txt \
-    -o results_cryodrgn/J64_real/train_final/representative_maps
+cryodrgn analyze results_cryodrgn/J64_real/train_final 99 --ksample 5
 ```
 
-To compare directly against the existing CryoSPARC 17-class labelling, the paper
-also reports the **on-data mean latent encoding per class**,
-$\hat z_M = \frac{1}{|M|}\sum_{i\in M} z_i$; the figure script marks these as
-stars when you pass `--cs/--passthrough-cs/--protein-idx`.
+This writes `analyze.99/kmeans5/centers.txt` and renders 5 volumes at the
+on-data cluster centres.
+
+**6b. Generate all paper latent-space figures (run locally after syncing):**
+
+```bash
+python scripts/cryodrgn/cryodrgn_paper_figures.py \
+    --z   results_cryodrgn/J64_real/train_final/z.99.pkl \
+    --cs  data/J64/cryosparc_P25_J64_00102_particles.cs \
+    --passthrough-cs data/J64/cryosparc_P25_J64_passthrough_particles_all_classes_blob.cs \
+    --run-log results_cryodrgn/J64_real/train_final/run.log \
+    -o    results_cryodrgn/J64_real/train_final/paper_figures
+```
+
+**6c. Render representative volumes at k-means centres:**
+
+```bash
+# On the cluster — uses the centres from step 6a
+cryodrgn eval_vol \
+    results_cryodrgn/J64_real/train_final/weights.99.pkl \
+    --config results_cryodrgn/J64_real/train_final/config.yaml \
+    --zfile  results_cryodrgn/J64_real/train_final/analyze.99/kmeans5/centers.txt \
+    -o results_cryodrgn/J64_real/train_final/vols_kmeans5
+```
+
+**6d. Run the full latent-space analysis pipeline (same scripts as J1442/J1497):**
+
+```bash
+# Latent GMM + population CIs + per-particle JS divergence vs CryoSPARC
+python scripts/cryodrgn/cryodrgn_latent_gmm.py \
+    --z results_cryodrgn/J64_real/train_final/z.99.pkl \
+    --passthrough-cs data/J64/cryosparc_P25_J64_passthrough_particles_all_classes_blob.cs \
+    --cs data/J64/cryosparc_P25_J64_00102_particles.cs \
+    --n-dummies 0 \
+    -k 3 \
+    --outdir results_cryodrgn/J64_real/latent_gmm
+
+# Free-energy landscape F(PC1) = -log p(PC1)
+python scripts/cryodrgn/cryodrgn_free_energy.py \
+    --dataset "J64:results_cryodrgn/J64_real/train_final/z.99.pkl:data/J64/cryosparc_P25_J64_passthrough_particles_all_classes_blob.cs:data/J64/cryosparc_P25_J64_00102_particles.cs" \
+    -o results_cryodrgn/J64_real/free_energy
+```
 
 ---
 
-## Non-map figures reproduced by `cryodrgn_paper_figures.py`
+## Paper figures produced (non-map panels)
 
-Run after any `train_vae` to get the paper's latent-space panels (everything
-except the 3D map renderings):
-
-| Output PNG | Paper panel | What it shows |
+| Script output | Paper panel | What it shows |
 |---|---|---|
-| `fig_pca_density.png`    | Fig. 4c,e | PCA of the latent with `PC (EV, x.xx)` axis labels |
-| `fig_umap_density.png`   | Fig. 5b   | UMAP (k=15, min_dist=0.1) density embedding |
-| `fig_pc1_histogram.png`  | Fig. 3e–h / 5a | 1-D latent (PC1) histogram; modes = states |
-| `fig_latent_by_class.png`| Fig. 5c,d | latent coloured by CryoSPARC class + on-data class means |
-| `fig_junk_filter.png`    | Fig. 5c   | 5-component GMM + `\|z\|` magnitude; junk cluster flagged |
-| `fig_training_curve.png` | Fig. 2c,d | training loss vs epoch (from `run.log`) |
-| `kmeans_centers.txt`     | Fig. 5f,g | on-data k-means centres → `eval_vol --zfile` |
+| `fig_pca_density.png` | Fig. 4c,e | PCA with `PC1 (EV, x.xx)` axis labels |
+| `fig_umap_density.png` | Fig. 5b | UMAP (k=15, min_dist=0.1) density map |
+| `fig_pc1_histogram.png` | Fig. 3e–h / 5a | PC1 histogram; modes = candidate states |
+| `fig_latent_by_class.png` | Fig. 5c,d | Latent coloured by CryoSPARC class + on-data class mean stars |
+| `fig_junk_filter.png` | Fig. 5c | 5-comp GMM + `\|z\|`; junk cluster highlighted |
+| `fig_training_curve.png` | Fig. 2c,d | Training loss vs epoch from `run.log` |
+| `kmeans_centers.txt` | Fig. 5f,g | On-data k-means centres for `eval_vol --zfile` |
 
 ---
 
 ## Is it worth the time?
 
-**Yes — but run it as a junk-filter / rare-state finder, not to force 3–5 tidy
-classes.** Prior analysis in this workspace shows the J1442/J1497 latent is a
-**continuous 1-D reaction coordinate**, so any "3 classes" or "5 classes" there
-are arbitrary slices of a continuum. J64 is the *upstream, junkier* parent set,
-which is exactly where cryoDRGN's two documented strengths (paper Fig. 5) pay
-off: (1) **impurity removal** via latent-space outlier rejection, and (2)
-**discovery of rare/under-represented states** (~1% populations) that 3D
-classification misses. Expect the main wins to be a **cleaner particle stack**
-(feed the kept indices back into CryoSPARC) and a **map of the true number of
-states**, rather than a clean 3- or 5-way partition. The pilot D=128 runs (step
-3) are cheap — do those first; only commit to the D=256 final run (step 5) if the
-pilots show structure beyond the continuum.
+**Yes — run it as a junk-filter and rare-state finder, not to force tidy classes.**
+Prior J1442/J1497 analysis shows the latent is a continuous 1-D reaction
+coordinate; discrete classes are arbitrary slices. J64 is the upstream, junkier
+parent, which is exactly where cryoDRGN's Fig. 5 workflow pays off:
+(1) **impurity removal** via latent-space outlier rejection (the main win), and
+(2) **rare-state discovery** that discrete classification misses.
+The D=128 pilot runs (step 3) are cheap on a GPU (~1–2 h for 700k particles);
+only commit to the D=256 final run (step 5) if the pilots show structure beyond
+the continuum.
