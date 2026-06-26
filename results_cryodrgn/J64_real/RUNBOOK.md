@@ -14,66 +14,56 @@ then a high-res final run to resolve states.
 
 ## File inventory — what you have
 
-All three J64 `.cs` files are in `data/J64/`:
+All J64 `.cs` files are in `data/J64/`:
 
 | file | rows | has blob | has 3D poses | has CTF |
 |---|---|---|---|---|
-| `cryosparc_P25_J64_00102_particles.cs` | 702,919 | ✗ | ✗ (only `alignments3D_multi/*`, 17-class) | ✗ |
-| `cryosparc_P25_J64_passthrough_particles_all_classes_blob.cs` | 702,919 | ✓ `J21/extract/…_particles.mrc`, D=320, 0.83 Å | ✗ (only `alignments2D/*`) | ✓ |
-| `cryosparc_P25_J64_passthrough_particles_all_classes_ctf.cs` | 702,919 | ✓ | ✗ | ✓ |
+| `cryosparc_P25_J64_00102_particles.cs` | 702,919 | ✗ | `alignments3D_multi/*` (17-class, used to derive poses — see Step 1) | ✗ |
+| `cryosparc_P25_J64_passthrough_particles_all_classes_blob.cs` | 702,919 | ✓ `J21/extract/…_particles.mrc`, D=320, 0.83 Å | ✗ | ✓ |
 
-**What is still needed before running cryoDRGN:**
+**Inputs already generated locally (checked in):**
+- `results_cryodrgn/J64_real/inputs/poses.pkl` — rot (702919,3,3) + trans (702919,2)
+- `results_cryodrgn/J64_real/inputs/ctf.pkl` — (702919,9)
 
-1. **3D consensus poses** — the passthrough files only have 2D-class poses. You
-   need to export the **C1 homogeneous/NU-refinement** of these 702,919 particles
-   from CryoSPARC. That job's `*_particles.cs` will carry `alignments3D/pose` and
-   `alignments3D/shift` (single orientation per particle). Call that file
-   `$CONSENSUS_CS` in the commands below.
-
-   > Compare to J1442/J1497: their passthrough
-   > `data/cryosparc_P25_J1442_passthrough_particles_all_classes.cs` is a single
-   > file with blob + `alignments3D/` consensus poses + CTF all in one — the
-   > standard output of a CryoSPARC hetero-refinement passthrough. J64's passthrough
-   > is split across field-group files and was exported from the **2D classification**
-   > job, so 3D poses are absent.
-
-2. **Raw particle pixels** — `blob/path` resolves to
-   `J21/extract/<uid>_…_particles.mrc` on the CryoSPARC server. Rsync or copy the
-   `J21/extract/` directory to the cluster so cryoDRGN can read the images. Set
-   `--datadir` to the directory that makes `J21/extract/…mrc` resolve (i.e. the
-   directory *above* `J21/`).
+**One thing still needed on the cluster before `downsample`:**
+The raw particle pixels. `blob/path` → `J21/extract/<uid>_…_particles.mrc` on the
+CryoSPARC server. Rsync or copy the `J21/extract/` directory to the cluster and set
+`$IMAGES_DIR` to the directory that makes `J21/extract/…mrc` resolve (the directory
+*above* `J21/`).
 
 In the commands below:
-- `$CONSENSUS_CS` = path to the C1 consensus `*_particles.cs` (for 3D poses)
-- `$IMAGES_DIR` = directory above `J21/` that makes `blob/path` entries resolve
+- `$IMAGES_DIR` = parent of `J21/` on the cluster
 - All commands run from the repo root: `cd /home/mae2183/cryoem-classification`
 
 ---
 
-## Step 1 — Parse poses and CTF
+## Step 1 — Parse poses and CTF  ✅ DONE LOCALLY
 
-Poses come from the consensus `.cs`; CTF and image layout come from the J64
-passthrough blob `.cs` (already in the repo):
+Both files are already generated and checked in:
 
+| file | shape | note |
+|---|---|---|
+| `results_cryodrgn/J64_real/inputs/poses.pkl` | rot (702919,3,3) float32 + trans (702919,2) float32 | best-class argmax pose extracted from `alignments3D_multi/pose` |
+| `results_cryodrgn/J64_real/inputs/ctf.pkl` | (702919,9) float32 | parsed from `data/J64/…_blob.cs` via `parse_ctf_csparc` |
+
+**How poses were derived:** `cryodrgn parse_pose_csparc` is designed for a single-class
+`.cs` (reads `alignments3D/pose`). J64 only has `alignments3D_multi/pose` (shape
+702919×17×3). The equivalent was computed directly:
+
+```python
+best  = np.argmax(class_posterior, axis=1)          # argmax over 17 classes
+ax_angle = pose_multi[np.arange(N), best, :]        # best-class axis-angle (N,3)
+rot   = expmap(torch.tensor(ax_angle)).numpy()       # Rodrigues -> 3x3
+rot   = np.array([r.T for r in rot], dtype=np.float32)  # transpose (cryodrgn convention)
+trans = (shift_multi[np.arange(N), best, :] / psize).astype(np.float32)  # A -> pix
+```
+
+**CTF command that was run:**
 ```bash
-# 3D consensus poses — from the C1 refinement you export
-cryodrgn parse_pose_csparc \
-    $CONSENSUS_CS \
-    -D 320 \
-    -o results_cryodrgn/J64_real/inputs/poses.pkl
-
-# CTF — from the J64 passthrough blob file
 cryodrgn parse_ctf_csparc \
     data/J64/cryosparc_P25_J64_passthrough_particles_all_classes_blob.cs \
     -D 320 --Apix 0.83 \
     -o results_cryodrgn/J64_real/inputs/ctf.pkl
-```
-
-Verify both parsed correctly (should each print 702,919 particles):
-
-```bash
-python -c "import pickle; z=pickle.load(open('results_cryodrgn/J64_real/inputs/poses.pkl','rb')); print('poses:', len(z[0]))"
-python -c "import pickle; z=pickle.load(open('results_cryodrgn/J64_real/inputs/ctf.pkl','rb')); print('ctf:', len(z))"
 ```
 
 ---
