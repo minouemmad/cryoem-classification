@@ -134,6 +134,53 @@ partition is harder for cryoDRGN to reproduce than the 3-class one.
 
 ---
 
+## 7. Hybrid pipeline: recover the 5 classes as basins x substates
+
+This is the constructive follow-up to "the latent supports ~3 regions, not 5".
+Instead of forcing cryoDRGN to output 5 clusters, we separate the two ideas the
+original heteroref conflates:
+
+- **energetic states** = free-energy basins (where particles actually sit);
+- **structural substates** = finer maps that may live *inside* one basin.
+
+Pipeline (`scripts/cryodrgn/cryodrgn_basin_occupancy.py --export-basins`):
+
+```
+230k particles -> cryoDRGN latent -> F(PC1,PC2) basins -> assign particles
+              -> basin_N_particles.cs (exported) -> CryoSPARC NU-refine = basin maps
+              -> within-basin focused heteroref (K from occupancy) -> NU-refine substates
+```
+
+**Which classes to pair / what K is read straight off the occupancy matrix**
+(`results_cryodrgn/basin_occupancy/occupancy_J1497_hard.csv`): a class is placed
+in the basin holding most of its particles; classes that share a basin are the
+substate candidates, and K = how many share it.
+
+| basin | population | particles (exported .cs) | CryoSPARC classes here | within-basin K |
+|-------|-----------|--------------------------|------------------------|----------------|
+| Basin 1 | 0.429 | 98,794 | P6 (0.91), P10 (0.67) | **K=2** (P6 vs P10) |
+| Basin 2 | 0.571 | 131,602 | P7 (0.77), P8 (0.93), P9 (0.87) | **K=3** (P7/P8/P9) |
+
+For J1442 the same matrix is block-diagonal (P6->B1, P7->B2, P8->B3), so the 3
+basins recover the 3 classes directly (K=1 each, no split to impose).
+
+**Exact maps to compare** (always rigid-body align first):
+1. Basin 1 map vs Basin 2 map (FSC / CC / difference) = *are the energetic
+   states distinct?*
+2. Within Basin 1: K=2 substates P6-like vs P10-like; within Basin 2: K=3
+   substates P7/P8/P9-like (FSC, local resolution, CC, difference, occupancy)
+   = *do the CryoSPARC sub-classes survive from images alone?*
+3. Headline: CC matrix of the hybrid substate maps vs the ORIGINAL heteroref
+   K=5 maps (P6..P10). Reproducing all five demonstrates
+   `5 reconstructable maps = 2 energetic basins x structural substates`.
+
+Exported inputs are in `results_cryodrgn/basin_occupancy/basin_particles/`
+(`J1497_basin{1,2}_particles.cs` + `J1497_basin_assignments.csv`). The full
+plan with both datasets is in
+[../basin_occupancy/basin_occupancy_summary.md](../basin_occupancy/basin_occupancy_summary.md).
+
+---
+
 ## Summary
 
 The J1497 5-class CryoSPARC run did **not** resolve five conformations.

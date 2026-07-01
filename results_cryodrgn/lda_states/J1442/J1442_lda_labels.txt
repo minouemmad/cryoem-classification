@@ -1,0 +1,14 @@
+0	6_7_lo
+1	6_7_hi
+2	6_7_traj00
+3	6_7_traj01
+4	6_7_traj02
+5	6_7_traj03
+6	6_7_traj04
+7	6_7_traj05
+8	6_7_medoidA
+9	6_7_medoidB
+10	6_7_h0lo
+11	6_7_h0hi
+12	6_7_h1lo
+13	6_7_h1hi

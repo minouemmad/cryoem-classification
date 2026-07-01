@@ -1,0 +1,66 @@
+[
+  {
+    "label": "J1497",
+    "balanced_acc": 0.4854292916031676,
+    "pairs": [
+      {
+        "pair": "P6-P10",
+        "lda_axis": 0,
+        "fisher_sep": 0.5439761789638755,
+        "n_a": 66134,
+        "n_b": 28472,
+        "status": "ok",
+        "cc_endpoints": 0.5157244013056443,
+        "cc_medoid": 0.9057891679875566,
+        "diff_rms": 0.9841499872421433,
+        "fsc05_resolution_A": 14.755555555555556,
+        "splithalf_diffmap_cc": 0.9999841545787952
+      },
+      {
+        "pair": "P8-P9",
+        "lda_axis": 0,
+        "fisher_sep": 0.43950557899727655,
+        "n_a": 53397,
+        "n_b": 34075,
+        "status": "ok",
+        "cc_endpoints": 0.0980773998889151,
+        "cc_medoid": 0.5538551736276807,
+        "diff_rms": 1.3430730435170568,
+        "fsc05_resolution_A": 53.120000000000005,
+        "splithalf_diffmap_cc": 0.9999980518972374
+      },
+      {
+        "pair": "P6-P7",
+        "lda_axis": 0,
+        "fisher_sep": 1.6964474925347268,
+        "n_a": 66134,
+        "n_b": 48318,
+        "status": "ok",
+        "cc_endpoints": 0.2541081961139113,
+        "cc_medoid": 0.6694066658993557,
+        "diff_rms": 1.22138593727461,
+        "fsc05_resolution_A": 53.120000000000005,
+        "splithalf_diffmap_cc": 0.9989129537608813
+      }
+    ]
+  },
+  {
+    "label": "J1442",
+    "balanced_acc": 0.7990020172214508,
+    "pairs": [
+      {
+        "pair": "P6-P7",
+        "lda_axis": 0,
+        "fisher_sep": 1.6060567954249039,
+        "n_a": 83843,
+        "n_b": 67671,
+        "status": "ok",
+        "cc_endpoints": 0.2389809727903115,
+        "cc_medoid": 0.7556366525949998,
+        "diff_rms": 1.2337090639285166,
+        "fsc05_resolution_A": 53.120000000000005,
+        "splithalf_diffmap_cc": 0.9998814578512843
+      }
+    ]
+  }
+]

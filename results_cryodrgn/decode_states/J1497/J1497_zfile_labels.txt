@@ -1,0 +1,13 @@
+0	P6
+1	P7
+2	P8
+3	P9
+4	P10
+5	traj00
+6	traj01
+7	traj02
+8	traj03
+9	traj04
+10	traj05
+11	traj06
+12	traj07

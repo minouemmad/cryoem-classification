@@ -1,0 +1,30 @@
+[
+  {
+    "pair": "P6_P10",
+    "box": 128,
+    "apix": 2.075,
+    "cc_raw_unaligned": -0.05038581046964199,
+    "align_rot_deg": 177.61472454597555,
+    "align_shift_vox": 2.8026829680888787,
+    "cc_class0_class1": 0.3120224575356178,
+    "fsc05_A": 26.560000000000002,
+    "fsc0143_A": 22.133333333333336,
+    "diff_rms": 1.173011118842769,
+    "lda_region_match": 0.24342763976001167,
+    "lda_region_flip": "flipy"
+  },
+  {
+    "pair": "P8_P9",
+    "box": 128,
+    "apix": 2.075,
+    "cc_raw_unaligned": 0.34119359852197967,
+    "align_rot_deg": 180.19461296296086,
+    "align_shift_vox": 1.2931846440823642,
+    "cc_class0_class1": 0.3544588098118066,
+    "fsc05_A": 24.145454545454548,
+    "fsc0143_A": 17.706666666666667,
+    "diff_rms": 1.136258060643086,
+    "lda_region_match": -0.2061691993084108,
+    "lda_region_flip": "identity"
+  }
+]

@@ -1,0 +1,106 @@
+[
+  {
+    "label": "J1442",
+    "names": [
+      "P6",
+      "P7",
+      "P8"
+    ],
+    "n_particles": 230396,
+    "rep": "medoid",
+    "class_counts": [
+      83843,
+      67671,
+      78882
+    ],
+    "zfile": "results_cryodrgn/decode_states\\J1442\\J1442_zfile.txt",
+    "eval_vol_cmd": "C:\\Users\\maemm\\OneDrive\\Desktop\\CryoEM\\cryodrgn-py310\\Scripts\\cryodrgn.exe eval_vol results_cryodrgn/J1442_real/train_z10/weights.100.pkl -c results_cryodrgn/J1442_real/train_z10/config.yaml -o results_cryodrgn/decode_states\\J1442 --zfile results_cryodrgn/decode_states\\J1442\\J1442_zfile.txt --prefix J1442_vol --Apix 1.0 -d 64",
+    "volumes_present": [
+      "P6",
+      "P7",
+      "P8"
+    ],
+    "cc_matrix": [
+      [
+        1.0,
+        0.7606521745781114,
+        0.14040438282627965
+      ],
+      [
+        0.7606521745781114,
+        1.0,
+        0.12146404956773718
+      ],
+      [
+        0.14040438282627965,
+        0.12146404956773718,
+        1.0
+      ]
+    ]
+  },
+  {
+    "label": "J1497",
+    "names": [
+      "P6",
+      "P7",
+      "P8",
+      "P9",
+      "P10"
+    ],
+    "n_particles": 230396,
+    "rep": "medoid",
+    "class_counts": [
+      66134,
+      48318,
+      53397,
+      34075,
+      28472
+    ],
+    "zfile": "results_cryodrgn/decode_states\\J1497\\J1497_zfile.txt",
+    "eval_vol_cmd": "C:\\Users\\maemm\\OneDrive\\Desktop\\CryoEM\\cryodrgn-py310\\Scripts\\cryodrgn.exe eval_vol results_cryodrgn/J1497_real/train/weights.100.pkl -c results_cryodrgn/J1497_real/train/config.yaml -o results_cryodrgn/decode_states\\J1497 --zfile results_cryodrgn/decode_states\\J1497\\J1497_zfile.txt --prefix J1497_vol --Apix 1.0 -d 64",
+    "volumes_present": [
+      "P6",
+      "P7",
+      "P8",
+      "P9",
+      "P10"
+    ],
+    "cc_matrix": [
+      [
+        1.0,
+        0.6741735657382074,
+        0.1890764941426363,
+        0.5606694715878645,
+        0.9089636041193506
+      ],
+      [
+        0.6741735657382074,
+        1.0,
+        0.11845021487609679,
+        0.8442126834827961,
+        0.904990845649377
+      ],
+      [
+        0.1890764941426363,
+        0.11845021487609679,
+        1.0,
+        0.574159477881813,
+        0.11671104068807657
+      ],
+      [
+        0.5606694715878645,
+        0.8442126834827961,
+        0.574159477881813,
+        1.0,
+        0.7236879412019885
+      ],
+      [
+        0.9089636041193506,
+        0.904990845649377,
+        0.11671104068807657,
+        0.7236879412019885,
+        1.0
+      ]
+    ]
+  }
+]

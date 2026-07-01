@@ -1,0 +1,22 @@
+[
+  {
+    "pair": "P6-P10",
+    "n_pair": 94606,
+    "n_a": 66134,
+    "n_b": 28472,
+    "diff_threshold_abs": 0.08494452241808181,
+    "hard_mask_voxels": 5338,
+    "mask_written": true,
+    "pair_dir": "results_cryodrgn/focused_classification/J1497\\P6_P10"
+  },
+  {
+    "pair": "P8-P9",
+    "n_pair": 87472,
+    "n_a": 53397,
+    "n_b": 34075,
+    "diff_threshold_abs": 0.13862990558147467,
+    "hard_mask_voxels": 5259,
+    "mask_written": true,
+    "pair_dir": "results_cryodrgn/focused_classification/J1497\\P8_P9"
+  }
+]
