@@ -26,3 +26,4 @@ cryodrgn-py310/
 # OS / editor
 .DS_Store
 Thumbs.db
+results_cryodrgn/*/inputs/*.mrcs
