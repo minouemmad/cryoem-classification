@@ -1,0 +1,20 @@
+nohup: ignoring input
+(INFO) (train_vae.py) (26-Jun-2026 16:14:54) /home/mae2183/miniconda3/envs/cryodrgn/bin/cryodrgn train_vae results_cryodrgn/J64_real/inputs/particles.128.mrcs --poses results_cryodrgn/J64_real/inputs/poses.pkl --ctf results_cryodrgn/J64_real/inputs/ctf.pkl --zdim 1 -n 50 --enc-dim 256 --enc-layers 3 --dec-dim 256 --dec-layers 3 -o results_cryodrgn/J64_real/pilot_z1
+(INFO) (train_vae.py) (26-Jun-2026 16:14:54) cryoDRGN 4.3.0
+(INFO) (train_vae.py) (26-Jun-2026 16:14:54) Namespace(particles='/home/mae2183/cryoem-classification/results_cryodrgn/J64_real/inputs/particles.128.mrcs', outdir='/home/mae2183/cryoem-classification/results_cryodrgn/J64_real/pilot_z1', zdim=1, poses='/home/mae2183/cryoem-classification/results_cryodrgn/J64_real/inputs/poses.pkl', ctf='/home/mae2183/cryoem-classification/results_cryodrgn/J64_real/inputs/ctf.pkl', load=None, do_analysis=True, checkpoint=1, log_interval=1000, verbose=False, seed=18216, shuffle_seed=None, ind=None, invert_data=True, window=True, window_r=0.85, datadir=None, lazy=False, shuffler_size=0, num_workers=None, max_threads=16, ntilts=10, random_tilts=False, t_emb_dim=64, tlayers=3, tdim=1024, dose_per_tilt=None, angle_per_tilt=3, num_epochs=50, batch_size=16, wd=0, lr=0.0001, beta=None, beta_control=None, norm=None, amp=True, multigpu=False, do_pose_sgd=False, pretrain=1, emb_type='quat', pose_lr=0.0003, qlayers=3, qdim=256, encode_mode='resid', enc_mask=None, use_real=False, players=3, pdim=256, pe_type='gaussian', feat_sigma=0.5, pe_dim=None, domain='fourier', activation='relu', func=<function main at 0x71295614a8c0>)
+(INFO) (train_vae.py) (26-Jun-2026 16:14:55) Use cuda True
+(INFO) (train_vae.py) (26-Jun-2026 16:14:55) Loading dataset from /home/mae2183/cryoem-classification/results_cryodrgn/J64_real/inputs/particles.128.mrcs
+(INFO) (dataset.py) (26-Jun-2026 16:16:04) Normalizing HT by 0 +/- 191.7242431640625
+(INFO) (dataset.py) (26-Jun-2026 16:16:05) Normalized real space images by 0.0011452697217464447 +/- 1.492341160774231
+Traceback (most recent call last):
+  File "/home/mae2183/miniconda3/envs/cryodrgn/bin/cryodrgn", line 6, in <module>
+    sys.exit(main_commands())
+  File "/home/mae2183/miniconda3/envs/cryodrgn/lib/python3.10/site-packages/cryodrgn/command_line.py", line 81, in main_commands
+    _get_commands(
+  File "/home/mae2183/miniconda3/envs/cryodrgn/lib/python3.10/site-packages/cryodrgn/command_line.py", line 76, in _get_commands
+    args.func(args)
+  File "/home/mae2183/miniconda3/envs/cryodrgn/lib/python3.10/site-packages/cryodrgn/commands/train_vae.py", line 725, in main
+    posetracker = PoseTracker.load(
+  File "/home/mae2183/miniconda3/envs/cryodrgn/lib/python3.10/site-packages/cryodrgn/pose.py", line 128, in load
+    raise ValueError(
+ValueError: Old pose format detected; translations must be in units of fraction of box!
