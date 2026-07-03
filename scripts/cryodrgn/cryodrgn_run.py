@@ -39,6 +39,9 @@ def parse_args():
     p.add_argument("--dec-layers", type=int, default=3)
     p.add_argument("--ind", help="PKL of particle indices to train on.")
     p.add_argument("--no-ctf", action="store_true")
+    p.add_argument("--no-amp", action="store_true",
+                   help="Disable mixed-precision (fp16) training. Use this if "
+                        "train_vae diverges to NaN (kld explodes, fp16 nan loss).")
     p.add_argument("--quick", action="store_true",
                    help="CPU smoke test: D=64, 2000-particle subset, 3 epochs.")
     p.add_argument("--dry-run", action="store_true")
@@ -122,6 +125,8 @@ def main():
           "--dec-dim", str(dec_dim), "--dec-layers", str(dec_layers), "-o", train_dir]
     if not args.no_ctf:
         tv += ["--ctf", ctf]
+    if args.no_amp:
+        tv += ["--no-amp"]
     if ind:
         tv += ["--ind", ind]
     if run(tv, args.dry_run):
