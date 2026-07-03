@@ -72,5 +72,30 @@
     ],
     "max_barrier_kt": 0.9016391242192985,
     "verdict": "3 METASTABLE BASINS (max barrier 0.90 kT)"
+  },
+  {
+    "label": "J264",
+    "n_particles": 299745,
+    "zdim": 10,
+    "protein_idx": [
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12,
+      13,
+      14
+    ],
+    "pc1_explained_var": 0.14584854451942797,
+    "pc2_explained_var": 0.11036246738066587,
+    "n_wells": 1,
+    "well_positions": [
+      -0.15386334440963267
+    ],
+    "barriers": [],
+    "max_barrier_kt": 0.0,
+    "verdict": "CONTINUOUS (single basin)"
   }
 ]

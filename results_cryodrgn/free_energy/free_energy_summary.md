@@ -17,3 +17,10 @@ Treating the latent density as a Boltzmann distribution, `F(PC1) = -log p(PC1)` 
   - barrier at PC1=-0.53: **0.90 kT** above the shallower well (absolute height 1.24 kT).
   - barrier at PC1=0.56: **0.53 kT** above the shallower well (absolute height 0.87 kT).
 - **Verdict: 3 METASTABLE BASINS (max barrier 0.90 kT)**
+
+## J264 (9-class, 299,745 particles)
+
+- PC1 explains **14.6%** of standardized latent variance (PC2 11.0%).
+- Free-energy wells: **1** at PC1 = [-0.15].
+  - no interior barrier above 0.5 kT.
+- **Verdict: CONTINUOUS (single basin)**

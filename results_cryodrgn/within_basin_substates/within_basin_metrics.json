@@ -1,0 +1,292 @@
+[
+  {
+    "label": "J1442",
+    "n_particles": 230396,
+    "zdim": 10,
+    "protein_idx": [
+      6,
+      7,
+      8
+    ],
+    "n_basins": 3,
+    "basin_populations": [
+      0.40375700967030675,
+      0.2503949721349329,
+      0.3458480181947603
+    ],
+    "basin_population_std": [
+      0.0009428959843410056,
+      0.0008673751304636509,
+      0.0008456735817878335
+    ],
+    "substates": [
+      {
+        "n_particles": 93024,
+        "n_sub_wells": 1,
+        "sub_well_positions": [
+          -0.0415113944670944
+        ],
+        "deepest_sub_barrier_kt": 0.0,
+        "sub_barriers": [],
+        "reproducibility": {
+          "axis_cos": 0.9977139687038449,
+          "n_sub_a": 1,
+          "n_sub_b": 2,
+          "curve_corr": 0.857833880792506,
+          "reproducible": false
+        },
+        "basin": 1,
+        "population": 0.40375700967030675,
+        "population_std": 0.0009428959843410056,
+        "subwell_class_counts": [
+          [
+            75540,
+            13544,
+            3940
+          ]
+        ]
+      },
+      {
+        "n_particles": 57690,
+        "n_sub_wells": 2,
+        "sub_well_positions": [
+          0.32391724308097736,
+          7.6198288694839045
+        ],
+        "deepest_sub_barrier_kt": 1.7915626316458422,
+        "sub_barriers": [
+          {
+            "pos": 7.142526239719227,
+            "F_barrier_kt": 9.833376459992166,
+            "depth_from_shallower_well_kt": 1.7915626316458422,
+            "left_well_pos": 0.32391724308097736,
+            "right_well_pos": 7.6198288694839045
+          }
+        ],
+        "reproducibility": {
+          "axis_cos": 0.996973736677339,
+          "n_sub_a": 2,
+          "n_sub_b": 1,
+          "curve_corr": 0.42450993147314814,
+          "reproducible": false
+        },
+        "basin": 2,
+        "population": 0.2503949721349329,
+        "population_std": 0.0008673751304636509,
+        "subwell_class_counts": [
+          [
+            5793,
+            43444,
+            8196
+          ],
+          [
+            49,
+            114,
+            94
+          ]
+        ]
+      },
+      {
+        "n_particles": 79682,
+        "n_sub_wells": 1,
+        "sub_well_positions": [
+          -0.07655078125070691
+        ],
+        "deepest_sub_barrier_kt": 0.0,
+        "sub_barriers": [],
+        "reproducibility": {
+          "axis_cos": 0.6261931902411106,
+          "n_sub_a": 2,
+          "n_sub_b": 1,
+          "curve_corr": 0.845215733188096,
+          "reproducible": false
+        },
+        "basin": 3,
+        "population": 0.3458480181947603,
+        "population_std": 0.0008456735817878335,
+        "subwell_class_counts": [
+          [
+            2461,
+            10569,
+            66652
+          ]
+        ]
+      }
+    ],
+    "diffusion_spectral_gap_k": 1,
+    "diffusion_eigenvalues": [
+      1.0000000000000009,
+      0.16766735351229498,
+      0.13207885666093197,
+      0.11893543882448199,
+      0.11140792559811125,
+      0.10743274762110612,
+      0.10452271461468177,
+      0.10244189884005758,
+      0.1007345029667776
+    ],
+    "diffusion_dc1_pc1_corr": 0.9966646015106374
+  },
+  {
+    "label": "J1497",
+    "n_particles": 230396,
+    "zdim": 10,
+    "protein_idx": [
+      6,
+      7,
+      8,
+      9,
+      10
+    ],
+    "n_basins": 2,
+    "basin_populations": [
+      0.4288008472369312,
+      0.5711991527630688
+    ],
+    "basin_population_std": [
+      0.0009483276074801704,
+      0.0009483276074801694
+    ],
+    "substates": [
+      {
+        "n_particles": 98794,
+        "n_sub_wells": 1,
+        "sub_well_positions": [
+          0.30867385285154736
+        ],
+        "deepest_sub_barrier_kt": 0.0,
+        "sub_barriers": [],
+        "reproducibility": {
+          "axis_cos": 0.9996737174800213,
+          "n_sub_a": 2,
+          "n_sub_b": 1,
+          "curve_corr": 0.8844389196029727,
+          "reproducible": false
+        },
+        "basin": 1,
+        "population": 0.4288008472369312,
+        "population_std": 0.0009483276074801704,
+        "subwell_class_counts": [
+          [
+            60312,
+            11345,
+            3633,
+            4326,
+            19178
+          ]
+        ]
+      },
+      {
+        "n_particles": 131602,
+        "n_sub_wells": 1,
+        "sub_well_positions": [
+          -0.008857389868806465
+        ],
+        "deepest_sub_barrier_kt": 0.0,
+        "sub_barriers": [],
+        "reproducibility": {
+          "axis_cos": 0.9965282476631804,
+          "n_sub_a": 1,
+          "n_sub_b": 1,
+          "curve_corr": 0.9889635389447626,
+          "reproducible": false
+        },
+        "basin": 2,
+        "population": 0.5711991527630688,
+        "population_std": 0.0009483276074801694,
+        "subwell_class_counts": [
+          [
+            5822,
+            36973,
+            49764,
+            29749,
+            9294
+          ]
+        ]
+      }
+    ],
+    "diffusion_spectral_gap_k": 1,
+    "diffusion_eigenvalues": [
+      1.0000000000000004,
+      0.16963368211500673,
+      0.12243030858840288,
+      0.11923487576151148,
+      0.11233121254020037,
+      0.10881903191150528,
+      0.10608058057002433,
+      0.1015998036291083,
+      0.09911719830947774
+    ],
+    "diffusion_dc1_pc1_corr": 0.9955296601530059
+  },
+  {
+    "label": "J264",
+    "n_particles": 299745,
+    "zdim": 10,
+    "protein_idx": [
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12,
+      13,
+      14
+    ],
+    "n_basins": 1,
+    "basin_populations": [
+      1.0
+    ],
+    "basin_population_std": [
+      0.0
+    ],
+    "substates": [
+      {
+        "n_particles": 299745,
+        "n_sub_wells": 1,
+        "sub_well_positions": [
+          0.14124232421092398
+        ],
+        "deepest_sub_barrier_kt": 0.0,
+        "sub_barriers": [],
+        "reproducibility": {
+          "axis_cos": 0.9996339720329299,
+          "n_sub_a": 1,
+          "n_sub_b": 1,
+          "curve_corr": 0.959537281197754,
+          "reproducible": false
+        },
+        "basin": 1,
+        "population": 1.0,
+        "population_std": 0.0,
+        "subwell_class_counts": [
+          [
+            66431,
+            57929,
+            45284,
+            50285,
+            42747,
+            17350,
+            8059,
+            8549,
+            3111
+          ]
+        ]
+      }
+    ],
+    "diffusion_spectral_gap_k": 1,
+    "diffusion_eigenvalues": [
+      0.9999999999999998,
+      0.15792168872360063,
+      0.12055877784260247,
+      0.1139467638522844,
+      0.11215518511791284,
+      0.1072953223225705,
+      0.0997334294143746,
+      0.09732003327368631,
+      0.09639835920139513
+    ],
+    "diffusion_dc1_pc1_corr": 0.9966099851315925
+  }
+]

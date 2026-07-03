@@ -77,3 +77,45 @@
   2. **Substate maps (within Basin 1):** focused hetero-refine K=2 on `basin1_particles.cs` -> P6-like/P10-like; NU-refine each and compare them to each other (FSC, local resolution, CC, difference map, occupancies). These answer *do P6+P10 survive as substates from images alone?*
   2. **Substate maps (within Basin 2):** focused hetero-refine K=3 on `basin2_particles.cs` -> P7-like/P8-like/P9-like; NU-refine each and compare them to each other (FSC, local resolution, CC, difference map, occupancies). These answer *do P7+P8+P9 survive as substates from images alone?*
   3. **Cross-pipeline (the headline):** compare each hybrid substate map to the ORIGINAL CryoSPARC hetero-refine K=5 map of the same class (e.g. Basin-1 substate vs original P6 and P10) via a CC matrix. If the hybrid reproduces the 5 original maps, you have shown `5 reconstructable maps = 2 basins x substates` -- structural heterogeneity nested inside fewer energetic states.
+
+## J264 (9-class, 299,745 particles)
+
+- PC1 14.6% / PC2 11.0% of standardized latent variance.
+- **2D basins @ 0.5 kT: 1** (raw watershed found 4; tail basins < 1% absorbed). 1-D F(PC1) reported 3 wells for both datasets.
+- basin minima: B1=(PC1 0.65, PC2 0.11).
+- basin populations: [1.0].
+- top basin persistences (kT): 1.29, 0.79, 0.63, 0.04, 0.02.
+
+  Occupancy `P(basin | class)` (hard):
+
+  | class | Basin 1 |
+  |---|---|
+  | P6 | 1.00 |
+  | P7 | 1.00 |
+  | P8 | 1.00 |
+  | P9 | 1.00 |
+  | P10 | 1.00 |
+  | P11 | 1.00 |
+  | P12 | 1.00 |
+  | P13 | 1.00 |
+  | P14 | 1.00 |
+
+
+  ### Hybrid-pipeline plan (J264)
+
+  Each basin = one **energetic state** (NU-refine its particle subset). CryoSPARC classes that pile into the *same* basin are candidate **structural substates** of that one energetic state; the within-basin hetero-refine `K` is just how many classes share the basin (`K=1` => the basin already is a single class).
+
+  | basin | population | CryoSPARC classes in basin | within-basin hetero-refine K |
+  |---|---|---|---|
+  | Basin 1 | 1.000 | P6 (1.00), P7 (1.00), P8 (1.00), P9 (1.00), P10 (1.00), P11 (1.00), P12 (1.00), P13 (1.00), P14 (1.00) | **K=9** |
+
+  **Which classes to pair / what K:** Basin 1: heteroref K=9 on P6+P7+P8+P9+P10+P11+P12+P13+P14.
+  The pairing is *not* chosen by hand -- it is read off the occupancy matrix: the classes listed in a basin row above are exactly the ones that share that free-energy minimum, so they are the substates to try to re-separate *within that basin only*.
+
+  ### Exact maps to compare
+
+  Independent CryoSPARC refinements are NOT in a common frame -- rigid-body align before every comparison (`scripts/cryodrgn/cryodrgn_focused_analysis.py` aligns class1->class0; for basin maps use ChimeraX fitmap).
+
+  1. **Energetic-state maps (between basins):** NU-refine each `basin_N_particles.cs`, then compare the basin maps pairwise (FSC, masked CC, difference map). These answer *are the free-energy basins genuinely distinct states?*
+  2. **Substate maps (within Basin 1):** focused hetero-refine K=9 on `basin1_particles.cs` -> P6-like/P7-like/P8-like/P9-like/P10-like/P11-like/P12-like/P13-like/P14-like; NU-refine each and compare them to each other (FSC, local resolution, CC, difference map, occupancies). These answer *do P6+P7+P8+P9+P10+P11+P12+P13+P14 survive as substates from images alone?*
+  3. **Cross-pipeline (the headline):** compare each hybrid substate map to the ORIGINAL CryoSPARC hetero-refine K=5 map of the same class (e.g. Basin-1 substate vs original P6 and P10) via a CC matrix. If the hybrid reproduces the 5 original maps, you have shown `5 reconstructable maps = 1 basins x substates` -- structural heterogeneity nested inside fewer energetic states.

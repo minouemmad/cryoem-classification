@@ -140,6 +140,7 @@ cryodrgn train_vae \
     -n 50 \
     --enc-dim 256 --enc-layers 3 \
     --dec-dim 256 --dec-layers 3 \
+    --no-amp \
     -o results_cryodrgn/J264_real/pilot_z1
 
 # --- 10-D latent pilot: UMAP; junk = outlier 5-component GMM cluster ---
@@ -151,6 +152,7 @@ cryodrgn train_vae \
     -n 50 \
     --enc-dim 256 --enc-layers 3 \
     --dec-dim 256 --dec-layers 3 \
+    --no-amp \
     -o results_cryodrgn/J264_real/pilot_z10
 
 # Built-in analysis for the 10-D pilot (UMAP, PCA, kmeans20 volumes)
@@ -206,6 +208,12 @@ edge hits, junk.
 
 Train on **kept particles only** at D=256, 1024×3, 100 epochs (paper Fig. 5e–g).
 
+> **`--no-amp` is required.** cryoDRGN enables mixed-precision (fp16) training by
+> default. On this larger D=256 / 1024×3 run it overflows: the KLD term blows up
+> (kld → 1e13–1e14) and `gen loss`/`loss` become `nan` (float16 tensors of
+> `nan` in the log). Passing `--no-amp` runs in fp32 and fixes the instability.
+> See "Troubleshooting: NaN loss" below.
+
 ```bash
 cryodrgn train_vae \
     results_cryodrgn/J264_real/inputs/particles.256.mrcs \
@@ -216,6 +224,7 @@ cryodrgn train_vae \
     -n 100 \
     --enc-dim 1024 --enc-layers 3 \
     --dec-dim 1024 --dec-layers 3 \
+    --no-amp \
     -o results_cryodrgn/J264_real/train_final
 
 # Built-in analysis
@@ -223,6 +232,59 @@ cryodrgn analyze results_cryodrgn/J264_real/train_final 99
 ```
 
 Outputs in `results_cryodrgn/J264_real/train_final/`: `z.99.pkl`, `analyze.99/`.
+
+### Troubleshooting: NaN loss (`gen loss=nan`, `kld=…e+14`)
+
+Symptom (from `train_final/run.log`):
+
+```
+# [Train Epoch: 26/100] [100000/220643 particles] gen loss=nan, kld=47529852928000.000000, beta=0.100000, loss=nan
+tensor([nan, nan, …], device='cuda:0', dtype=torch.float16, grad_fn=<SelectBackward0>)
+```
+
+Cause: the default fp16 AMP autocast overflows once the KLD spikes; the fp16
+`nan` then propagates through the encoder and every subsequent batch is `nan`.
+The `dtype=torch.float16` in the dumped tensor is the tell.
+
+Fix / restart (the crashed run cannot be resumed — its checkpoints from epoch 26
+onward are already `nan`):
+
+```bash
+# clean restart from scratch with fp32 (recommended)
+rm -rf results_cryodrgn/J264_real/train_final
+cryodrgn train_vae \
+    results_cryodrgn/J264_real/inputs/particles.256.mrcs \
+    --poses results_cryodrgn/J264_real/inputs/poses.pkl \
+    --ctf   results_cryodrgn/J264_real/inputs/ctf.pkl \
+    --ind   results_cryodrgn/J264_real/inputs/ind_keep.pkl \
+    --zdim 10 -n 100 \
+    --enc-dim 1024 --enc-layers 3 --dec-dim 1024 --dec-layers 3 \
+    --no-amp \
+    -o results_cryodrgn/J264_real/train_final
+```
+
+Faster alternative — resume from the last **pre-NaN** checkpoint (epoch 25 is the
+last clean one; the NaN first appears during epoch 26). Verify `weights.25.pkl`
+is finite first, then continue with AMP disabled:
+
+```bash
+python -c "import pickle,torch,numpy as np; w=pickle.load(open('results_cryodrgn/J264_real/train_final/weights.25.pkl','rb')); print('finite:', all(torch.isfinite(v).all() for v in w['model_state_dict'].values()))"
+
+cryodrgn train_vae \
+    results_cryodrgn/J264_real/inputs/particles.256.mrcs \
+    --poses results_cryodrgn/J264_real/inputs/poses.pkl \
+    --ctf   results_cryodrgn/J264_real/inputs/ctf.pkl \
+    --ind   results_cryodrgn/J264_real/inputs/ind_keep.pkl \
+    --zdim 10 -n 100 \
+    --enc-dim 1024 --enc-layers 3 --dec-dim 1024 --dec-layers 3 \
+    --no-amp \
+    --load results_cryodrgn/J264_real/train_final/weights.25.pkl \
+    -o results_cryodrgn/J264_real/train_final
+```
+
+If NaNs ever persist even with `--no-amp`, lower the learning rate
+(`--lr 1e-4`) or the KLD weight (`--beta 0.05`) — but `--no-amp` alone has
+resolved it here.
 
 ---
 
