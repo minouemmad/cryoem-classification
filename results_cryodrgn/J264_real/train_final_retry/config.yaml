@@ -21,8 +21,6 @@ cmd:
 - --dec-layers
 - '3'
 - --no-amp
-- --num-workers
-- '16'
 - --batch-size
 - '32'
 - --checkpoint
@@ -30,7 +28,7 @@ cmd:
 - --log-interval
 - '5000'
 - -o
-- results_cryodrgn/J264_real/train_final
+- results_cryodrgn/J264_real/train_final_retry
 dataset_args:
   ctf: /home/mae2183/cryoem-classification/results_cryodrgn/J264_real/inputs/ctf.pkl
   datadir: null
@@ -67,6 +65,6 @@ model_args:
     tdim: 1024
     tlayers: 3
   zdim: 10
-seed: 16065
-time: 2026-07-03 16:23:31.929631
+seed: 40062
+time: 2026-07-03 16:41:31.782758
 version: 4.3.0

@@ -1,0 +1,53 @@
+/home/mae2183/miniconda3/envs/cryodrgn/bin/cryodrgn train_vae results_cryodrgn/J1442_real/inputs/particles.256.mrcs --poses results_cryodrgn/J1442_real/inputs/poses.pkl --ctf results_cryodrgn/J1442_real/inputs/ctf.pkl --ind results_cryodrgn/J1442_real/inputs/ind_keep.pkl --zdim 10 -n 100 --enc-dim 1024 --enc-layers 3 --dec-dim 1024 --dec-layers 3 --no-amp --batch-size 32 --checkpoint 5 --log-interval 5000 -o results_cryodrgn/J1442_real/train_final
+cryoDRGN 4.3.0
+Namespace(particles='/home/mae2183/cryoem-classification/results_cryodrgn/J1442_real/inputs/particles.256.mrcs', outdir='/home/mae2183/cryoem-classification/results_cryodrgn/J1442_real/train_final', zdim=10, poses='/home/mae2183/cryoem-classification/results_cryodrgn/J1442_real/inputs/poses.pkl', ctf='/home/mae2183/cryoem-classification/results_cryodrgn/J1442_real/inputs/ctf.pkl', load=None, do_analysis=True, checkpoint=5, log_interval=5000, verbose=False, seed=64804, shuffle_seed=None, ind='/home/mae2183/cryoem-classification/results_cryodrgn/J1442_real/inputs/ind_keep.pkl', invert_data=True, window=True, window_r=0.85, datadir=None, lazy=False, shuffler_size=0, num_workers=None, max_threads=16, ntilts=10, random_tilts=False, t_emb_dim=64, tlayers=3, tdim=1024, dose_per_tilt=None, angle_per_tilt=3, num_epochs=100, batch_size=32, wd=0, lr=0.0001, beta=None, beta_control=None, norm=None, amp=False, multigpu=False, do_pose_sgd=False, pretrain=1, emb_type='quat', pose_lr=0.0003, qlayers=3, qdim=1024, encode_mode='resid', enc_mask=None, use_real=False, players=3, pdim=1024, pe_type='gaussian', feat_sigma=0.5, pe_dim=None, domain='fourier', activation='relu', func=<function main at 0x77f34a33e8c0>)
+Use cuda True
+Filtering image dataset with /home/mae2183/cryoem-classification/results_cryodrgn/J1442_real/inputs/ind_keep.pkl
+Loading dataset from /home/mae2183/cryoem-classification/results_cryodrgn/J1442_real/inputs/particles.256.mrcs
+Loading ctf params from /home/mae2183/cryoem-classification/results_cryodrgn/J1442_real/inputs/ctf.pkl
+HetOnlyVAE(
+  (encoder): ResidLinearMLP(
+    (main): Sequential(
+      (0): MyLinear(in_features=51432, out_features=1024, bias=True)
+      (1): ReLU()
+      (2): ResidLinear(
+        (linear): MyLinear(in_features=1024, out_features=1024, bias=True)
+      )
+      (3): ReLU()
+      (4): ResidLinear(
+        (linear): MyLinear(in_features=1024, out_features=1024, bias=True)
+      )
+      (5): ReLU()
+      (6): ResidLinear(
+        (linear): MyLinear(in_features=1024, out_features=1024, bias=True)
+      )
+      (7): ReLU()
+      (8): MyLinear(in_features=1024, out_features=20, bias=True)
+    )
+  )
+  (decoder): FTPositionalDecoder(
+    (decoder): ResidLinearMLP(
+      (main): Sequential(
+        (0): MyLinear(in_features=778, out_features=1024, bias=True)
+        (1): ReLU()
+        (2): ResidLinear(
+          (linear): MyLinear(in_features=1024, out_features=1024, bias=True)
+        )
+        (3): ReLU()
+        (4): ResidLinear(
+          (linear): MyLinear(in_features=1024, out_features=1024, bias=True)
+        )
+        (5): ReLU()
+        (6): ResidLinear(
+          (linear): MyLinear(in_features=1024, out_features=1024, bias=True)
+        )
+        (7): ReLU()
+        (8): MyLinear(in_features=1024, out_features=2, bias=True)
+      )
+    )
+  )
+)
+59785238 parameters in model
+55836692 parameters in encoder
+3948546 parameters in decoder
+Using 0 workers for data loading

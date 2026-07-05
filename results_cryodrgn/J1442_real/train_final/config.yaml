@@ -1,13 +1,13 @@
 cmd:
 - /home/mae2183/miniconda3/envs/cryodrgn/bin/cryodrgn
 - train_vae
-- results_cryodrgn/J264_real/inputs/particles.256.mrcs
+- results_cryodrgn/J1442_real/inputs/particles.256.mrcs
 - --poses
-- results_cryodrgn/J264_real/inputs/poses.pkl
+- results_cryodrgn/J1442_real/inputs/poses.pkl
 - --ctf
-- results_cryodrgn/J264_real/inputs/ctf.pkl
+- results_cryodrgn/J1442_real/inputs/ctf.pkl
 - --ind
-- results_cryodrgn/J264_real/inputs/ind_keep.pkl
+- results_cryodrgn/J1442_real/inputs/ind_keep.pkl
 - --zdim
 - '10'
 - -n
@@ -21,8 +21,6 @@ cmd:
 - --dec-layers
 - '3'
 - --no-amp
-- --num-workers
-- '16'
 - --batch-size
 - '32'
 - --checkpoint
@@ -30,19 +28,19 @@ cmd:
 - --log-interval
 - '5000'
 - -o
-- results_cryodrgn/J264_real/train_final
+- results_cryodrgn/J1442_real/train_final
 dataset_args:
-  ctf: /home/mae2183/cryoem-classification/results_cryodrgn/J264_real/inputs/ctf.pkl
+  ctf: /home/mae2183/cryoem-classification/results_cryodrgn/J1442_real/inputs/ctf.pkl
   datadir: null
   do_pose_sgd: false
-  ind: /home/mae2183/cryoem-classification/results_cryodrgn/J264_real/inputs/ind_keep.pkl
+  ind: /home/mae2183/cryoem-classification/results_cryodrgn/J1442_real/inputs/ind_keep.pkl
   invert_data: true
   keepreal: false
   norm:
   - 0.0
-  - 106.52123260498047
-  particles: /home/mae2183/cryoem-classification/results_cryodrgn/J264_real/inputs/particles.256.mrcs
-  poses: /home/mae2183/cryoem-classification/results_cryodrgn/J264_real/inputs/poses.pkl
+  - 103.7168960571289
+  particles: /home/mae2183/cryoem-classification/results_cryodrgn/J1442_real/inputs/particles.256.mrcs
+  poses: /home/mae2183/cryoem-classification/results_cryodrgn/J1442_real/inputs/poses.pkl
   window: true
   window_r: 0.85
 lattice_args:
@@ -67,6 +65,6 @@ model_args:
     tdim: 1024
     tlayers: 3
   zdim: 10
-seed: 16065
-time: 2026-07-03 16:23:31.929631
+seed: 64804
+time: 2026-07-05 19:40:56.503112
 version: 4.3.0
