@@ -6,8 +6,6 @@ cmd:
 - results_cryodrgn/J264_real/inputs/poses.pkl
 - --ctf
 - results_cryodrgn/J264_real/inputs/ctf.pkl
-- --ind
-- results_cryodrgn/J264_real/inputs/ind_keep.pkl
 - --zdim
 - '10'
 - -n
@@ -21,26 +19,24 @@ cmd:
 - --dec-layers
 - '3'
 - --no-amp
-- --num-workers
-- '16'
 - --batch-size
-- '32'
+- '24'
 - --checkpoint
 - '5'
 - --log-interval
 - '5000'
 - -o
-- results_cryodrgn/J264_real/train_final
+- results_cryodrgn/J264_real/train_fullset
 dataset_args:
   ctf: /home/mae2183/cryoem-classification/results_cryodrgn/J264_real/inputs/ctf.pkl
   datadir: null
   do_pose_sgd: false
-  ind: /home/mae2183/cryoem-classification/results_cryodrgn/J264_real/inputs/ind_keep.pkl
+  ind: null
   invert_data: true
   keepreal: false
   norm:
   - 0.0
-  - 106.52123260498047
+  - 106.50198364257812
   particles: /home/mae2183/cryoem-classification/results_cryodrgn/J264_real/inputs/particles.256.mrcs
   poses: /home/mae2183/cryoem-classification/results_cryodrgn/J264_real/inputs/poses.pkl
   window: true
@@ -67,6 +63,6 @@ model_args:
     tdim: 1024
     tlayers: 3
   zdim: 10
-seed: 16065
-time: 2026-07-03 16:23:31.929631
+seed: 28837
+time: 2026-07-03 16:42:01.355383
 version: 4.3.0

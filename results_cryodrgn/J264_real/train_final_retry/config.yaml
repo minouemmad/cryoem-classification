@@ -10,8 +10,6 @@ cmd:
 - results_cryodrgn/J264_real/inputs/ind_keep.pkl
 - --zdim
 - '10'
-- -n
-- '100'
 - --enc-dim
 - '1024'
 - --enc-layers
@@ -21,16 +19,21 @@ cmd:
 - --dec-layers
 - '3'
 - --no-amp
+- --load
+- results_cryodrgn/J264_real/train_final_retry/weights.20.pkl
+- -n
+- '50'
+- --lazy
 - --num-workers
-- '16'
+- '4'
 - --batch-size
-- '32'
+- '64'
 - --checkpoint
 - '5'
 - --log-interval
 - '5000'
 - -o
-- results_cryodrgn/J264_real/train_final
+- results_cryodrgn/J264_real/train_final_retry
 dataset_args:
   ctf: /home/mae2183/cryoem-classification/results_cryodrgn/J264_real/inputs/ctf.pkl
   datadir: null
@@ -67,6 +70,6 @@ model_args:
     tdim: 1024
     tlayers: 3
   zdim: 10
-seed: 16065
-time: 2026-07-03 16:23:31.929631
+seed: 21879
+time: 2026-07-06 12:40:46.627083
 version: 4.3.0

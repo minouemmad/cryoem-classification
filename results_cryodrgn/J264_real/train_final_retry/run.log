@@ -1,0 +1,1387 @@
+/home/mae2183/miniconda3/envs/cryodrgn/bin/cryodrgn train_vae results_cryodrgn/J264_real/inputs/particles.256.mrcs --poses results_cryodrgn/J264_real/inputs/poses.pkl --ctf results_cryodrgn/J264_real/inputs/ctf.pkl --ind results_cryodrgn/J264_real/inputs/ind_keep.pkl --zdim 10 -n 100 --enc-dim 1024 --enc-layers 3 --dec-dim 1024 --dec-layers 3 --no-amp --num-workers 0 --batch-size 32 --checkpoint 5 --log-interval 5000 -o results_cryodrgn/J264_real/train_final_retry
+cryoDRGN 4.3.0
+Namespace(particles='/home/mae2183/cryoem-classification/results_cryodrgn/J264_real/inputs/particles.256.mrcs', outdir='/home/mae2183/cryoem-classification/results_cryodrgn/J264_real/train_final_retry', zdim=10, poses='/home/mae2183/cryoem-classification/results_cryodrgn/J264_real/inputs/poses.pkl', ctf='/home/mae2183/cryoem-classification/results_cryodrgn/J264_real/inputs/ctf.pkl', load=None, do_analysis=True, checkpoint=5, log_interval=5000, verbose=False, seed=65845, shuffle_seed=None, ind='/home/mae2183/cryoem-classification/results_cryodrgn/J264_real/inputs/ind_keep.pkl', invert_data=True, window=True, window_r=0.85, datadir=None, lazy=False, shuffler_size=0, num_workers=0, max_threads=16, ntilts=10, random_tilts=False, t_emb_dim=64, tlayers=3, tdim=1024, dose_per_tilt=None, angle_per_tilt=3, num_epochs=100, batch_size=32, wd=0, lr=0.0001, beta=None, beta_control=None, norm=None, amp=False, multigpu=False, do_pose_sgd=False, pretrain=1, emb_type='quat', pose_lr=0.0003, qlayers=3, qdim=1024, encode_mode='resid', enc_mask=None, use_real=False, players=3, pdim=1024, pe_type='gaussian', feat_sigma=0.5, pe_dim=None, domain='fourier', activation='relu', func=<function main at 0x72ff1ddce8c0>)
+Use cuda True
+Filtering image dataset with /home/mae2183/cryoem-classification/results_cryodrgn/J264_real/inputs/ind_keep.pkl
+Loading dataset from /home/mae2183/cryoem-classification/results_cryodrgn/J264_real/inputs/particles.256.mrcs
+Loading ctf params from /home/mae2183/cryoem-classification/results_cryodrgn/J264_real/inputs/ctf.pkl
+HetOnlyVAE(
+  (encoder): ResidLinearMLP(
+    (main): Sequential(
+      (0): MyLinear(in_features=51432, out_features=1024, bias=True)
+      (1): ReLU()
+      (2): ResidLinear(
+        (linear): MyLinear(in_features=1024, out_features=1024, bias=True)
+      )
+      (3): ReLU()
+      (4): ResidLinear(
+        (linear): MyLinear(in_features=1024, out_features=1024, bias=True)
+      )
+      (5): ReLU()
+      (6): ResidLinear(
+        (linear): MyLinear(in_features=1024, out_features=1024, bias=True)
+      )
+      (7): ReLU()
+      (8): MyLinear(in_features=1024, out_features=20, bias=True)
+    )
+  )
+  (decoder): FTPositionalDecoder(
+    (decoder): ResidLinearMLP(
+      (main): Sequential(
+        (0): MyLinear(in_features=778, out_features=1024, bias=True)
+        (1): ReLU()
+        (2): ResidLinear(
+          (linear): MyLinear(in_features=1024, out_features=1024, bias=True)
+        )
+        (3): ReLU()
+        (4): ResidLinear(
+          (linear): MyLinear(in_features=1024, out_features=1024, bias=True)
+        )
+        (5): ReLU()
+        (6): ResidLinear(
+          (linear): MyLinear(in_features=1024, out_features=1024, bias=True)
+        )
+        (7): ReLU()
+        (8): MyLinear(in_features=1024, out_features=2, bias=True)
+      )
+    )
+  )
+)
+59785238 parameters in model
+55836692 parameters in encoder
+3948546 parameters in decoder
+Using 0 workers for data loading
+/home/mae2183/miniconda3/envs/cryodrgn/bin/cryodrgn train_vae results_cryodrgn/J264_real/inputs/particles.256.mrcs --poses results_cryodrgn/J264_real/inputs/poses.pkl --ctf results_cryodrgn/J264_real/inputs/ctf.pkl --ind results_cryodrgn/J264_real/inputs/ind_keep.pkl --zdim 10 -n 100 --enc-dim 1024 --enc-layers 3 --dec-dim 1024 --dec-layers 3 --no-amp --batch-size 32 --checkpoint 5 --log-interval 5000 -o results_cryodrgn/J264_real/train_final_retry
+cryoDRGN 4.3.0
+Namespace(particles='/home/mae2183/cryoem-classification/results_cryodrgn/J264_real/inputs/particles.256.mrcs', outdir='/home/mae2183/cryoem-classification/results_cryodrgn/J264_real/train_final_retry', zdim=10, poses='/home/mae2183/cryoem-classification/results_cryodrgn/J264_real/inputs/poses.pkl', ctf='/home/mae2183/cryoem-classification/results_cryodrgn/J264_real/inputs/ctf.pkl', load=None, do_analysis=True, checkpoint=5, log_interval=5000, verbose=False, seed=40062, shuffle_seed=None, ind='/home/mae2183/cryoem-classification/results_cryodrgn/J264_real/inputs/ind_keep.pkl', invert_data=True, window=True, window_r=0.85, datadir=None, lazy=False, shuffler_size=0, num_workers=None, max_threads=16, ntilts=10, random_tilts=False, t_emb_dim=64, tlayers=3, tdim=1024, dose_per_tilt=None, angle_per_tilt=3, num_epochs=100, batch_size=32, wd=0, lr=0.0001, beta=None, beta_control=None, norm=None, amp=False, multigpu=False, do_pose_sgd=False, pretrain=1, emb_type='quat', pose_lr=0.0003, qlayers=3, qdim=1024, encode_mode='resid', enc_mask=None, use_real=False, players=3, pdim=1024, pe_type='gaussian', feat_sigma=0.5, pe_dim=None, domain='fourier', activation='relu', func=<function main at 0x784b236028c0>)
+Use cuda True
+Filtering image dataset with /home/mae2183/cryoem-classification/results_cryodrgn/J264_real/inputs/ind_keep.pkl
+Loading dataset from /home/mae2183/cryoem-classification/results_cryodrgn/J264_real/inputs/particles.256.mrcs
+Loading ctf params from /home/mae2183/cryoem-classification/results_cryodrgn/J264_real/inputs/ctf.pkl
+HetOnlyVAE(
+  (encoder): ResidLinearMLP(
+    (main): Sequential(
+      (0): MyLinear(in_features=51432, out_features=1024, bias=True)
+      (1): ReLU()
+      (2): ResidLinear(
+        (linear): MyLinear(in_features=1024, out_features=1024, bias=True)
+      )
+      (3): ReLU()
+      (4): ResidLinear(
+        (linear): MyLinear(in_features=1024, out_features=1024, bias=True)
+      )
+      (5): ReLU()
+      (6): ResidLinear(
+        (linear): MyLinear(in_features=1024, out_features=1024, bias=True)
+      )
+      (7): ReLU()
+      (8): MyLinear(in_features=1024, out_features=20, bias=True)
+    )
+  )
+  (decoder): FTPositionalDecoder(
+    (decoder): ResidLinearMLP(
+      (main): Sequential(
+        (0): MyLinear(in_features=778, out_features=1024, bias=True)
+        (1): ReLU()
+        (2): ResidLinear(
+          (linear): MyLinear(in_features=1024, out_features=1024, bias=True)
+        )
+        (3): ReLU()
+        (4): ResidLinear(
+          (linear): MyLinear(in_features=1024, out_features=1024, bias=True)
+        )
+        (5): ReLU()
+        (6): ResidLinear(
+          (linear): MyLinear(in_features=1024, out_features=1024, bias=True)
+        )
+        (7): ReLU()
+        (8): MyLinear(in_features=1024, out_features=2, bias=True)
+      )
+    )
+  )
+)
+59785238 parameters in model
+55836692 parameters in encoder
+3948546 parameters in decoder
+Using 0 workers for data loading
+# [Train Epoch: 1/100] [5024/220643 particles] gen loss=0.509006, kld=7.617824, beta=0.100000, loss=0.509021
+# [Train Epoch: 1/100] [10016/220643 particles] gen loss=0.499585, kld=10.271397, beta=0.100000, loss=0.499605
+# [Train Epoch: 1/100] [15008/220643 particles] gen loss=0.500503, kld=9.705633, beta=0.100000, loss=0.500522
+# [Train Epoch: 1/100] [20000/220643 particles] gen loss=0.505601, kld=9.205906, beta=0.100000, loss=0.505619
+# [Train Epoch: 1/100] [25024/220643 particles] gen loss=0.501812, kld=8.116784, beta=0.100000, loss=0.501827
+# [Train Epoch: 1/100] [30016/220643 particles] gen loss=0.501079, kld=7.653908, beta=0.100000, loss=0.501094
+# [Train Epoch: 1/100] [35008/220643 particles] gen loss=0.496162, kld=6.824023, beta=0.100000, loss=0.496175
+# [Train Epoch: 1/100] [40000/220643 particles] gen loss=0.499084, kld=6.342789, beta=0.100000, loss=0.499096
+# [Train Epoch: 1/100] [45024/220643 particles] gen loss=0.499255, kld=5.680330, beta=0.100000, loss=0.499266
+# [Train Epoch: 1/100] [50016/220643 particles] gen loss=0.498235, kld=5.328920, beta=0.100000, loss=0.498245
+# [Train Epoch: 1/100] [55008/220643 particles] gen loss=0.495616, kld=5.020854, beta=0.100000, loss=0.495626
+# [Train Epoch: 1/100] [60000/220643 particles] gen loss=0.497583, kld=4.332923, beta=0.100000, loss=0.497592
+# [Train Epoch: 1/100] [65024/220643 particles] gen loss=0.498493, kld=4.081149, beta=0.100000, loss=0.498501
+# [Train Epoch: 1/100] [70016/220643 particles] gen loss=0.499521, kld=3.722761, beta=0.100000, loss=0.499529
+# [Train Epoch: 1/100] [75008/220643 particles] gen loss=0.498397, kld=3.574386, beta=0.100000, loss=0.498404
+# [Train Epoch: 1/100] [80000/220643 particles] gen loss=0.497735, kld=3.323243, beta=0.100000, loss=0.497741
+# [Train Epoch: 1/100] [85024/220643 particles] gen loss=0.499887, kld=2.985911, beta=0.100000, loss=0.499893
+# [Train Epoch: 1/100] [90016/220643 particles] gen loss=0.501515, kld=2.813406, beta=0.100000, loss=0.501520
+# [Train Epoch: 1/100] [95008/220643 particles] gen loss=0.502799, kld=2.592336, beta=0.100000, loss=0.502804
+# [Train Epoch: 1/100] [100000/220643 particles] gen loss=0.499545, kld=2.215621, beta=0.100000, loss=0.499549
+# [Train Epoch: 1/100] [105024/220643 particles] gen loss=0.497547, kld=2.109103, beta=0.100000, loss=0.497551
+# [Train Epoch: 1/100] [110016/220643 particles] gen loss=0.495628, kld=1.782285, beta=0.100000, loss=0.495631
+# [Train Epoch: 1/100] [115008/220643 particles] gen loss=0.498475, kld=1.700068, beta=0.100000, loss=0.498478
+# [Train Epoch: 1/100] [120000/220643 particles] gen loss=0.501402, kld=1.638739, beta=0.100000, loss=0.501405
+# [Train Epoch: 1/100] [125024/220643 particles] gen loss=0.503978, kld=1.499101, beta=0.100000, loss=0.503981
+# [Train Epoch: 1/100] [130016/220643 particles] gen loss=0.498562, kld=1.177734, beta=0.100000, loss=0.498564
+# [Train Epoch: 1/100] [135008/220643 particles] gen loss=0.496567, kld=1.277458, beta=0.100000, loss=0.496569
+# [Train Epoch: 1/100] [140000/220643 particles] gen loss=0.497087, kld=1.020159, beta=0.100000, loss=0.497089
+# [Train Epoch: 1/100] [145024/220643 particles] gen loss=0.499351, kld=1.035169, beta=0.100000, loss=0.499353
+# [Train Epoch: 1/100] [150016/220643 particles] gen loss=0.496367, kld=0.858786, beta=0.100000, loss=0.496369
+# [Train Epoch: 1/100] [155008/220643 particles] gen loss=0.497761, kld=0.918255, beta=0.100000, loss=0.497762
+# [Train Epoch: 1/100] [160000/220643 particles] gen loss=0.509125, kld=0.856979, beta=0.100000, loss=0.509127
+# [Train Epoch: 1/100] [165024/220643 particles] gen loss=0.504803, kld=0.684676, beta=0.100000, loss=0.504804
+# [Train Epoch: 1/100] [170016/220643 particles] gen loss=0.497312, kld=0.569306, beta=0.100000, loss=0.497313
+# [Train Epoch: 1/100] [175008/220643 particles] gen loss=0.501225, kld=0.499572, beta=0.100000, loss=0.501226
+# [Train Epoch: 1/100] [180000/220643 particles] gen loss=0.500596, kld=0.499001, beta=0.100000, loss=0.500597
+# [Train Epoch: 1/100] [185024/220643 particles] gen loss=0.496666, kld=0.472049, beta=0.100000, loss=0.496666
+# [Train Epoch: 1/100] [190016/220643 particles] gen loss=0.501055, kld=0.395573, beta=0.100000, loss=0.501056
+# [Train Epoch: 1/100] [195008/220643 particles] gen loss=0.496971, kld=0.377366, beta=0.100000, loss=0.496972
+# [Train Epoch: 1/100] [200000/220643 particles] gen loss=0.496609, kld=0.340013, beta=0.100000, loss=0.496610
+# [Train Epoch: 1/100] [205024/220643 particles] gen loss=0.497615, kld=0.323706, beta=0.100000, loss=0.497615
+# [Train Epoch: 1/100] [210016/220643 particles] gen loss=0.499617, kld=0.331512, beta=0.100000, loss=0.499617
+# [Train Epoch: 1/100] [215008/220643 particles] gen loss=0.501287, kld=0.277433, beta=0.100000, loss=0.501287
+# [Train Epoch: 1/100] [220000/220643 particles] gen loss=0.502451, kld=0.208746, beta=0.100000, loss=0.502451
+# =====> Epoch: 1 Average gen loss = 0.499337, KLD = 3.026687, total loss = 0.499343; Finished in 2:39:41.853708
+# [Train Epoch: 2/100] [5024/220643 particles] gen loss=0.494475, kld=0.553606, beta=0.100000, loss=0.494476
+# [Train Epoch: 2/100] [10016/220643 particles] gen loss=0.497246, kld=0.496008, beta=0.100000, loss=0.497247
+# [Train Epoch: 2/100] [15008/220643 particles] gen loss=0.497850, kld=0.605994, beta=0.100000, loss=0.497851
+# [Train Epoch: 2/100] [20000/220643 particles] gen loss=0.494509, kld=0.571228, beta=0.100000, loss=0.494510
+# [Train Epoch: 2/100] [25024/220643 particles] gen loss=0.497548, kld=0.587749, beta=0.100000, loss=0.497549
+# [Train Epoch: 2/100] [30016/220643 particles] gen loss=0.494212, kld=0.529754, beta=0.100000, loss=0.494213
+# [Train Epoch: 2/100] [35008/220643 particles] gen loss=0.492968, kld=0.589779, beta=0.100000, loss=0.492970
+# [Train Epoch: 2/100] [40000/220643 particles] gen loss=0.493604, kld=0.554574, beta=0.100000, loss=0.493605
+# [Train Epoch: 2/100] [45024/220643 particles] gen loss=0.500291, kld=0.611712, beta=0.100000, loss=0.500292
+# [Train Epoch: 2/100] [50016/220643 particles] gen loss=0.504122, kld=0.589636, beta=0.100000, loss=0.504123
+# [Train Epoch: 2/100] [55008/220643 particles] gen loss=0.496005, kld=0.614506, beta=0.100000, loss=0.496006
+# [Train Epoch: 2/100] [60000/220643 particles] gen loss=0.503184, kld=0.589030, beta=0.100000, loss=0.503185
+# [Train Epoch: 2/100] [65024/220643 particles] gen loss=0.499268, kld=0.564072, beta=0.100000, loss=0.499269
+# [Train Epoch: 2/100] [70016/220643 particles] gen loss=0.502807, kld=0.530822, beta=0.100000, loss=0.502808
+# [Train Epoch: 2/100] [75008/220643 particles] gen loss=0.501568, kld=0.504224, beta=0.100000, loss=0.501569
+# [Train Epoch: 2/100] [80000/220643 particles] gen loss=0.496525, kld=0.452380, beta=0.100000, loss=0.496525
+# [Train Epoch: 2/100] [85024/220643 particles] gen loss=0.496035, kld=0.727560, beta=0.100000, loss=0.496036
+# [Train Epoch: 2/100] [90016/220643 particles] gen loss=0.497994, kld=0.630132, beta=0.100000, loss=0.497995
+# [Train Epoch: 2/100] [95008/220643 particles] gen loss=0.496919, kld=0.733014, beta=0.100000, loss=0.496921
+# [Train Epoch: 2/100] [100000/220643 particles] gen loss=0.494323, kld=0.725765, beta=0.100000, loss=0.494325
+# [Train Epoch: 2/100] [105024/220643 particles] gen loss=0.498218, kld=0.911042, beta=0.100000, loss=0.498220
+# [Train Epoch: 2/100] [110016/220643 particles] gen loss=0.498863, kld=0.869631, beta=0.100000, loss=0.498864
+# [Train Epoch: 2/100] [115008/220643 particles] gen loss=0.505635, kld=0.828936, beta=0.100000, loss=0.505636
+# [Train Epoch: 2/100] [120000/220643 particles] gen loss=0.499352, kld=0.756263, beta=0.100000, loss=0.499353
+# [Train Epoch: 2/100] [125024/220643 particles] gen loss=0.502978, kld=0.857756, beta=0.100000, loss=0.502980
+# [Train Epoch: 2/100] [130016/220643 particles] gen loss=0.495590, kld=1.081142, beta=0.100000, loss=0.495592
+# [Train Epoch: 2/100] [135008/220643 particles] gen loss=0.494989, kld=1.075062, beta=0.100000, loss=0.494991
+# [Train Epoch: 2/100] [140000/220643 particles] gen loss=0.496708, kld=1.400668, beta=0.100000, loss=0.496711
+# [Train Epoch: 2/100] [145024/220643 particles] gen loss=0.504107, kld=1.040739, beta=0.100000, loss=0.504109
+# [Train Epoch: 2/100] [150016/220643 particles] gen loss=0.503032, kld=1.214911, beta=0.100000, loss=0.503035
+# [Train Epoch: 2/100] [155008/220643 particles] gen loss=0.499471, kld=1.684547, beta=0.100000, loss=0.499474
+# [Train Epoch: 2/100] [160000/220643 particles] gen loss=0.496345, kld=1.428843, beta=0.100000, loss=0.496347
+# [Train Epoch: 2/100] [165024/220643 particles] gen loss=0.500309, kld=1.450047, beta=0.100000, loss=0.500312
+# [Train Epoch: 2/100] [170016/220643 particles] gen loss=0.502521, kld=1.321519, beta=0.100000, loss=0.502523
+# [Train Epoch: 2/100] [175008/220643 particles] gen loss=0.496332, kld=2.009459, beta=0.100000, loss=0.496336
+# [Train Epoch: 2/100] [180000/220643 particles] gen loss=0.499653, kld=1.666412, beta=0.100000, loss=0.499656
+# [Train Epoch: 2/100] [185024/220643 particles] gen loss=0.501392, kld=1.687409, beta=0.100000, loss=0.501395
+# [Train Epoch: 2/100] [190016/220643 particles] gen loss=0.498908, kld=2.104142, beta=0.100000, loss=0.498912
+# [Train Epoch: 2/100] [195008/220643 particles] gen loss=0.500879, kld=3.430258, beta=0.100000, loss=0.500885
+# [Train Epoch: 2/100] [200000/220643 particles] gen loss=0.502191, kld=3.006843, beta=0.100000, loss=0.502197
+# [Train Epoch: 2/100] [205024/220643 particles] gen loss=0.493630, kld=2.866318, beta=0.100000, loss=0.493635
+# [Train Epoch: 2/100] [210016/220643 particles] gen loss=0.500778, kld=3.377006, beta=0.100000, loss=0.500784
+# [Train Epoch: 2/100] [215008/220643 particles] gen loss=0.499362, kld=2.847478, beta=0.100000, loss=0.499368
+# [Train Epoch: 2/100] [220000/220643 particles] gen loss=0.494732, kld=2.422127, beta=0.100000, loss=0.494737
+# =====> Epoch: 2 Average gen loss = 0.498994, KLD = 1.146565, total loss = 0.498996; Finished in 2:45:57.996081
+# [Train Epoch: 3/100] [5024/220643 particles] gen loss=0.502383, kld=6.286562, beta=0.100000, loss=0.502395
+# [Train Epoch: 3/100] [10016/220643 particles] gen loss=0.495458, kld=3.282612, beta=0.100000, loss=0.495465
+# [Train Epoch: 3/100] [15008/220643 particles] gen loss=0.495005, kld=4.334665, beta=0.100000, loss=0.495014
+# [Train Epoch: 3/100] [20000/220643 particles] gen loss=0.498933, kld=5.797338, beta=0.100000, loss=0.498944
+# [Train Epoch: 3/100] [25024/220643 particles] gen loss=0.499363, kld=7.778124, beta=0.100000, loss=0.499378
+# [Train Epoch: 3/100] [30016/220643 particles] gen loss=0.494905, kld=5.421043, beta=0.100000, loss=0.494915
+# [Train Epoch: 3/100] [35008/220643 particles] gen loss=0.500382, kld=4.646481, beta=0.100000, loss=0.500391
+# [Train Epoch: 3/100] [40000/220643 particles] gen loss=0.506165, kld=5.304266, beta=0.100000, loss=0.506175
+# [Train Epoch: 3/100] [45024/220643 particles] gen loss=0.500350, kld=4.150793, beta=0.100000, loss=0.500359
+# [Train Epoch: 3/100] [50016/220643 particles] gen loss=0.498781, kld=4.903643, beta=0.100000, loss=0.498791
+# [Train Epoch: 3/100] [55008/220643 particles] gen loss=0.504214, kld=4.558648, beta=0.100000, loss=0.504223
+# [Train Epoch: 3/100] [60000/220643 particles] gen loss=0.503118, kld=3.975030, beta=0.100000, loss=0.503125
+# [Train Epoch: 3/100] [65024/220643 particles] gen loss=0.494634, kld=4.770604, beta=0.100000, loss=0.494643
+# [Train Epoch: 3/100] [70016/220643 particles] gen loss=0.495549, kld=8.562740, beta=0.100000, loss=0.495565
+# [Train Epoch: 3/100] [75008/220643 particles] gen loss=0.502696, kld=4.735766, beta=0.100000, loss=0.502705
+# [Train Epoch: 3/100] [80000/220643 particles] gen loss=0.496605, kld=6.202344, beta=0.100000, loss=0.496617
+# [Train Epoch: 3/100] [85024/220643 particles] gen loss=0.501402, kld=5.994715, beta=0.100000, loss=0.501414
+# [Train Epoch: 3/100] [90016/220643 particles] gen loss=0.501774, kld=5.722524, beta=0.100000, loss=0.501785
+# [Train Epoch: 3/100] [95008/220643 particles] gen loss=0.501576, kld=4.959651, beta=0.100000, loss=0.501585
+# [Train Epoch: 3/100] [100000/220643 particles] gen loss=0.497539, kld=4.701893, beta=0.100000, loss=0.497548
+# [Train Epoch: 3/100] [105024/220643 particles] gen loss=0.502686, kld=4.819270, beta=0.100000, loss=0.502696
+# [Train Epoch: 3/100] [110016/220643 particles] gen loss=0.505046, kld=4.859807, beta=0.100000, loss=0.505055
+# [Train Epoch: 3/100] [115008/220643 particles] gen loss=0.493201, kld=4.730174, beta=0.100000, loss=0.493211
+# [Train Epoch: 3/100] [120000/220643 particles] gen loss=0.490623, kld=5.576830, beta=0.100000, loss=0.490634
+# [Train Epoch: 3/100] [125024/220643 particles] gen loss=0.498635, kld=5.375620, beta=0.100000, loss=0.498645
+# [Train Epoch: 3/100] [130016/220643 particles] gen loss=0.499437, kld=5.038156, beta=0.100000, loss=0.499447
+# [Train Epoch: 3/100] [135008/220643 particles] gen loss=0.493416, kld=5.598956, beta=0.100000, loss=0.493426
+# [Train Epoch: 3/100] [140000/220643 particles] gen loss=0.497708, kld=6.040208, beta=0.100000, loss=0.497720
+# [Train Epoch: 3/100] [145024/220643 particles] gen loss=0.496401, kld=4.911334, beta=0.100000, loss=0.496410
+# [Train Epoch: 3/100] [150016/220643 particles] gen loss=0.500121, kld=6.672340, beta=0.100000, loss=0.500134
+# [Train Epoch: 3/100] [155008/220643 particles] gen loss=0.498733, kld=5.535688, beta=0.100000, loss=0.498744
+# [Train Epoch: 3/100] [160000/220643 particles] gen loss=0.504033, kld=7.039301, beta=0.100000, loss=0.504046
+# [Train Epoch: 3/100] [165024/220643 particles] gen loss=0.498308, kld=6.540290, beta=0.100000, loss=0.498321
+# [Train Epoch: 3/100] [170016/220643 particles] gen loss=0.501557, kld=5.350485, beta=0.100000, loss=0.501568
+# [Train Epoch: 3/100] [175008/220643 particles] gen loss=0.506862, kld=7.297614, beta=0.100000, loss=0.506876
+# [Train Epoch: 3/100] [180000/220643 particles] gen loss=0.499720, kld=5.154659, beta=0.100000, loss=0.499730
+# [Train Epoch: 3/100] [185024/220643 particles] gen loss=0.494792, kld=5.469281, beta=0.100000, loss=0.494802
+# [Train Epoch: 3/100] [190016/220643 particles] gen loss=0.498292, kld=5.756590, beta=0.100000, loss=0.498303
+# [Train Epoch: 3/100] [195008/220643 particles] gen loss=0.501019, kld=5.608447, beta=0.100000, loss=0.501030
+# [Train Epoch: 3/100] [200000/220643 particles] gen loss=0.500677, kld=5.254203, beta=0.100000, loss=0.500687
+# [Train Epoch: 3/100] [205024/220643 particles] gen loss=0.502201, kld=5.324220, beta=0.100000, loss=0.502211
+# [Train Epoch: 3/100] [210016/220643 particles] gen loss=0.498923, kld=5.409090, beta=0.100000, loss=0.498934
+# [Train Epoch: 3/100] [215008/220643 particles] gen loss=0.497383, kld=5.458683, beta=0.100000, loss=0.497393
+# [Train Epoch: 3/100] [220000/220643 particles] gen loss=0.502045, kld=6.024346, beta=0.100000, loss=0.502057
+# =====> Epoch: 3 Average gen loss = 0.498917, KLD = 5.258581, total loss = 0.498927; Finished in 2:45:01.382132
+# [Train Epoch: 4/100] [5024/220643 particles] gen loss=0.495962, kld=7.016844, beta=0.100000, loss=0.495976
+# [Train Epoch: 4/100] [10016/220643 particles] gen loss=0.489599, kld=6.607605, beta=0.100000, loss=0.489612
+# [Train Epoch: 4/100] [15008/220643 particles] gen loss=0.504719, kld=5.938073, beta=0.100000, loss=0.504731
+# [Train Epoch: 4/100] [20000/220643 particles] gen loss=0.496198, kld=6.336997, beta=0.100000, loss=0.496210
+# [Train Epoch: 4/100] [25024/220643 particles] gen loss=0.495403, kld=6.333116, beta=0.100000, loss=0.495415
+# [Train Epoch: 4/100] [30016/220643 particles] gen loss=0.503903, kld=5.267524, beta=0.100000, loss=0.503913
+# [Train Epoch: 4/100] [35008/220643 particles] gen loss=0.502724, kld=6.456450, beta=0.100000, loss=0.502737
+# [Train Epoch: 4/100] [40000/220643 particles] gen loss=0.497686, kld=6.887091, beta=0.100000, loss=0.497700
+# [Train Epoch: 4/100] [45024/220643 particles] gen loss=0.504740, kld=5.980917, beta=0.100000, loss=0.504752
+# [Train Epoch: 4/100] [50016/220643 particles] gen loss=0.503115, kld=7.063608, beta=0.100000, loss=0.503129
+# [Train Epoch: 4/100] [55008/220643 particles] gen loss=0.500573, kld=4.684345, beta=0.100000, loss=0.500582
+# [Train Epoch: 4/100] [60000/220643 particles] gen loss=0.496519, kld=5.652949, beta=0.100000, loss=0.496530
+# [Train Epoch: 4/100] [65024/220643 particles] gen loss=0.500116, kld=5.886814, beta=0.100000, loss=0.500128
+# [Train Epoch: 4/100] [70016/220643 particles] gen loss=0.501131, kld=6.366001, beta=0.100000, loss=0.501143
+# [Train Epoch: 4/100] [75008/220643 particles] gen loss=0.495555, kld=6.286614, beta=0.100000, loss=0.495567
+# [Train Epoch: 4/100] [80000/220643 particles] gen loss=0.504199, kld=6.100916, beta=0.100000, loss=0.504211
+# [Train Epoch: 4/100] [85024/220643 particles] gen loss=0.500745, kld=5.917497, beta=0.100000, loss=0.500756
+# [Train Epoch: 4/100] [90016/220643 particles] gen loss=0.503881, kld=6.139313, beta=0.100000, loss=0.503893
+# [Train Epoch: 4/100] [95008/220643 particles] gen loss=0.499719, kld=6.635194, beta=0.100000, loss=0.499732
+# [Train Epoch: 4/100] [100000/220643 particles] gen loss=0.496720, kld=6.702143, beta=0.100000, loss=0.496733
+# [Train Epoch: 4/100] [105024/220643 particles] gen loss=0.495984, kld=5.924201, beta=0.100000, loss=0.495995
+# [Train Epoch: 4/100] [110016/220643 particles] gen loss=0.502044, kld=5.483051, beta=0.100000, loss=0.502055
+# [Train Epoch: 4/100] [115008/220643 particles] gen loss=0.499906, kld=6.340568, beta=0.100000, loss=0.499918
+# [Train Epoch: 4/100] [120000/220643 particles] gen loss=0.501122, kld=7.053893, beta=0.100000, loss=0.501136
+# [Train Epoch: 4/100] [125024/220643 particles] gen loss=0.504440, kld=5.907003, beta=0.100000, loss=0.504451
+# [Train Epoch: 4/100] [130016/220643 particles] gen loss=0.498087, kld=5.570597, beta=0.100000, loss=0.498098
+# [Train Epoch: 4/100] [135008/220643 particles] gen loss=0.498804, kld=6.438540, beta=0.100000, loss=0.498817
+# [Train Epoch: 4/100] [140000/220643 particles] gen loss=0.491465, kld=7.781718, beta=0.100000, loss=0.491481
+# [Train Epoch: 4/100] [145024/220643 particles] gen loss=0.498412, kld=6.963453, beta=0.100000, loss=0.498426
+# [Train Epoch: 4/100] [150016/220643 particles] gen loss=0.495526, kld=6.895332, beta=0.100000, loss=0.495540
+# [Train Epoch: 4/100] [155008/220643 particles] gen loss=0.494584, kld=6.040846, beta=0.100000, loss=0.494596
+# [Train Epoch: 4/100] [160000/220643 particles] gen loss=0.491904, kld=7.072676, beta=0.100000, loss=0.491918
+# [Train Epoch: 4/100] [165024/220643 particles] gen loss=0.500190, kld=5.744424, beta=0.100000, loss=0.500201
+# [Train Epoch: 4/100] [170016/220643 particles] gen loss=0.496044, kld=6.485119, beta=0.100000, loss=0.496057
+# [Train Epoch: 4/100] [175008/220643 particles] gen loss=0.499371, kld=5.961615, beta=0.100000, loss=0.499383
+# [Train Epoch: 4/100] [180000/220643 particles] gen loss=0.503947, kld=6.940057, beta=0.100000, loss=0.503960
+# [Train Epoch: 4/100] [185024/220643 particles] gen loss=0.494995, kld=7.858186, beta=0.100000, loss=0.495010
+# [Train Epoch: 4/100] [190016/220643 particles] gen loss=0.491151, kld=6.082320, beta=0.100000, loss=0.491163
+# [Train Epoch: 4/100] [195008/220643 particles] gen loss=0.493455, kld=6.342032, beta=0.100000, loss=0.493467
+# [Train Epoch: 4/100] [200000/220643 particles] gen loss=0.504599, kld=7.401412, beta=0.100000, loss=0.504614
+# [Train Epoch: 4/100] [205024/220643 particles] gen loss=0.496207, kld=7.085489, beta=0.100000, loss=0.496220
+# [Train Epoch: 4/100] [210016/220643 particles] gen loss=0.495962, kld=6.832514, beta=0.100000, loss=0.495975
+# [Train Epoch: 4/100] [215008/220643 particles] gen loss=0.500620, kld=5.707211, beta=0.100000, loss=0.500631
+# [Train Epoch: 4/100] [220000/220643 particles] gen loss=0.498422, kld=6.891624, beta=0.100000, loss=0.498436
+# =====> Epoch: 4 Average gen loss = 0.498825, KLD = 6.472522, total loss = 0.498838; Finished in 2:44:07.207608
+# [Train Epoch: 5/100] [5024/220643 particles] gen loss=0.502190, kld=8.008081, beta=0.100000, loss=0.502205
+# [Train Epoch: 5/100] [10016/220643 particles] gen loss=0.488672, kld=7.870362, beta=0.100000, loss=0.488688
+# [Train Epoch: 5/100] [15008/220643 particles] gen loss=0.497228, kld=8.974239, beta=0.100000, loss=0.497245
+# [Train Epoch: 5/100] [20000/220643 particles] gen loss=0.499563, kld=6.940103, beta=0.100000, loss=0.499577
+# [Train Epoch: 5/100] [25024/220643 particles] gen loss=0.507707, kld=7.601412, beta=0.100000, loss=0.507722
+# [Train Epoch: 5/100] [30016/220643 particles] gen loss=0.499599, kld=8.836819, beta=0.100000, loss=0.499617
+# [Train Epoch: 5/100] [35008/220643 particles] gen loss=0.496312, kld=7.253266, beta=0.100000, loss=0.496327
+# [Train Epoch: 5/100] [40000/220643 particles] gen loss=0.494674, kld=8.841634, beta=0.100000, loss=0.494691
+# [Train Epoch: 5/100] [45024/220643 particles] gen loss=0.498312, kld=7.725338, beta=0.100000, loss=0.498327
+# [Train Epoch: 5/100] [50016/220643 particles] gen loss=0.500468, kld=8.259174, beta=0.100000, loss=0.500484
+# [Train Epoch: 5/100] [55008/220643 particles] gen loss=0.501469, kld=8.064945, beta=0.100000, loss=0.501485
+# [Train Epoch: 5/100] [60000/220643 particles] gen loss=0.502231, kld=9.180487, beta=0.100000, loss=0.502249
+# [Train Epoch: 5/100] [65024/220643 particles] gen loss=0.502447, kld=8.279479, beta=0.100000, loss=0.502463
+# [Train Epoch: 5/100] [70016/220643 particles] gen loss=0.492456, kld=8.168659, beta=0.100000, loss=0.492472
+# [Train Epoch: 5/100] [75008/220643 particles] gen loss=0.494396, kld=7.699992, beta=0.100000, loss=0.494411
+# [Train Epoch: 5/100] [80000/220643 particles] gen loss=0.497598, kld=6.875133, beta=0.100000, loss=0.497611
+# [Train Epoch: 5/100] [85024/220643 particles] gen loss=0.496760, kld=8.864054, beta=0.100000, loss=0.496777
+# [Train Epoch: 5/100] [90016/220643 particles] gen loss=0.499016, kld=7.553608, beta=0.100000, loss=0.499031
+# [Train Epoch: 5/100] [95008/220643 particles] gen loss=0.499623, kld=7.593743, beta=0.100000, loss=0.499638
+# [Train Epoch: 5/100] [100000/220643 particles] gen loss=0.500670, kld=8.739564, beta=0.100000, loss=0.500687
+# [Train Epoch: 5/100] [105024/220643 particles] gen loss=0.505225, kld=7.943468, beta=0.100000, loss=0.505240
+# [Train Epoch: 5/100] [110016/220643 particles] gen loss=0.501011, kld=7.162528, beta=0.100000, loss=0.501025
+# [Train Epoch: 5/100] [115008/220643 particles] gen loss=0.500226, kld=7.776335, beta=0.100000, loss=0.500241
+# [Train Epoch: 5/100] [120000/220643 particles] gen loss=0.502791, kld=7.694661, beta=0.100000, loss=0.502805
+# [Train Epoch: 5/100] [125024/220643 particles] gen loss=0.501416, kld=7.207135, beta=0.100000, loss=0.501430
+# [Train Epoch: 5/100] [130016/220643 particles] gen loss=0.500019, kld=7.168650, beta=0.100000, loss=0.500033
+# [Train Epoch: 5/100] [135008/220643 particles] gen loss=0.500480, kld=7.316490, beta=0.100000, loss=0.500494
+# [Train Epoch: 5/100] [140000/220643 particles] gen loss=0.508139, kld=7.668488, beta=0.100000, loss=0.508154
+# [Train Epoch: 5/100] [145024/220643 particles] gen loss=0.496219, kld=7.905995, beta=0.100000, loss=0.496234
+# [Train Epoch: 5/100] [150016/220643 particles] gen loss=0.494491, kld=8.379279, beta=0.100000, loss=0.494507
+# [Train Epoch: 5/100] [155008/220643 particles] gen loss=0.496803, kld=7.324414, beta=0.100000, loss=0.496817
+# [Train Epoch: 5/100] [160000/220643 particles] gen loss=0.491847, kld=8.518796, beta=0.100000, loss=0.491864
+# [Train Epoch: 5/100] [165024/220643 particles] gen loss=0.500449, kld=7.856567, beta=0.100000, loss=0.500465
+# [Train Epoch: 5/100] [170016/220643 particles] gen loss=0.495370, kld=7.165638, beta=0.100000, loss=0.495384
+# [Train Epoch: 5/100] [175008/220643 particles] gen loss=0.502818, kld=6.918732, beta=0.100000, loss=0.502831
+# [Train Epoch: 5/100] [180000/220643 particles] gen loss=0.500394, kld=8.743701, beta=0.100000, loss=0.500411
+# [Train Epoch: 5/100] [185024/220643 particles] gen loss=0.494266, kld=8.603882, beta=0.100000, loss=0.494283
+# [Train Epoch: 5/100] [190016/220643 particles] gen loss=0.496343, kld=7.478041, beta=0.100000, loss=0.496358
+# [Train Epoch: 5/100] [195008/220643 particles] gen loss=0.498660, kld=9.229004, beta=0.100000, loss=0.498678
+# [Train Epoch: 5/100] [200000/220643 particles] gen loss=0.496052, kld=8.909843, beta=0.100000, loss=0.496069
+# [Train Epoch: 5/100] [205024/220643 particles] gen loss=0.498095, kld=6.924719, beta=0.100000, loss=0.498109
+# [Train Epoch: 5/100] [210016/220643 particles] gen loss=0.496828, kld=8.062004, beta=0.100000, loss=0.496843
+# [Train Epoch: 5/100] [215008/220643 particles] gen loss=0.495200, kld=9.224606, beta=0.100000, loss=0.495218
+# [Train Epoch: 5/100] [220000/220643 particles] gen loss=0.498696, kld=7.743799, beta=0.100000, loss=0.498711
+# =====> Epoch: 5 Average gen loss = 0.498772, KLD = 7.965873, total loss = 0.498788; Finished in 2:37:50.042159
+Evaluating z
+# [Train Epoch: 6/100] [5024/220643 particles] gen loss=0.497746, kld=9.428483, beta=0.100000, loss=0.497764
+# [Train Epoch: 6/100] [10016/220643 particles] gen loss=0.500915, kld=10.085314, beta=0.100000, loss=0.500935
+# [Train Epoch: 6/100] [15008/220643 particles] gen loss=0.504850, kld=9.198370, beta=0.100000, loss=0.504868
+# [Train Epoch: 6/100] [20000/220643 particles] gen loss=0.498230, kld=8.467077, beta=0.100000, loss=0.498247
+# [Train Epoch: 6/100] [25024/220643 particles] gen loss=0.500335, kld=8.984921, beta=0.100000, loss=0.500353
+# [Train Epoch: 6/100] [30016/220643 particles] gen loss=0.497766, kld=8.159727, beta=0.100000, loss=0.497782
+# [Train Epoch: 6/100] [35008/220643 particles] gen loss=0.496941, kld=8.953030, beta=0.100000, loss=0.496959
+# [Train Epoch: 6/100] [40000/220643 particles] gen loss=0.496500, kld=8.762503, beta=0.100000, loss=0.496517
+# [Train Epoch: 6/100] [45024/220643 particles] gen loss=0.497372, kld=8.808950, beta=0.100000, loss=0.497389
+# [Train Epoch: 6/100] [50016/220643 particles] gen loss=0.501328, kld=9.164984, beta=0.100000, loss=0.501346
+# [Train Epoch: 6/100] [55008/220643 particles] gen loss=0.507091, kld=9.107254, beta=0.100000, loss=0.507109
+# [Train Epoch: 6/100] [60000/220643 particles] gen loss=0.502935, kld=9.064032, beta=0.100000, loss=0.502952
+# [Train Epoch: 6/100] [65024/220643 particles] gen loss=0.502212, kld=9.665083, beta=0.100000, loss=0.502231
+# [Train Epoch: 6/100] [70016/220643 particles] gen loss=0.502833, kld=9.726042, beta=0.100000, loss=0.502852
+# [Train Epoch: 6/100] [75008/220643 particles] gen loss=0.499318, kld=8.033879, beta=0.100000, loss=0.499333
+# [Train Epoch: 6/100] [80000/220643 particles] gen loss=0.493207, kld=8.623537, beta=0.100000, loss=0.493223
+# [Train Epoch: 6/100] [85024/220643 particles] gen loss=0.497896, kld=8.571065, beta=0.100000, loss=0.497913
+# [Train Epoch: 6/100] [90016/220643 particles] gen loss=0.498085, kld=8.893521, beta=0.100000, loss=0.498103
+# [Train Epoch: 6/100] [95008/220643 particles] gen loss=0.493771, kld=8.142933, beta=0.100000, loss=0.493787
+# [Train Epoch: 6/100] [100000/220643 particles] gen loss=0.493328, kld=9.537814, beta=0.100000, loss=0.493347
+# [Train Epoch: 6/100] [105024/220643 particles] gen loss=0.505697, kld=8.016187, beta=0.100000, loss=0.505713
+# [Train Epoch: 6/100] [110016/220643 particles] gen loss=0.496957, kld=8.686546, beta=0.100000, loss=0.496973
+# [Train Epoch: 6/100] [115008/220643 particles] gen loss=0.504590, kld=9.249802, beta=0.100000, loss=0.504608
+# [Train Epoch: 6/100] [120000/220643 particles] gen loss=0.494324, kld=8.306381, beta=0.100000, loss=0.494340
+# [Train Epoch: 6/100] [125024/220643 particles] gen loss=0.501577, kld=8.603758, beta=0.100000, loss=0.501593
+# [Train Epoch: 6/100] [130016/220643 particles] gen loss=0.505469, kld=9.174763, beta=0.100000, loss=0.505487
+# [Train Epoch: 6/100] [135008/220643 particles] gen loss=0.494598, kld=9.481098, beta=0.100000, loss=0.494617
+# [Train Epoch: 6/100] [140000/220643 particles] gen loss=0.501460, kld=9.472393, beta=0.100000, loss=0.501478
+# [Train Epoch: 6/100] [145024/220643 particles] gen loss=0.500879, kld=8.763663, beta=0.100000, loss=0.500896
+# [Train Epoch: 6/100] [150016/220643 particles] gen loss=0.504993, kld=9.008814, beta=0.100000, loss=0.505010
+# [Train Epoch: 6/100] [155008/220643 particles] gen loss=0.499762, kld=8.827696, beta=0.100000, loss=0.499779
+# [Train Epoch: 6/100] [160000/220643 particles] gen loss=0.502144, kld=8.798143, beta=0.100000, loss=0.502161
+# [Train Epoch: 6/100] [165024/220643 particles] gen loss=0.494053, kld=9.838081, beta=0.100000, loss=0.494072
+# [Train Epoch: 6/100] [170016/220643 particles] gen loss=0.493605, kld=9.376450, beta=0.100000, loss=0.493623
+# [Train Epoch: 6/100] [175008/220643 particles] gen loss=0.494746, kld=9.402452, beta=0.100000, loss=0.494764
+# [Train Epoch: 6/100] [180000/220643 particles] gen loss=0.499225, kld=9.519838, beta=0.100000, loss=0.499244
+# [Train Epoch: 6/100] [185024/220643 particles] gen loss=0.495099, kld=9.189905, beta=0.100000, loss=0.495117
+# [Train Epoch: 6/100] [190016/220643 particles] gen loss=0.502632, kld=8.132142, beta=0.100000, loss=0.502648
+# [Train Epoch: 6/100] [195008/220643 particles] gen loss=0.494215, kld=8.346642, beta=0.100000, loss=0.494231
+# [Train Epoch: 6/100] [200000/220643 particles] gen loss=0.491472, kld=8.831077, beta=0.100000, loss=0.491489
+# [Train Epoch: 6/100] [205024/220643 particles] gen loss=0.496673, kld=8.836849, beta=0.100000, loss=0.496690
+# [Train Epoch: 6/100] [210016/220643 particles] gen loss=0.493564, kld=9.080109, beta=0.100000, loss=0.493582
+# [Train Epoch: 6/100] [215008/220643 particles] gen loss=0.496832, kld=9.097112, beta=0.100000, loss=0.496849
+# [Train Epoch: 6/100] [220000/220643 particles] gen loss=0.501644, kld=9.481048, beta=0.100000, loss=0.501663
+# =====> Epoch: 6 Average gen loss = 0.498726, KLD = 8.831941, total loss = 0.498743; Finished in 2:20:09.596919
+# [Train Epoch: 7/100] [5024/220643 particles] gen loss=0.488741, kld=9.187045, beta=0.100000, loss=0.488759
+# [Train Epoch: 7/100] [10016/220643 particles] gen loss=0.492575, kld=9.413230, beta=0.100000, loss=0.492593
+# [Train Epoch: 7/100] [15008/220643 particles] gen loss=0.493633, kld=8.490267, beta=0.100000, loss=0.493649
+# [Train Epoch: 7/100] [20000/220643 particles] gen loss=0.496990, kld=8.813233, beta=0.100000, loss=0.497007
+# [Train Epoch: 7/100] [25024/220643 particles] gen loss=0.494825, kld=9.551685, beta=0.100000, loss=0.494843
+# [Train Epoch: 7/100] [30016/220643 particles] gen loss=0.498582, kld=8.782147, beta=0.100000, loss=0.498599
+# [Train Epoch: 7/100] [35008/220643 particles] gen loss=0.500327, kld=8.851129, beta=0.100000, loss=0.500345
+# [Train Epoch: 7/100] [40000/220643 particles] gen loss=0.498405, kld=8.500046, beta=0.100000, loss=0.498422
+# [Train Epoch: 7/100] [45024/220643 particles] gen loss=0.500723, kld=9.297287, beta=0.100000, loss=0.500741
+# [Train Epoch: 7/100] [50016/220643 particles] gen loss=0.501370, kld=10.699161, beta=0.100000, loss=0.501391
+# [Train Epoch: 7/100] [55008/220643 particles] gen loss=0.499265, kld=8.690088, beta=0.100000, loss=0.499282
+# [Train Epoch: 7/100] [60000/220643 particles] gen loss=0.499149, kld=9.907853, beta=0.100000, loss=0.499168
+# [Train Epoch: 7/100] [65024/220643 particles] gen loss=0.499995, kld=9.365402, beta=0.100000, loss=0.500013
+# [Train Epoch: 7/100] [70016/220643 particles] gen loss=0.495662, kld=9.274423, beta=0.100000, loss=0.495680
+# [Train Epoch: 7/100] [75008/220643 particles] gen loss=0.497368, kld=9.058989, beta=0.100000, loss=0.497385
+# [Train Epoch: 7/100] [80000/220643 particles] gen loss=0.499129, kld=9.852386, beta=0.100000, loss=0.499148
+# [Train Epoch: 7/100] [85024/220643 particles] gen loss=0.496422, kld=8.201202, beta=0.100000, loss=0.496438
+# [Train Epoch: 7/100] [90016/220643 particles] gen loss=0.501955, kld=9.318954, beta=0.100000, loss=0.501973
+# [Train Epoch: 7/100] [95008/220643 particles] gen loss=0.501891, kld=8.924661, beta=0.100000, loss=0.501908
+# [Train Epoch: 7/100] [100000/220643 particles] gen loss=0.501879, kld=8.794397, beta=0.100000, loss=0.501896
+# [Train Epoch: 7/100] [105024/220643 particles] gen loss=0.501610, kld=8.779645, beta=0.100000, loss=0.501627
+# [Train Epoch: 7/100] [110016/220643 particles] gen loss=0.497290, kld=10.177336, beta=0.100000, loss=0.497310
+# [Train Epoch: 7/100] [115008/220643 particles] gen loss=0.495905, kld=8.459619, beta=0.100000, loss=0.495922
+# [Train Epoch: 7/100] [120000/220643 particles] gen loss=0.502297, kld=9.427544, beta=0.100000, loss=0.502316
+# [Train Epoch: 7/100] [125024/220643 particles] gen loss=0.502384, kld=8.940914, beta=0.100000, loss=0.502401
+# [Train Epoch: 7/100] [130016/220643 particles] gen loss=0.496132, kld=8.733107, beta=0.100000, loss=0.496149
+# [Train Epoch: 7/100] [135008/220643 particles] gen loss=0.501777, kld=9.039970, beta=0.100000, loss=0.501795
+# [Train Epoch: 7/100] [140000/220643 particles] gen loss=0.497488, kld=8.483119, beta=0.100000, loss=0.497505
+# [Train Epoch: 7/100] [145024/220643 particles] gen loss=0.497832, kld=8.856710, beta=0.100000, loss=0.497850
+# [Train Epoch: 7/100] [150016/220643 particles] gen loss=0.501641, kld=9.094367, beta=0.100000, loss=0.501658
+# [Train Epoch: 7/100] [155008/220643 particles] gen loss=0.496479, kld=9.753879, beta=0.100000, loss=0.496498
+# [Train Epoch: 7/100] [160000/220643 particles] gen loss=0.499808, kld=9.281244, beta=0.100000, loss=0.499826
+# [Train Epoch: 7/100] [165024/220643 particles] gen loss=0.498324, kld=8.810045, beta=0.100000, loss=0.498342
+# [Train Epoch: 7/100] [170016/220643 particles] gen loss=0.497345, kld=8.866405, beta=0.100000, loss=0.497362
+# [Train Epoch: 7/100] [175008/220643 particles] gen loss=0.495616, kld=9.383779, beta=0.100000, loss=0.495634
+# [Train Epoch: 7/100] [180000/220643 particles] gen loss=0.504506, kld=9.529778, beta=0.100000, loss=0.504525
+# [Train Epoch: 7/100] [185024/220643 particles] gen loss=0.497642, kld=10.317523, beta=0.100000, loss=0.497662
+# [Train Epoch: 7/100] [190016/220643 particles] gen loss=0.498904, kld=9.000532, beta=0.100000, loss=0.498921
+# [Train Epoch: 7/100] [195008/220643 particles] gen loss=0.497644, kld=9.129142, beta=0.100000, loss=0.497661
+# [Train Epoch: 7/100] [200000/220643 particles] gen loss=0.501585, kld=8.369055, beta=0.100000, loss=0.501601
+# [Train Epoch: 7/100] [205024/220643 particles] gen loss=0.498810, kld=8.841177, beta=0.100000, loss=0.498828
+# [Train Epoch: 7/100] [210016/220643 particles] gen loss=0.497404, kld=8.367462, beta=0.100000, loss=0.497420
+# [Train Epoch: 7/100] [215008/220643 particles] gen loss=0.500691, kld=9.634043, beta=0.100000, loss=0.500710
+# [Train Epoch: 7/100] [220000/220643 particles] gen loss=0.506604, kld=8.539495, beta=0.100000, loss=0.506621
+# =====> Epoch: 7 Average gen loss = 0.498682, KLD = 9.212452, total loss = 0.498700; Finished in 2:19:54.817253
+# [Train Epoch: 8/100] [5024/220643 particles] gen loss=0.499485, kld=8.648937, beta=0.100000, loss=0.499502
+# [Train Epoch: 8/100] [10016/220643 particles] gen loss=0.495382, kld=8.980608, beta=0.100000, loss=0.495400
+# [Train Epoch: 8/100] [15008/220643 particles] gen loss=0.500918, kld=9.097666, beta=0.100000, loss=0.500936
+# [Train Epoch: 8/100] [20000/220643 particles] gen loss=0.500092, kld=10.142431, beta=0.100000, loss=0.500112
+# [Train Epoch: 8/100] [25024/220643 particles] gen loss=0.498102, kld=9.071213, beta=0.100000, loss=0.498119
+# [Train Epoch: 8/100] [30016/220643 particles] gen loss=0.497511, kld=9.970640, beta=0.100000, loss=0.497530
+# [Train Epoch: 8/100] [35008/220643 particles] gen loss=0.494042, kld=9.475040, beta=0.100000, loss=0.494061
+# [Train Epoch: 8/100] [40000/220643 particles] gen loss=0.499808, kld=9.970870, beta=0.100000, loss=0.499827
+# [Train Epoch: 8/100] [45024/220643 particles] gen loss=0.500886, kld=10.466941, beta=0.100000, loss=0.500906
+# [Train Epoch: 8/100] [50016/220643 particles] gen loss=0.497348, kld=9.580681, beta=0.100000, loss=0.497366
+# [Train Epoch: 8/100] [55008/220643 particles] gen loss=0.494315, kld=9.139404, beta=0.100000, loss=0.494333
+# [Train Epoch: 8/100] [60000/220643 particles] gen loss=0.501654, kld=8.154449, beta=0.100000, loss=0.501670
+# [Train Epoch: 8/100] [65024/220643 particles] gen loss=0.500421, kld=9.734674, beta=0.100000, loss=0.500440
+# [Train Epoch: 8/100] [70016/220643 particles] gen loss=0.501428, kld=10.153568, beta=0.100000, loss=0.501447
+# [Train Epoch: 8/100] [75008/220643 particles] gen loss=0.503526, kld=9.707479, beta=0.100000, loss=0.503545
+# [Train Epoch: 8/100] [80000/220643 particles] gen loss=0.496707, kld=9.178913, beta=0.100000, loss=0.496725
+# [Train Epoch: 8/100] [85024/220643 particles] gen loss=0.494295, kld=10.313696, beta=0.100000, loss=0.494315
+# [Train Epoch: 8/100] [90016/220643 particles] gen loss=0.497383, kld=9.842794, beta=0.100000, loss=0.497402
+# [Train Epoch: 8/100] [95008/220643 particles] gen loss=0.495093, kld=8.561019, beta=0.100000, loss=0.495110
+# [Train Epoch: 8/100] [100000/220643 particles] gen loss=0.495593, kld=10.681414, beta=0.100000, loss=0.495614
+# [Train Epoch: 8/100] [105024/220643 particles] gen loss=0.494537, kld=9.861552, beta=0.100000, loss=0.494556
+# [Train Epoch: 8/100] [110016/220643 particles] gen loss=0.498370, kld=9.618687, beta=0.100000, loss=0.498388
+# [Train Epoch: 8/100] [115008/220643 particles] gen loss=0.501469, kld=8.677240, beta=0.100000, loss=0.501486
+# [Train Epoch: 8/100] [120000/220643 particles] gen loss=0.503443, kld=9.382072, beta=0.100000, loss=0.503462
+# [Train Epoch: 8/100] [125024/220643 particles] gen loss=0.500569, kld=9.114181, beta=0.100000, loss=0.500587
+# [Train Epoch: 8/100] [130016/220643 particles] gen loss=0.499910, kld=8.990018, beta=0.100000, loss=0.499927
+# [Train Epoch: 8/100] [135008/220643 particles] gen loss=0.494389, kld=8.875971, beta=0.100000, loss=0.494406
+# [Train Epoch: 8/100] [140000/220643 particles] gen loss=0.503242, kld=10.174122, beta=0.100000, loss=0.503262
+# [Train Epoch: 8/100] [145024/220643 particles] gen loss=0.500665, kld=9.346161, beta=0.100000, loss=0.500683
+# [Train Epoch: 8/100] [150016/220643 particles] gen loss=0.496767, kld=9.460964, beta=0.100000, loss=0.496785
+# [Train Epoch: 8/100] [155008/220643 particles] gen loss=0.495180, kld=9.384188, beta=0.100000, loss=0.495199
+# [Train Epoch: 8/100] [160000/220643 particles] gen loss=0.494307, kld=9.785420, beta=0.100000, loss=0.494326
+# [Train Epoch: 8/100] [165024/220643 particles] gen loss=0.509090, kld=8.682439, beta=0.100000, loss=0.509107
+# [Train Epoch: 8/100] [170016/220643 particles] gen loss=0.500391, kld=9.673202, beta=0.100000, loss=0.500410
+# [Train Epoch: 8/100] [175008/220643 particles] gen loss=0.498396, kld=9.787732, beta=0.100000, loss=0.498415
+# [Train Epoch: 8/100] [180000/220643 particles] gen loss=0.499504, kld=10.231152, beta=0.100000, loss=0.499524
+# [Train Epoch: 8/100] [185024/220643 particles] gen loss=0.498284, kld=8.663172, beta=0.100000, loss=0.498301
+# [Train Epoch: 8/100] [190016/220643 particles] gen loss=0.498153, kld=10.496937, beta=0.100000, loss=0.498174
+# [Train Epoch: 8/100] [195008/220643 particles] gen loss=0.491496, kld=9.030852, beta=0.100000, loss=0.491514
+# [Train Epoch: 8/100] [200000/220643 particles] gen loss=0.496889, kld=9.258541, beta=0.100000, loss=0.496907
+# [Train Epoch: 8/100] [205024/220643 particles] gen loss=0.500271, kld=9.095229, beta=0.100000, loss=0.500288
+# [Train Epoch: 8/100] [210016/220643 particles] gen loss=0.491037, kld=8.871834, beta=0.100000, loss=0.491054
+# [Train Epoch: 8/100] [215008/220643 particles] gen loss=0.497591, kld=8.553174, beta=0.100000, loss=0.497607
+# [Train Epoch: 8/100] [220000/220643 particles] gen loss=0.501441, kld=9.020461, beta=0.100000, loss=0.501458
+# =====> Epoch: 8 Average gen loss = 0.498652, KLD = 9.471272, total loss = 0.498670; Finished in 2:33:23.425697
+# [Train Epoch: 9/100] [5024/220643 particles] gen loss=0.494341, kld=10.091661, beta=0.100000, loss=0.494360
+# [Train Epoch: 9/100] [10016/220643 particles] gen loss=0.494450, kld=9.062836, beta=0.100000, loss=0.494468
+# [Train Epoch: 9/100] [15008/220643 particles] gen loss=0.499145, kld=10.224784, beta=0.100000, loss=0.499165
+# [Train Epoch: 9/100] [20000/220643 particles] gen loss=0.498009, kld=9.712297, beta=0.100000, loss=0.498028
+# [Train Epoch: 9/100] [25024/220643 particles] gen loss=0.495588, kld=10.023542, beta=0.100000, loss=0.495607
+# [Train Epoch: 9/100] [30016/220643 particles] gen loss=0.496230, kld=10.743313, beta=0.100000, loss=0.496251
+# [Train Epoch: 9/100] [35008/220643 particles] gen loss=0.502582, kld=9.178807, beta=0.100000, loss=0.502600
+# [Train Epoch: 9/100] [40000/220643 particles] gen loss=0.497174, kld=11.127086, beta=0.100000, loss=0.497196
+# [Train Epoch: 9/100] [45024/220643 particles] gen loss=0.497846, kld=9.613238, beta=0.100000, loss=0.497864
+# [Train Epoch: 9/100] [50016/220643 particles] gen loss=0.500525, kld=9.851509, beta=0.100000, loss=0.500544
+# [Train Epoch: 9/100] [55008/220643 particles] gen loss=0.497819, kld=10.653629, beta=0.100000, loss=0.497840
+# [Train Epoch: 9/100] [60000/220643 particles] gen loss=0.497989, kld=9.884056, beta=0.100000, loss=0.498008
+# [Train Epoch: 9/100] [65024/220643 particles] gen loss=0.495100, kld=9.958145, beta=0.100000, loss=0.495120
+# [Train Epoch: 9/100] [70016/220643 particles] gen loss=0.498803, kld=9.780128, beta=0.100000, loss=0.498822
+# [Train Epoch: 9/100] [75008/220643 particles] gen loss=0.494538, kld=10.114666, beta=0.100000, loss=0.494557
+# [Train Epoch: 9/100] [80000/220643 particles] gen loss=0.496858, kld=9.762519, beta=0.100000, loss=0.496877
+# [Train Epoch: 9/100] [85024/220643 particles] gen loss=0.498509, kld=8.901504, beta=0.100000, loss=0.498527
+# [Train Epoch: 9/100] [90016/220643 particles] gen loss=0.496737, kld=8.852516, beta=0.100000, loss=0.496754
+# [Train Epoch: 9/100] [95008/220643 particles] gen loss=0.503689, kld=9.986529, beta=0.100000, loss=0.503709
+# [Train Epoch: 9/100] [100000/220643 particles] gen loss=0.495915, kld=9.235201, beta=0.100000, loss=0.495933
+# [Train Epoch: 9/100] [105024/220643 particles] gen loss=0.498248, kld=9.648487, beta=0.100000, loss=0.498267
+# [Train Epoch: 9/100] [110016/220643 particles] gen loss=0.492531, kld=9.271852, beta=0.100000, loss=0.492549
+# [Train Epoch: 9/100] [115008/220643 particles] gen loss=0.498711, kld=9.208770, beta=0.100000, loss=0.498729
+# [Train Epoch: 9/100] [120000/220643 particles] gen loss=0.492123, kld=10.342840, beta=0.100000, loss=0.492143
+# [Train Epoch: 9/100] [125024/220643 particles] gen loss=0.501495, kld=9.954643, beta=0.100000, loss=0.501515
+# [Train Epoch: 9/100] [130016/220643 particles] gen loss=0.498126, kld=8.953485, beta=0.100000, loss=0.498144
+# [Train Epoch: 9/100] [135008/220643 particles] gen loss=0.499382, kld=10.136972, beta=0.100000, loss=0.499402
+# [Train Epoch: 9/100] [140000/220643 particles] gen loss=0.491886, kld=9.225264, beta=0.100000, loss=0.491904
+# [Train Epoch: 9/100] [145024/220643 particles] gen loss=0.497454, kld=9.335159, beta=0.100000, loss=0.497472
+# [Train Epoch: 9/100] [150016/220643 particles] gen loss=0.497674, kld=9.704473, beta=0.100000, loss=0.497693
+# [Train Epoch: 9/100] [155008/220643 particles] gen loss=0.495387, kld=10.103083, beta=0.100000, loss=0.495407
+# [Train Epoch: 9/100] [160000/220643 particles] gen loss=0.493990, kld=9.074614, beta=0.100000, loss=0.494008
+# [Train Epoch: 9/100] [165024/220643 particles] gen loss=0.498685, kld=8.886686, beta=0.100000, loss=0.498702
+# [Train Epoch: 9/100] [170016/220643 particles] gen loss=0.497027, kld=8.316545, beta=0.100000, loss=0.497043
+# [Train Epoch: 9/100] [175008/220643 particles] gen loss=0.499758, kld=9.208758, beta=0.100000, loss=0.499776
+# [Train Epoch: 9/100] [180000/220643 particles] gen loss=0.491468, kld=9.974198, beta=0.100000, loss=0.491487
+# [Train Epoch: 9/100] [185024/220643 particles] gen loss=0.497708, kld=9.544958, beta=0.100000, loss=0.497727
+# [Train Epoch: 9/100] [190016/220643 particles] gen loss=0.496435, kld=9.047529, beta=0.100000, loss=0.496452
+# [Train Epoch: 9/100] [195008/220643 particles] gen loss=0.503659, kld=8.976137, beta=0.100000, loss=0.503676
+# [Train Epoch: 9/100] [200000/220643 particles] gen loss=0.495155, kld=9.030910, beta=0.100000, loss=0.495172
+# [Train Epoch: 9/100] [205024/220643 particles] gen loss=0.497104, kld=10.113348, beta=0.100000, loss=0.497124
+# [Train Epoch: 9/100] [210016/220643 particles] gen loss=0.504891, kld=9.742819, beta=0.100000, loss=0.504910
+# [Train Epoch: 9/100] [215008/220643 particles] gen loss=0.493627, kld=10.055560, beta=0.100000, loss=0.493646
+# [Train Epoch: 9/100] [220000/220643 particles] gen loss=0.501251, kld=9.385611, beta=0.100000, loss=0.501269
+# =====> Epoch: 9 Average gen loss = 0.498624, KLD = 9.689811, total loss = 0.498643; Finished in 3:08:01.894064
+# [Train Epoch: 10/100] [5024/220643 particles] gen loss=0.497019, kld=10.666028, beta=0.100000, loss=0.497040
+# [Train Epoch: 10/100] [10016/220643 particles] gen loss=0.502238, kld=9.761539, beta=0.100000, loss=0.502257
+# [Train Epoch: 10/100] [15008/220643 particles] gen loss=0.501321, kld=9.310987, beta=0.100000, loss=0.501339
+# [Train Epoch: 10/100] [20000/220643 particles] gen loss=0.502265, kld=9.369380, beta=0.100000, loss=0.502284
+# [Train Epoch: 10/100] [25024/220643 particles] gen loss=0.500629, kld=9.881105, beta=0.100000, loss=0.500648
+# [Train Epoch: 10/100] [30016/220643 particles] gen loss=0.501350, kld=9.909994, beta=0.100000, loss=0.501369
+# [Train Epoch: 10/100] [35008/220643 particles] gen loss=0.494551, kld=9.218279, beta=0.100000, loss=0.494569
+# [Train Epoch: 10/100] [40000/220643 particles] gen loss=0.499252, kld=9.294676, beta=0.100000, loss=0.499270
+# [Train Epoch: 10/100] [45024/220643 particles] gen loss=0.500406, kld=10.333792, beta=0.100000, loss=0.500426
+# [Train Epoch: 10/100] [50016/220643 particles] gen loss=0.503799, kld=9.964939, beta=0.100000, loss=0.503818
+# [Train Epoch: 10/100] [55008/220643 particles] gen loss=0.496113, kld=9.689685, beta=0.100000, loss=0.496132
+# [Train Epoch: 10/100] [60000/220643 particles] gen loss=0.489985, kld=9.821356, beta=0.100000, loss=0.490004
+# [Train Epoch: 10/100] [65024/220643 particles] gen loss=0.494630, kld=10.165074, beta=0.100000, loss=0.494650
+# [Train Epoch: 10/100] [70016/220643 particles] gen loss=0.502149, kld=9.598598, beta=0.100000, loss=0.502167
+# [Train Epoch: 10/100] [75008/220643 particles] gen loss=0.498475, kld=9.541140, beta=0.100000, loss=0.498493
+# [Train Epoch: 10/100] [80000/220643 particles] gen loss=0.501820, kld=9.497313, beta=0.100000, loss=0.501839
+# [Train Epoch: 10/100] [85024/220643 particles] gen loss=0.493453, kld=9.998138, beta=0.100000, loss=0.493473
+# [Train Epoch: 10/100] [90016/220643 particles] gen loss=0.500850, kld=9.433456, beta=0.100000, loss=0.500868
+# [Train Epoch: 10/100] [95008/220643 particles] gen loss=0.507827, kld=9.947021, beta=0.100000, loss=0.507847
+# [Train Epoch: 10/100] [100000/220643 particles] gen loss=0.497286, kld=10.263998, beta=0.100000, loss=0.497306
+# [Train Epoch: 10/100] [105024/220643 particles] gen loss=0.504042, kld=10.044683, beta=0.100000, loss=0.504062
+# [Train Epoch: 10/100] [110016/220643 particles] gen loss=0.498872, kld=9.732874, beta=0.100000, loss=0.498891
+# [Train Epoch: 10/100] [115008/220643 particles] gen loss=0.503292, kld=9.244158, beta=0.100000, loss=0.503310
+# [Train Epoch: 10/100] [120000/220643 particles] gen loss=0.496998, kld=9.025091, beta=0.100000, loss=0.497015
+# [Train Epoch: 10/100] [125024/220643 particles] gen loss=0.500479, kld=10.638765, beta=0.100000, loss=0.500500
+# [Train Epoch: 10/100] [130016/220643 particles] gen loss=0.494625, kld=9.865869, beta=0.100000, loss=0.494644
+# [Train Epoch: 10/100] [135008/220643 particles] gen loss=0.502537, kld=9.894853, beta=0.100000, loss=0.502556
+# [Train Epoch: 10/100] [140000/220643 particles] gen loss=0.499626, kld=11.188856, beta=0.100000, loss=0.499648
+# [Train Epoch: 10/100] [145024/220643 particles] gen loss=0.501267, kld=9.438779, beta=0.100000, loss=0.501285
+# [Train Epoch: 10/100] [150016/220643 particles] gen loss=0.503092, kld=9.414491, beta=0.100000, loss=0.503110
+# [Train Epoch: 10/100] [155008/220643 particles] gen loss=0.494502, kld=9.843102, beta=0.100000, loss=0.494521
+# [Train Epoch: 10/100] [160000/220643 particles] gen loss=0.500633, kld=10.247051, beta=0.100000, loss=0.500653
+# [Train Epoch: 10/100] [165024/220643 particles] gen loss=0.497290, kld=11.024963, beta=0.100000, loss=0.497312
+# [Train Epoch: 10/100] [170016/220643 particles] gen loss=0.495845, kld=10.090140, beta=0.100000, loss=0.495865
+# [Train Epoch: 10/100] [175008/220643 particles] gen loss=0.494508, kld=9.827374, beta=0.100000, loss=0.494527
+# [Train Epoch: 10/100] [180000/220643 particles] gen loss=0.489978, kld=9.841934, beta=0.100000, loss=0.489998
+# [Train Epoch: 10/100] [185024/220643 particles] gen loss=0.499793, kld=10.419484, beta=0.100000, loss=0.499813
+# [Train Epoch: 10/100] [190016/220643 particles] gen loss=0.503462, kld=10.660062, beta=0.100000, loss=0.503483
+# [Train Epoch: 10/100] [195008/220643 particles] gen loss=0.499060, kld=9.405120, beta=0.100000, loss=0.499078
+# [Train Epoch: 10/100] [200000/220643 particles] gen loss=0.503355, kld=10.099773, beta=0.100000, loss=0.503374
+# [Train Epoch: 10/100] [205024/220643 particles] gen loss=0.501990, kld=8.882841, beta=0.100000, loss=0.502008
+# [Train Epoch: 10/100] [210016/220643 particles] gen loss=0.494210, kld=9.508259, beta=0.100000, loss=0.494228
+# [Train Epoch: 10/100] [215008/220643 particles] gen loss=0.501655, kld=9.393695, beta=0.100000, loss=0.501673
+# [Train Epoch: 10/100] [220000/220643 particles] gen loss=0.494223, kld=9.759857, beta=0.100000, loss=0.494242
+# =====> Epoch: 10 Average gen loss = 0.498604, KLD = 9.814577, total loss = 0.498623; Finished in 3:07:01.186467
+Evaluating z
+# [Train Epoch: 11/100] [5024/220643 particles] gen loss=0.502593, kld=11.250940, beta=0.100000, loss=0.502615
+# [Train Epoch: 11/100] [10016/220643 particles] gen loss=0.496147, kld=9.986738, beta=0.100000, loss=0.496166
+# [Train Epoch: 11/100] [15008/220643 particles] gen loss=0.491671, kld=9.964728, beta=0.100000, loss=0.491690
+# [Train Epoch: 11/100] [20000/220643 particles] gen loss=0.493132, kld=9.345310, beta=0.100000, loss=0.493150
+# [Train Epoch: 11/100] [25024/220643 particles] gen loss=0.508488, kld=9.970098, beta=0.100000, loss=0.508507
+# [Train Epoch: 11/100] [30016/220643 particles] gen loss=0.500176, kld=10.059605, beta=0.100000, loss=0.500195
+# [Train Epoch: 11/100] [35008/220643 particles] gen loss=0.494617, kld=11.199148, beta=0.100000, loss=0.494639
+# [Train Epoch: 11/100] [40000/220643 particles] gen loss=0.507484, kld=10.056770, beta=0.100000, loss=0.507504
+# [Train Epoch: 11/100] [45024/220643 particles] gen loss=0.501759, kld=10.253717, beta=0.100000, loss=0.501779
+# [Train Epoch: 11/100] [50016/220643 particles] gen loss=0.498950, kld=9.720673, beta=0.100000, loss=0.498968
+# [Train Epoch: 11/100] [55008/220643 particles] gen loss=0.500967, kld=9.928736, beta=0.100000, loss=0.500986
+# [Train Epoch: 11/100] [60000/220643 particles] gen loss=0.499271, kld=10.602823, beta=0.100000, loss=0.499292
+# [Train Epoch: 11/100] [65024/220643 particles] gen loss=0.497971, kld=10.467529, beta=0.100000, loss=0.497992
+# [Train Epoch: 11/100] [70016/220643 particles] gen loss=0.499775, kld=10.374411, beta=0.100000, loss=0.499796
+# [Train Epoch: 11/100] [75008/220643 particles] gen loss=0.503122, kld=10.624282, beta=0.100000, loss=0.503143
+# [Train Epoch: 11/100] [80000/220643 particles] gen loss=0.500445, kld=9.841999, beta=0.100000, loss=0.500465
+# [Train Epoch: 11/100] [85024/220643 particles] gen loss=0.502302, kld=10.190868, beta=0.100000, loss=0.502322
+# [Train Epoch: 11/100] [90016/220643 particles] gen loss=0.496974, kld=9.960285, beta=0.100000, loss=0.496993
+# [Train Epoch: 11/100] [95008/220643 particles] gen loss=0.496453, kld=9.889311, beta=0.100000, loss=0.496472
+# [Train Epoch: 11/100] [100000/220643 particles] gen loss=0.500938, kld=10.068478, beta=0.100000, loss=0.500957
+# [Train Epoch: 11/100] [105024/220643 particles] gen loss=0.495415, kld=9.209187, beta=0.100000, loss=0.495433
+# [Train Epoch: 11/100] [110016/220643 particles] gen loss=0.498468, kld=8.906942, beta=0.100000, loss=0.498486
+# [Train Epoch: 11/100] [115008/220643 particles] gen loss=0.497644, kld=9.852237, beta=0.100000, loss=0.497663
+# [Train Epoch: 11/100] [120000/220643 particles] gen loss=0.503198, kld=9.883068, beta=0.100000, loss=0.503217
+# [Train Epoch: 11/100] [125024/220643 particles] gen loss=0.501707, kld=10.253359, beta=0.100000, loss=0.501727
+# [Train Epoch: 11/100] [130016/220643 particles] gen loss=0.498444, kld=10.200953, beta=0.100000, loss=0.498464
+# [Train Epoch: 11/100] [135008/220643 particles] gen loss=0.495347, kld=9.729900, beta=0.100000, loss=0.495366
+# [Train Epoch: 11/100] [140000/220643 particles] gen loss=0.502438, kld=10.432781, beta=0.100000, loss=0.502458
+# [Train Epoch: 11/100] [145024/220643 particles] gen loss=0.501055, kld=9.799932, beta=0.100000, loss=0.501074
+# [Train Epoch: 11/100] [150016/220643 particles] gen loss=0.495001, kld=10.027830, beta=0.100000, loss=0.495021
+# [Train Epoch: 11/100] [155008/220643 particles] gen loss=0.496952, kld=10.054564, beta=0.100000, loss=0.496971
+# [Train Epoch: 11/100] [160000/220643 particles] gen loss=0.495741, kld=9.939984, beta=0.100000, loss=0.495761
+# [Train Epoch: 11/100] [165024/220643 particles] gen loss=0.503402, kld=9.370404, beta=0.100000, loss=0.503420
+# [Train Epoch: 11/100] [170016/220643 particles] gen loss=0.495470, kld=9.965523, beta=0.100000, loss=0.495490
+# [Train Epoch: 11/100] [175008/220643 particles] gen loss=0.502051, kld=10.944654, beta=0.100000, loss=0.502072
+# [Train Epoch: 11/100] [180000/220643 particles] gen loss=0.498388, kld=9.826117, beta=0.100000, loss=0.498407
+# [Train Epoch: 11/100] [185024/220643 particles] gen loss=0.494737, kld=10.229290, beta=0.100000, loss=0.494757
+# [Train Epoch: 11/100] [190016/220643 particles] gen loss=0.495389, kld=10.423468, beta=0.100000, loss=0.495410
+# [Train Epoch: 11/100] [195008/220643 particles] gen loss=0.509332, kld=10.349024, beta=0.100000, loss=0.509352
+# [Train Epoch: 11/100] [200000/220643 particles] gen loss=0.500427, kld=10.355947, beta=0.100000, loss=0.500448
+# [Train Epoch: 11/100] [205024/220643 particles] gen loss=0.502362, kld=9.727800, beta=0.100000, loss=0.502381
+# [Train Epoch: 11/100] [210016/220643 particles] gen loss=0.502291, kld=10.717159, beta=0.100000, loss=0.502311
+# [Train Epoch: 11/100] [215008/220643 particles] gen loss=0.496720, kld=9.044645, beta=0.100000, loss=0.496737
+# [Train Epoch: 11/100] [220000/220643 particles] gen loss=0.500630, kld=9.513963, beta=0.100000, loss=0.500648
+# =====> Epoch: 11 Average gen loss = 0.498587, KLD = 9.961359, total loss = 0.498606; Finished in 3:07:47.275768
+# [Train Epoch: 12/100] [5024/220643 particles] gen loss=0.506209, kld=10.878598, beta=0.100000, loss=0.506230
+# [Train Epoch: 12/100] [10016/220643 particles] gen loss=0.498571, kld=10.280427, beta=0.100000, loss=0.498591
+# [Train Epoch: 12/100] [15008/220643 particles] gen loss=0.499437, kld=11.232304, beta=0.100000, loss=0.499458
+# [Train Epoch: 12/100] [20000/220643 particles] gen loss=0.505772, kld=9.644046, beta=0.100000, loss=0.505791
+# [Train Epoch: 12/100] [25024/220643 particles] gen loss=0.504912, kld=10.887447, beta=0.100000, loss=0.504933
+# [Train Epoch: 12/100] [30016/220643 particles] gen loss=0.500043, kld=10.964125, beta=0.100000, loss=0.500065
+# [Train Epoch: 12/100] [35008/220643 particles] gen loss=0.503887, kld=10.255507, beta=0.100000, loss=0.503907
+# [Train Epoch: 12/100] [40000/220643 particles] gen loss=0.495859, kld=10.230279, beta=0.100000, loss=0.495878
+# [Train Epoch: 12/100] [45024/220643 particles] gen loss=0.498484, kld=10.318371, beta=0.100000, loss=0.498504
+# [Train Epoch: 12/100] [50016/220643 particles] gen loss=0.495154, kld=10.852062, beta=0.100000, loss=0.495175
+# [Train Epoch: 12/100] [55008/220643 particles] gen loss=0.502962, kld=10.583881, beta=0.100000, loss=0.502983
+# [Train Epoch: 12/100] [60000/220643 particles] gen loss=0.500567, kld=9.418350, beta=0.100000, loss=0.500586
+# [Train Epoch: 12/100] [65024/220643 particles] gen loss=0.498788, kld=9.628638, beta=0.100000, loss=0.498806
+# [Train Epoch: 12/100] [70016/220643 particles] gen loss=0.500107, kld=10.200748, beta=0.100000, loss=0.500127
+# [Train Epoch: 12/100] [75008/220643 particles] gen loss=0.500032, kld=10.786263, beta=0.100000, loss=0.500053
+# [Train Epoch: 12/100] [80000/220643 particles] gen loss=0.504756, kld=10.043175, beta=0.100000, loss=0.504775
+# [Train Epoch: 12/100] [85024/220643 particles] gen loss=0.500117, kld=9.931407, beta=0.100000, loss=0.500137
+# [Train Epoch: 12/100] [90016/220643 particles] gen loss=0.499515, kld=10.270166, beta=0.100000, loss=0.499535
+# [Train Epoch: 12/100] [95008/220643 particles] gen loss=0.498225, kld=9.954572, beta=0.100000, loss=0.498244
+# [Train Epoch: 12/100] [100000/220643 particles] gen loss=0.493466, kld=10.364464, beta=0.100000, loss=0.493487
+# [Train Epoch: 12/100] [105024/220643 particles] gen loss=0.495426, kld=9.363088, beta=0.100000, loss=0.495444
+# [Train Epoch: 12/100] [110016/220643 particles] gen loss=0.496834, kld=9.860460, beta=0.100000, loss=0.496853
+# [Train Epoch: 12/100] [115008/220643 particles] gen loss=0.497447, kld=9.822817, beta=0.100000, loss=0.497467
+# [Train Epoch: 12/100] [120000/220643 particles] gen loss=0.503952, kld=9.656961, beta=0.100000, loss=0.503971
+# [Train Epoch: 12/100] [125024/220643 particles] gen loss=0.495063, kld=9.030224, beta=0.100000, loss=0.495080
+# [Train Epoch: 12/100] [130016/220643 particles] gen loss=0.496013, kld=9.635242, beta=0.100000, loss=0.496032
+# [Train Epoch: 12/100] [135008/220643 particles] gen loss=0.503820, kld=9.771341, beta=0.100000, loss=0.503839
+# [Train Epoch: 12/100] [140000/220643 particles] gen loss=0.494556, kld=9.962778, beta=0.100000, loss=0.494575
+# [Train Epoch: 12/100] [145024/220643 particles] gen loss=0.498330, kld=9.647077, beta=0.100000, loss=0.498349
+# [Train Epoch: 12/100] [150016/220643 particles] gen loss=0.507300, kld=10.213994, beta=0.100000, loss=0.507320
+# [Train Epoch: 12/100] [155008/220643 particles] gen loss=0.491600, kld=9.703524, beta=0.100000, loss=0.491619
+# [Train Epoch: 12/100] [160000/220643 particles] gen loss=0.499908, kld=9.947585, beta=0.100000, loss=0.499927
+# [Train Epoch: 12/100] [165024/220643 particles] gen loss=0.501084, kld=9.841069, beta=0.100000, loss=0.501103
+# [Train Epoch: 12/100] [170016/220643 particles] gen loss=0.500669, kld=10.370482, beta=0.100000, loss=0.500689
+# [Train Epoch: 12/100] [175008/220643 particles] gen loss=0.498540, kld=9.685263, beta=0.100000, loss=0.498559
+# [Train Epoch: 12/100] [180000/220643 particles] gen loss=0.508203, kld=10.354797, beta=0.100000, loss=0.508223
+# [Train Epoch: 12/100] [185024/220643 particles] gen loss=0.497505, kld=10.288298, beta=0.100000, loss=0.497525
+# [Train Epoch: 12/100] [190016/220643 particles] gen loss=0.496480, kld=10.288690, beta=0.100000, loss=0.496500
+# [Train Epoch: 12/100] [195008/220643 particles] gen loss=0.492286, kld=10.703806, beta=0.100000, loss=0.492307
+# [Train Epoch: 12/100] [200000/220643 particles] gen loss=0.497426, kld=10.201894, beta=0.100000, loss=0.497446
+# [Train Epoch: 12/100] [205024/220643 particles] gen loss=0.495885, kld=9.934889, beta=0.100000, loss=0.495905
+# [Train Epoch: 12/100] [210016/220643 particles] gen loss=0.494472, kld=9.957870, beta=0.100000, loss=0.494491
+# [Train Epoch: 12/100] [215008/220643 particles] gen loss=0.498288, kld=9.611303, beta=0.100000, loss=0.498307
+# [Train Epoch: 12/100] [220000/220643 particles] gen loss=0.504240, kld=9.805737, beta=0.100000, loss=0.504259
+# =====> Epoch: 12 Average gen loss = 0.498571, KLD = 10.105526, total loss = 0.498591; Finished in 3:07:44.097391
+# [Train Epoch: 13/100] [5024/220643 particles] gen loss=0.509987, kld=9.975645, beta=0.100000, loss=0.510007
+# [Train Epoch: 13/100] [10016/220643 particles] gen loss=0.499629, kld=10.330717, beta=0.100000, loss=0.499649
+# [Train Epoch: 13/100] [15008/220643 particles] gen loss=0.498653, kld=10.387506, beta=0.100000, loss=0.498674
+# [Train Epoch: 13/100] [20000/220643 particles] gen loss=0.502145, kld=10.247598, beta=0.100000, loss=0.502165
+# [Train Epoch: 13/100] [25024/220643 particles] gen loss=0.498441, kld=10.645311, beta=0.100000, loss=0.498462
+# [Train Epoch: 13/100] [30016/220643 particles] gen loss=0.505795, kld=10.350826, beta=0.100000, loss=0.505815
+# [Train Epoch: 13/100] [35008/220643 particles] gen loss=0.495981, kld=10.395138, beta=0.100000, loss=0.496001
+# [Train Epoch: 13/100] [40000/220643 particles] gen loss=0.500086, kld=9.758263, beta=0.100000, loss=0.500105
+# [Train Epoch: 13/100] [45024/220643 particles] gen loss=0.500456, kld=9.916527, beta=0.100000, loss=0.500476
+# [Train Epoch: 13/100] [50016/220643 particles] gen loss=0.501685, kld=10.819217, beta=0.100000, loss=0.501706
+# [Train Epoch: 13/100] [55008/220643 particles] gen loss=0.502803, kld=10.134357, beta=0.100000, loss=0.502823
+# [Train Epoch: 13/100] [60000/220643 particles] gen loss=0.493592, kld=10.442636, beta=0.100000, loss=0.493612
+# [Train Epoch: 13/100] [65024/220643 particles] gen loss=0.497103, kld=10.397719, beta=0.100000, loss=0.497123
+# [Train Epoch: 13/100] [70016/220643 particles] gen loss=0.498837, kld=10.657027, beta=0.100000, loss=0.498858
+# [Train Epoch: 13/100] [75008/220643 particles] gen loss=0.505905, kld=10.159979, beta=0.100000, loss=0.505924
+# [Train Epoch: 13/100] [80000/220643 particles] gen loss=0.504603, kld=9.661037, beta=0.100000, loss=0.504622
+# [Train Epoch: 13/100] [85024/220643 particles] gen loss=0.505138, kld=10.264894, beta=0.100000, loss=0.505158
+# [Train Epoch: 13/100] [90016/220643 particles] gen loss=0.503012, kld=9.531188, beta=0.100000, loss=0.503031
+# [Train Epoch: 13/100] [95008/220643 particles] gen loss=0.497411, kld=9.680143, beta=0.100000, loss=0.497430
+# [Train Epoch: 13/100] [100000/220643 particles] gen loss=0.503392, kld=10.410656, beta=0.100000, loss=0.503412
+# [Train Epoch: 13/100] [105024/220643 particles] gen loss=0.499420, kld=9.870968, beta=0.100000, loss=0.499439
+# [Train Epoch: 13/100] [110016/220643 particles] gen loss=0.498654, kld=10.039022, beta=0.100000, loss=0.498674
+# [Train Epoch: 13/100] [115008/220643 particles] gen loss=0.493527, kld=10.234783, beta=0.100000, loss=0.493547
+# [Train Epoch: 13/100] [120000/220643 particles] gen loss=0.498173, kld=9.973381, beta=0.100000, loss=0.498192
+# [Train Epoch: 13/100] [125024/220643 particles] gen loss=0.497696, kld=10.350729, beta=0.100000, loss=0.497716
+# [Train Epoch: 13/100] [130016/220643 particles] gen loss=0.494784, kld=9.467615, beta=0.100000, loss=0.494803
+# [Train Epoch: 13/100] [135008/220643 particles] gen loss=0.501414, kld=11.231771, beta=0.100000, loss=0.501435
+# [Train Epoch: 13/100] [140000/220643 particles] gen loss=0.495020, kld=10.392997, beta=0.100000, loss=0.495041
+# [Train Epoch: 13/100] [145024/220643 particles] gen loss=0.497537, kld=10.268587, beta=0.100000, loss=0.497557
+# [Train Epoch: 13/100] [150016/220643 particles] gen loss=0.494252, kld=10.260714, beta=0.100000, loss=0.494272
+# [Train Epoch: 13/100] [155008/220643 particles] gen loss=0.498839, kld=10.605846, beta=0.100000, loss=0.498860
+# [Train Epoch: 13/100] [160000/220643 particles] gen loss=0.495374, kld=10.074355, beta=0.100000, loss=0.495393
+# [Train Epoch: 13/100] [165024/220643 particles] gen loss=0.500942, kld=9.808784, beta=0.100000, loss=0.500961
+# [Train Epoch: 13/100] [170016/220643 particles] gen loss=0.496826, kld=11.406160, beta=0.100000, loss=0.496848
+# [Train Epoch: 13/100] [175008/220643 particles] gen loss=0.502658, kld=10.306800, beta=0.100000, loss=0.502678
+# [Train Epoch: 13/100] [180000/220643 particles] gen loss=0.494486, kld=9.784393, beta=0.100000, loss=0.494505
+# [Train Epoch: 13/100] [185024/220643 particles] gen loss=0.502216, kld=10.493979, beta=0.100000, loss=0.502237
+# [Train Epoch: 13/100] [190016/220643 particles] gen loss=0.495047, kld=9.922968, beta=0.100000, loss=0.495066
+# [Train Epoch: 13/100] [195008/220643 particles] gen loss=0.495879, kld=9.815292, beta=0.100000, loss=0.495898
+# [Train Epoch: 13/100] [200000/220643 particles] gen loss=0.493073, kld=10.119246, beta=0.100000, loss=0.493093
+# [Train Epoch: 13/100] [205024/220643 particles] gen loss=0.501921, kld=9.638090, beta=0.100000, loss=0.501939
+# [Train Epoch: 13/100] [210016/220643 particles] gen loss=0.501098, kld=11.014544, beta=0.100000, loss=0.501119
+# [Train Epoch: 13/100] [215008/220643 particles] gen loss=0.500912, kld=10.193851, beta=0.100000, loss=0.500932
+# [Train Epoch: 13/100] [220000/220643 particles] gen loss=0.501360, kld=11.495695, beta=0.100000, loss=0.501382
+# =====> Epoch: 13 Average gen loss = 0.498557, KLD = 10.221930, total loss = 0.498577; Finished in 2:33:56.326217
+# [Train Epoch: 14/100] [5024/220643 particles] gen loss=0.501616, kld=11.036570, beta=0.100000, loss=0.501638
+# [Train Epoch: 14/100] [10016/220643 particles] gen loss=0.500345, kld=10.549070, beta=0.100000, loss=0.500366
+# [Train Epoch: 14/100] [15008/220643 particles] gen loss=0.495715, kld=10.561176, beta=0.100000, loss=0.495736
+# [Train Epoch: 14/100] [20000/220643 particles] gen loss=0.498328, kld=9.698838, beta=0.100000, loss=0.498347
+# [Train Epoch: 14/100] [25024/220643 particles] gen loss=0.498399, kld=10.631281, beta=0.100000, loss=0.498420
+# [Train Epoch: 14/100] [30016/220643 particles] gen loss=0.496294, kld=11.225647, beta=0.100000, loss=0.496315
+# [Train Epoch: 14/100] [35008/220643 particles] gen loss=0.502982, kld=10.230178, beta=0.100000, loss=0.503002
+# [Train Epoch: 14/100] [40000/220643 particles] gen loss=0.496271, kld=9.665844, beta=0.100000, loss=0.496290
+# [Train Epoch: 14/100] [45024/220643 particles] gen loss=0.499559, kld=11.119113, beta=0.100000, loss=0.499581
+# [Train Epoch: 14/100] [50016/220643 particles] gen loss=0.503281, kld=11.001541, beta=0.100000, loss=0.503302
+# [Train Epoch: 14/100] [55008/220643 particles] gen loss=0.500231, kld=10.250072, beta=0.100000, loss=0.500251
+# [Train Epoch: 14/100] [60000/220643 particles] gen loss=0.494212, kld=10.389303, beta=0.100000, loss=0.494232
+# [Train Epoch: 14/100] [65024/220643 particles] gen loss=0.498868, kld=10.902649, beta=0.100000, loss=0.498889
+# [Train Epoch: 14/100] [70016/220643 particles] gen loss=0.495309, kld=10.779594, beta=0.100000, loss=0.495330
+# [Train Epoch: 14/100] [75008/220643 particles] gen loss=0.496521, kld=10.497995, beta=0.100000, loss=0.496542
+# [Train Epoch: 14/100] [80000/220643 particles] gen loss=0.497475, kld=11.309560, beta=0.100000, loss=0.497497
+# [Train Epoch: 14/100] [85024/220643 particles] gen loss=0.498780, kld=10.016609, beta=0.100000, loss=0.498799
+# [Train Epoch: 14/100] [90016/220643 particles] gen loss=0.496634, kld=10.295079, beta=0.100000, loss=0.496654
+# [Train Epoch: 14/100] [95008/220643 particles] gen loss=0.499149, kld=9.499161, beta=0.100000, loss=0.499168
+# [Train Epoch: 14/100] [100000/220643 particles] gen loss=0.493045, kld=10.422859, beta=0.100000, loss=0.493065
+# [Train Epoch: 14/100] [105024/220643 particles] gen loss=0.494507, kld=11.002608, beta=0.100000, loss=0.494528
+# [Train Epoch: 14/100] [110016/220643 particles] gen loss=0.496703, kld=10.978986, beta=0.100000, loss=0.496724
+# [Train Epoch: 14/100] [115008/220643 particles] gen loss=0.499960, kld=10.419848, beta=0.100000, loss=0.499981
+# [Train Epoch: 14/100] [120000/220643 particles] gen loss=0.500275, kld=10.335072, beta=0.100000, loss=0.500295
+# [Train Epoch: 14/100] [125024/220643 particles] gen loss=0.490624, kld=9.992691, beta=0.100000, loss=0.490643
+# [Train Epoch: 14/100] [130016/220643 particles] gen loss=0.490769, kld=10.404881, beta=0.100000, loss=0.490790
+# [Train Epoch: 14/100] [135008/220643 particles] gen loss=0.498964, kld=9.626606, beta=0.100000, loss=0.498983
+# [Train Epoch: 14/100] [140000/220643 particles] gen loss=0.494736, kld=10.123318, beta=0.100000, loss=0.494756
+# [Train Epoch: 14/100] [145024/220643 particles] gen loss=0.503835, kld=9.928204, beta=0.100000, loss=0.503854
+# [Train Epoch: 14/100] [150016/220643 particles] gen loss=0.496003, kld=10.682587, beta=0.100000, loss=0.496024
+# [Train Epoch: 14/100] [155008/220643 particles] gen loss=0.499623, kld=10.816175, beta=0.100000, loss=0.499644
+# [Train Epoch: 14/100] [160000/220643 particles] gen loss=0.498352, kld=10.147732, beta=0.100000, loss=0.498372
+# [Train Epoch: 14/100] [165024/220643 particles] gen loss=0.499968, kld=10.239861, beta=0.100000, loss=0.499988
+# [Train Epoch: 14/100] [170016/220643 particles] gen loss=0.489034, kld=10.591898, beta=0.100000, loss=0.489055
+# [Train Epoch: 14/100] [175008/220643 particles] gen loss=0.503526, kld=10.419585, beta=0.100000, loss=0.503546
+# [Train Epoch: 14/100] [180000/220643 particles] gen loss=0.506640, kld=10.399723, beta=0.100000, loss=0.506660
+# [Train Epoch: 14/100] [185024/220643 particles] gen loss=0.500133, kld=10.066093, beta=0.100000, loss=0.500152
+# [Train Epoch: 14/100] [190016/220643 particles] gen loss=0.496403, kld=10.464083, beta=0.100000, loss=0.496424
+# [Train Epoch: 14/100] [195008/220643 particles] gen loss=0.500271, kld=10.288033, beta=0.100000, loss=0.500291
+# [Train Epoch: 14/100] [200000/220643 particles] gen loss=0.495253, kld=11.028482, beta=0.100000, loss=0.495274
+# [Train Epoch: 14/100] [205024/220643 particles] gen loss=0.502262, kld=9.532907, beta=0.100000, loss=0.502280
+# [Train Epoch: 14/100] [210016/220643 particles] gen loss=0.492859, kld=10.538867, beta=0.100000, loss=0.492879
+# [Train Epoch: 14/100] [215008/220643 particles] gen loss=0.497995, kld=10.206814, beta=0.100000, loss=0.498015
+# [Train Epoch: 14/100] [220000/220643 particles] gen loss=0.502459, kld=10.397050, beta=0.100000, loss=0.502479
+# =====> Epoch: 14 Average gen loss = 0.498545, KLD = 10.359285, total loss = 0.498566; Finished in 2:20:06.571320
+# [Train Epoch: 15/100] [5024/220643 particles] gen loss=0.504456, kld=10.520117, beta=0.100000, loss=0.504476
+# [Train Epoch: 15/100] [10016/220643 particles] gen loss=0.494849, kld=10.736313, beta=0.100000, loss=0.494870
+# [Train Epoch: 15/100] [15008/220643 particles] gen loss=0.495529, kld=9.849291, beta=0.100000, loss=0.495549
+# [Train Epoch: 15/100] [20000/220643 particles] gen loss=0.499787, kld=10.689608, beta=0.100000, loss=0.499808
+# [Train Epoch: 15/100] [25024/220643 particles] gen loss=0.502514, kld=9.751019, beta=0.100000, loss=0.502533
+# [Train Epoch: 15/100] [30016/220643 particles] gen loss=0.502038, kld=11.067738, beta=0.100000, loss=0.502059
+# [Train Epoch: 15/100] [35008/220643 particles] gen loss=0.494939, kld=9.964224, beta=0.100000, loss=0.494959
+# [Train Epoch: 15/100] [40000/220643 particles] gen loss=0.492554, kld=10.519319, beta=0.100000, loss=0.492574
+# [Train Epoch: 15/100] [45024/220643 particles] gen loss=0.505845, kld=11.366241, beta=0.100000, loss=0.505868
+# [Train Epoch: 15/100] [50016/220643 particles] gen loss=0.495407, kld=10.082254, beta=0.100000, loss=0.495426
+# [Train Epoch: 15/100] [55008/220643 particles] gen loss=0.502495, kld=10.551980, beta=0.100000, loss=0.502516
+# [Train Epoch: 15/100] [60000/220643 particles] gen loss=0.497527, kld=10.504639, beta=0.100000, loss=0.497548
+# [Train Epoch: 15/100] [65024/220643 particles] gen loss=0.497368, kld=11.193828, beta=0.100000, loss=0.497390
+# [Train Epoch: 15/100] [70016/220643 particles] gen loss=0.500797, kld=9.941839, beta=0.100000, loss=0.500816
+# [Train Epoch: 15/100] [75008/220643 particles] gen loss=0.491660, kld=10.380215, beta=0.100000, loss=0.491680
+# [Train Epoch: 15/100] [80000/220643 particles] gen loss=0.495442, kld=10.558607, beta=0.100000, loss=0.495463
+# [Train Epoch: 15/100] [85024/220643 particles] gen loss=0.497976, kld=10.678338, beta=0.100000, loss=0.497997
+# [Train Epoch: 15/100] [90016/220643 particles] gen loss=0.498672, kld=10.913564, beta=0.100000, loss=0.498693
+# [Train Epoch: 15/100] [95008/220643 particles] gen loss=0.504081, kld=10.589961, beta=0.100000, loss=0.504102
+# [Train Epoch: 15/100] [100000/220643 particles] gen loss=0.493903, kld=10.601682, beta=0.100000, loss=0.493924
+# [Train Epoch: 15/100] [105024/220643 particles] gen loss=0.492959, kld=10.338169, beta=0.100000, loss=0.492979
+# [Train Epoch: 15/100] [110016/220643 particles] gen loss=0.502017, kld=11.020857, beta=0.100000, loss=0.502038
+# [Train Epoch: 15/100] [115008/220643 particles] gen loss=0.505240, kld=11.427460, beta=0.100000, loss=0.505262
+# [Train Epoch: 15/100] [120000/220643 particles] gen loss=0.501017, kld=10.561726, beta=0.100000, loss=0.501038
+# [Train Epoch: 15/100] [125024/220643 particles] gen loss=0.495955, kld=9.873959, beta=0.100000, loss=0.495975
+# [Train Epoch: 15/100] [130016/220643 particles] gen loss=0.496120, kld=10.844006, beta=0.100000, loss=0.496141
+# [Train Epoch: 15/100] [135008/220643 particles] gen loss=0.494979, kld=10.571328, beta=0.100000, loss=0.495000
+# [Train Epoch: 15/100] [140000/220643 particles] gen loss=0.497095, kld=10.227159, beta=0.100000, loss=0.497115
+# [Train Epoch: 15/100] [145024/220643 particles] gen loss=0.501021, kld=10.021363, beta=0.100000, loss=0.501041
+# [Train Epoch: 15/100] [150016/220643 particles] gen loss=0.501465, kld=10.444098, beta=0.100000, loss=0.501486
+# [Train Epoch: 15/100] [155008/220643 particles] gen loss=0.500663, kld=9.296911, beta=0.100000, loss=0.500681
+# [Train Epoch: 15/100] [160000/220643 particles] gen loss=0.494129, kld=9.949730, beta=0.100000, loss=0.494148
+# [Train Epoch: 15/100] [165024/220643 particles] gen loss=0.496458, kld=10.868337, beta=0.100000, loss=0.496479
+# [Train Epoch: 15/100] [170016/220643 particles] gen loss=0.499854, kld=10.133906, beta=0.100000, loss=0.499874
+# [Train Epoch: 15/100] [175008/220643 particles] gen loss=0.499253, kld=11.027922, beta=0.100000, loss=0.499275
+# [Train Epoch: 15/100] [180000/220643 particles] gen loss=0.488763, kld=9.688534, beta=0.100000, loss=0.488782
+# [Train Epoch: 15/100] [185024/220643 particles] gen loss=0.502564, kld=9.409210, beta=0.100000, loss=0.502582
+# [Train Epoch: 15/100] [190016/220643 particles] gen loss=0.496310, kld=10.918632, beta=0.100000, loss=0.496331
+# [Train Epoch: 15/100] [195008/220643 particles] gen loss=0.494841, kld=10.233125, beta=0.100000, loss=0.494861
+# [Train Epoch: 15/100] [200000/220643 particles] gen loss=0.495988, kld=10.468798, beta=0.100000, loss=0.496008
+# [Train Epoch: 15/100] [205024/220643 particles] gen loss=0.496476, kld=10.703229, beta=0.100000, loss=0.496497
+# [Train Epoch: 15/100] [210016/220643 particles] gen loss=0.498167, kld=11.039124, beta=0.100000, loss=0.498188
+# [Train Epoch: 15/100] [215008/220643 particles] gen loss=0.499270, kld=10.926385, beta=0.100000, loss=0.499291
+# [Train Epoch: 15/100] [220000/220643 particles] gen loss=0.499425, kld=9.879852, beta=0.100000, loss=0.499444
+# =====> Epoch: 15 Average gen loss = 0.498534, KLD = 10.495330, total loss = 0.498554; Finished in 2:17:38.090657
+Evaluating z
+# [Train Epoch: 16/100] [5024/220643 particles] gen loss=0.497609, kld=10.727026, beta=0.100000, loss=0.497630
+# [Train Epoch: 16/100] [10016/220643 particles] gen loss=0.494403, kld=10.078032, beta=0.100000, loss=0.494423
+# [Train Epoch: 16/100] [15008/220643 particles] gen loss=0.487905, kld=11.184274, beta=0.100000, loss=0.487926
+# [Train Epoch: 16/100] [20000/220643 particles] gen loss=0.495005, kld=11.005690, beta=0.100000, loss=0.495026
+# [Train Epoch: 16/100] [25024/220643 particles] gen loss=0.501705, kld=10.881521, beta=0.100000, loss=0.501726
+# [Train Epoch: 16/100] [30016/220643 particles] gen loss=0.495605, kld=10.694111, beta=0.100000, loss=0.495626
+# [Train Epoch: 16/100] [35008/220643 particles] gen loss=0.501376, kld=10.685848, beta=0.100000, loss=0.501397
+# [Train Epoch: 16/100] [40000/220643 particles] gen loss=0.507775, kld=10.440784, beta=0.100000, loss=0.507795
+# [Train Epoch: 16/100] [45024/220643 particles] gen loss=0.497201, kld=11.417109, beta=0.100000, loss=0.497223
+# [Train Epoch: 16/100] [50016/220643 particles] gen loss=0.496641, kld=10.651369, beta=0.100000, loss=0.496662
+# [Train Epoch: 16/100] [55008/220643 particles] gen loss=0.495973, kld=11.772419, beta=0.100000, loss=0.495996
+# [Train Epoch: 16/100] [60000/220643 particles] gen loss=0.496622, kld=10.637187, beta=0.100000, loss=0.496643
+# [Train Epoch: 16/100] [65024/220643 particles] gen loss=0.503716, kld=10.322653, beta=0.100000, loss=0.503736
+# [Train Epoch: 16/100] [70016/220643 particles] gen loss=0.504775, kld=10.496187, beta=0.100000, loss=0.504795
+# [Train Epoch: 16/100] [75008/220643 particles] gen loss=0.497524, kld=10.717587, beta=0.100000, loss=0.497545
+# [Train Epoch: 16/100] [80000/220643 particles] gen loss=0.493501, kld=10.384426, beta=0.100000, loss=0.493521
+# [Train Epoch: 16/100] [85024/220643 particles] gen loss=0.502938, kld=10.193964, beta=0.100000, loss=0.502958
+# [Train Epoch: 16/100] [90016/220643 particles] gen loss=0.501260, kld=10.642301, beta=0.100000, loss=0.501281
+# [Train Epoch: 16/100] [95008/220643 particles] gen loss=0.497226, kld=10.327491, beta=0.100000, loss=0.497246
+# [Train Epoch: 16/100] [100000/220643 particles] gen loss=0.501086, kld=10.790532, beta=0.100000, loss=0.501107
+# [Train Epoch: 16/100] [105024/220643 particles] gen loss=0.499102, kld=10.663858, beta=0.100000, loss=0.499123
+# [Train Epoch: 16/100] [110016/220643 particles] gen loss=0.495279, kld=10.728628, beta=0.100000, loss=0.495299
+# [Train Epoch: 16/100] [115008/220643 particles] gen loss=0.498474, kld=10.845846, beta=0.100000, loss=0.498495
+# [Train Epoch: 16/100] [120000/220643 particles] gen loss=0.506428, kld=12.000084, beta=0.100000, loss=0.506451
+# [Train Epoch: 16/100] [125024/220643 particles] gen loss=0.498800, kld=11.745811, beta=0.100000, loss=0.498823
+# [Train Epoch: 16/100] [130016/220643 particles] gen loss=0.501831, kld=10.635498, beta=0.100000, loss=0.501851
+# [Train Epoch: 16/100] [135008/220643 particles] gen loss=0.495867, kld=10.178877, beta=0.100000, loss=0.495886
+# [Train Epoch: 16/100] [140000/220643 particles] gen loss=0.503340, kld=11.333948, beta=0.100000, loss=0.503362
+# [Train Epoch: 16/100] [145024/220643 particles] gen loss=0.499989, kld=10.404658, beta=0.100000, loss=0.500009
+# [Train Epoch: 16/100] [150016/220643 particles] gen loss=0.497665, kld=10.791405, beta=0.100000, loss=0.497686
+# [Train Epoch: 16/100] [155008/220643 particles] gen loss=0.495194, kld=10.181063, beta=0.100000, loss=0.495214
+# [Train Epoch: 16/100] [160000/220643 particles] gen loss=0.499706, kld=11.774894, beta=0.100000, loss=0.499728
+# [Train Epoch: 16/100] [165024/220643 particles] gen loss=0.501363, kld=10.291867, beta=0.100000, loss=0.501383
+# [Train Epoch: 16/100] [170016/220643 particles] gen loss=0.499081, kld=10.897661, beta=0.100000, loss=0.499102
+# [Train Epoch: 16/100] [175008/220643 particles] gen loss=0.494732, kld=11.321394, beta=0.100000, loss=0.494754
+# [Train Epoch: 16/100] [180000/220643 particles] gen loss=0.501022, kld=10.344346, beta=0.100000, loss=0.501042
+# [Train Epoch: 16/100] [185024/220643 particles] gen loss=0.502956, kld=10.842605, beta=0.100000, loss=0.502977
+# [Train Epoch: 16/100] [190016/220643 particles] gen loss=0.499846, kld=11.045210, beta=0.100000, loss=0.499868
+# [Train Epoch: 16/100] [195008/220643 particles] gen loss=0.508898, kld=10.606358, beta=0.100000, loss=0.508919
+# [Train Epoch: 16/100] [200000/220643 particles] gen loss=0.491651, kld=10.961684, beta=0.100000, loss=0.491672
+# [Train Epoch: 16/100] [205024/220643 particles] gen loss=0.499068, kld=10.895380, beta=0.100000, loss=0.499089
+# [Train Epoch: 16/100] [210016/220643 particles] gen loss=0.498201, kld=10.388792, beta=0.100000, loss=0.498221
+# [Train Epoch: 16/100] [215008/220643 particles] gen loss=0.500652, kld=10.052867, beta=0.100000, loss=0.500671
+# [Train Epoch: 16/100] [220000/220643 particles] gen loss=0.500826, kld=11.357316, beta=0.100000, loss=0.500848
+# =====> Epoch: 16 Average gen loss = 0.498524, KLD = 10.633009, total loss = 0.498544; Finished in 2:20:04.809659
+# [Train Epoch: 17/100] [5024/220643 particles] gen loss=0.497012, kld=11.246017, beta=0.100000, loss=0.497034
+# [Train Epoch: 17/100] [10016/220643 particles] gen loss=0.497023, kld=10.933123, beta=0.100000, loss=0.497045
+# [Train Epoch: 17/100] [15008/220643 particles] gen loss=0.501396, kld=11.144833, beta=0.100000, loss=0.501418
+# [Train Epoch: 17/100] [20000/220643 particles] gen loss=0.502080, kld=10.853947, beta=0.100000, loss=0.502101
+# [Train Epoch: 17/100] [25024/220643 particles] gen loss=0.503351, kld=11.643846, beta=0.100000, loss=0.503374
+# [Train Epoch: 17/100] [30016/220643 particles] gen loss=0.494874, kld=10.147894, beta=0.100000, loss=0.494894
+# [Train Epoch: 17/100] [35008/220643 particles] gen loss=0.496063, kld=11.598753, beta=0.100000, loss=0.496086
+# [Train Epoch: 17/100] [40000/220643 particles] gen loss=0.499225, kld=11.175331, beta=0.100000, loss=0.499247
+# [Train Epoch: 17/100] [45024/220643 particles] gen loss=0.500581, kld=11.478413, beta=0.100000, loss=0.500603
+# [Train Epoch: 17/100] [50016/220643 particles] gen loss=0.500786, kld=9.296936, beta=0.100000, loss=0.500804
+# [Train Epoch: 17/100] [55008/220643 particles] gen loss=0.496170, kld=10.438949, beta=0.100000, loss=0.496190
+# [Train Epoch: 17/100] [60000/220643 particles] gen loss=0.499255, kld=10.450969, beta=0.100000, loss=0.499275
+# [Train Epoch: 17/100] [65024/220643 particles] gen loss=0.503443, kld=11.726536, beta=0.100000, loss=0.503466
+# [Train Epoch: 17/100] [70016/220643 particles] gen loss=0.493734, kld=10.764437, beta=0.100000, loss=0.493755
+# [Train Epoch: 17/100] [75008/220643 particles] gen loss=0.495702, kld=11.527637, beta=0.100000, loss=0.495724
+# [Train Epoch: 17/100] [80000/220643 particles] gen loss=0.493868, kld=11.137511, beta=0.100000, loss=0.493890
+# [Train Epoch: 17/100] [85024/220643 particles] gen loss=0.515546, kld=10.564810, beta=0.100000, loss=0.515567
+# [Train Epoch: 17/100] [90016/220643 particles] gen loss=0.501779, kld=11.665699, beta=0.100000, loss=0.501801
+# [Train Epoch: 17/100] [95008/220643 particles] gen loss=0.498837, kld=10.526186, beta=0.100000, loss=0.498857
+# [Train Epoch: 17/100] [100000/220643 particles] gen loss=0.504295, kld=9.889749, beta=0.100000, loss=0.504314
+# [Train Epoch: 17/100] [105024/220643 particles] gen loss=0.501130, kld=10.729002, beta=0.100000, loss=0.501151
+# [Train Epoch: 17/100] [110016/220643 particles] gen loss=0.497251, kld=10.584098, beta=0.100000, loss=0.497271
+# [Train Epoch: 17/100] [115008/220643 particles] gen loss=0.503986, kld=10.335373, beta=0.100000, loss=0.504006
+# [Train Epoch: 17/100] [120000/220643 particles] gen loss=0.497394, kld=10.356363, beta=0.100000, loss=0.497414
+# [Train Epoch: 17/100] [125024/220643 particles] gen loss=0.499785, kld=9.973452, beta=0.100000, loss=0.499804
+# [Train Epoch: 17/100] [130016/220643 particles] gen loss=0.497287, kld=10.485318, beta=0.100000, loss=0.497308
+# [Train Epoch: 17/100] [135008/220643 particles] gen loss=0.500833, kld=11.189831, beta=0.100000, loss=0.500854
+# [Train Epoch: 17/100] [140000/220643 particles] gen loss=0.502684, kld=10.790991, beta=0.100000, loss=0.502705
+# [Train Epoch: 17/100] [145024/220643 particles] gen loss=0.501948, kld=10.938072, beta=0.100000, loss=0.501969
+# [Train Epoch: 17/100] [150016/220643 particles] gen loss=0.496193, kld=10.719986, beta=0.100000, loss=0.496214
+# [Train Epoch: 17/100] [155008/220643 particles] gen loss=0.493374, kld=10.947206, beta=0.100000, loss=0.493395
+# [Train Epoch: 17/100] [160000/220643 particles] gen loss=0.495411, kld=11.001608, beta=0.100000, loss=0.495433
+# [Train Epoch: 17/100] [165024/220643 particles] gen loss=0.502713, kld=10.722954, beta=0.100000, loss=0.502734
+# [Train Epoch: 17/100] [170016/220643 particles] gen loss=0.498947, kld=10.119865, beta=0.100000, loss=0.498966
+# [Train Epoch: 17/100] [175008/220643 particles] gen loss=0.500925, kld=10.524590, beta=0.100000, loss=0.500946
+# [Train Epoch: 17/100] [180000/220643 particles] gen loss=0.500815, kld=11.466610, beta=0.100000, loss=0.500837
+# [Train Epoch: 17/100] [185024/220643 particles] gen loss=0.491791, kld=10.991600, beta=0.100000, loss=0.491812
+# [Train Epoch: 17/100] [190016/220643 particles] gen loss=0.503298, kld=11.172199, beta=0.100000, loss=0.503320
+# [Train Epoch: 17/100] [195008/220643 particles] gen loss=0.499302, kld=10.324183, beta=0.100000, loss=0.499323
+# [Train Epoch: 17/100] [200000/220643 particles] gen loss=0.497792, kld=9.901222, beta=0.100000, loss=0.497811
+# [Train Epoch: 17/100] [205024/220643 particles] gen loss=0.501291, kld=10.670259, beta=0.100000, loss=0.501312
+# [Train Epoch: 17/100] [210016/220643 particles] gen loss=0.503039, kld=10.369940, beta=0.100000, loss=0.503059
+# [Train Epoch: 17/100] [215008/220643 particles] gen loss=0.499677, kld=10.550084, beta=0.100000, loss=0.499697
+# [Train Epoch: 17/100] [220000/220643 particles] gen loss=0.499584, kld=10.798596, beta=0.100000, loss=0.499605
+# =====> Epoch: 17 Average gen loss = 0.498514, KLD = 10.778645, total loss = 0.498535; Finished in 2:20:04.924045
+# [Train Epoch: 18/100] [5024/220643 particles] gen loss=0.501918, kld=11.647564, beta=0.100000, loss=0.501940
+# [Train Epoch: 18/100] [10016/220643 particles] gen loss=0.496095, kld=10.898860, beta=0.100000, loss=0.496116
+# [Train Epoch: 18/100] [15008/220643 particles] gen loss=0.500970, kld=10.669231, beta=0.100000, loss=0.500991
+# [Train Epoch: 18/100] [20000/220643 particles] gen loss=0.499070, kld=11.138605, beta=0.100000, loss=0.499091
+# [Train Epoch: 18/100] [25024/220643 particles] gen loss=0.501086, kld=11.120028, beta=0.100000, loss=0.501107
+# [Train Epoch: 18/100] [30016/220643 particles] gen loss=0.499630, kld=10.709633, beta=0.100000, loss=0.499651
+# [Train Epoch: 18/100] [35008/220643 particles] gen loss=0.496309, kld=10.803634, beta=0.100000, loss=0.496330
+# [Train Epoch: 18/100] [40000/220643 particles] gen loss=0.495662, kld=10.909728, beta=0.100000, loss=0.495683
+# [Train Epoch: 18/100] [45024/220643 particles] gen loss=0.500841, kld=10.567480, beta=0.100000, loss=0.500862
+# [Train Epoch: 18/100] [50016/220643 particles] gen loss=0.496011, kld=10.949713, beta=0.100000, loss=0.496032
+# [Train Epoch: 18/100] [55008/220643 particles] gen loss=0.499639, kld=9.873343, beta=0.100000, loss=0.499658
+# [Train Epoch: 18/100] [60000/220643 particles] gen loss=0.496978, kld=10.441994, beta=0.100000, loss=0.496998
+# [Train Epoch: 18/100] [65024/220643 particles] gen loss=0.497434, kld=11.547092, beta=0.100000, loss=0.497456
+# [Train Epoch: 18/100] [70016/220643 particles] gen loss=0.494700, kld=10.564517, beta=0.100000, loss=0.494721
+# [Train Epoch: 18/100] [75008/220643 particles] gen loss=0.506749, kld=10.302861, beta=0.100000, loss=0.506769
+# [Train Epoch: 18/100] [80000/220643 particles] gen loss=0.489892, kld=10.660624, beta=0.100000, loss=0.489913
+# [Train Epoch: 18/100] [85024/220643 particles] gen loss=0.490571, kld=11.201519, beta=0.100000, loss=0.490593
+# [Train Epoch: 18/100] [90016/220643 particles] gen loss=0.498762, kld=10.840589, beta=0.100000, loss=0.498783
+# [Train Epoch: 18/100] [95008/220643 particles] gen loss=0.498617, kld=10.564732, beta=0.100000, loss=0.498638
+# [Train Epoch: 18/100] [100000/220643 particles] gen loss=0.499324, kld=11.237865, beta=0.100000, loss=0.499346
+# [Train Epoch: 18/100] [105024/220643 particles] gen loss=0.501575, kld=11.289120, beta=0.100000, loss=0.501597
+# [Train Epoch: 18/100] [110016/220643 particles] gen loss=0.504370, kld=11.214019, beta=0.100000, loss=0.504392
+# [Train Epoch: 18/100] [115008/220643 particles] gen loss=0.499585, kld=11.132988, beta=0.100000, loss=0.499607
+# [Train Epoch: 18/100] [120000/220643 particles] gen loss=0.499759, kld=11.042267, beta=0.100000, loss=0.499781
+# [Train Epoch: 18/100] [125024/220643 particles] gen loss=0.495121, kld=10.609831, beta=0.100000, loss=0.495142
+# [Train Epoch: 18/100] [130016/220643 particles] gen loss=0.491287, kld=10.425652, beta=0.100000, loss=0.491307
+# [Train Epoch: 18/100] [135008/220643 particles] gen loss=0.504744, kld=10.746614, beta=0.100000, loss=0.504765
+# [Train Epoch: 18/100] [140000/220643 particles] gen loss=0.499629, kld=10.968563, beta=0.100000, loss=0.499651
+# [Train Epoch: 18/100] [145024/220643 particles] gen loss=0.500986, kld=10.514523, beta=0.100000, loss=0.501006
+# [Train Epoch: 18/100] [150016/220643 particles] gen loss=0.493906, kld=10.608509, beta=0.100000, loss=0.493927
+# [Train Epoch: 18/100] [155008/220643 particles] gen loss=0.503591, kld=11.433887, beta=0.100000, loss=0.503614
+# [Train Epoch: 18/100] [160000/220643 particles] gen loss=0.504068, kld=10.768282, beta=0.100000, loss=0.504089
+# [Train Epoch: 18/100] [165024/220643 particles] gen loss=0.501997, kld=10.563261, beta=0.100000, loss=0.502017
+# [Train Epoch: 18/100] [170016/220643 particles] gen loss=0.492931, kld=11.257702, beta=0.100000, loss=0.492953
+# [Train Epoch: 18/100] [175008/220643 particles] gen loss=0.498741, kld=10.742433, beta=0.100000, loss=0.498762
+# [Train Epoch: 18/100] [180000/220643 particles] gen loss=0.500402, kld=10.781170, beta=0.100000, loss=0.500423
+# [Train Epoch: 18/100] [185024/220643 particles] gen loss=0.499060, kld=10.388732, beta=0.100000, loss=0.499080
+# [Train Epoch: 18/100] [190016/220643 particles] gen loss=0.498508, kld=11.058928, beta=0.100000, loss=0.498529
+# [Train Epoch: 18/100] [195008/220643 particles] gen loss=0.504802, kld=10.755659, beta=0.100000, loss=0.504823
+# [Train Epoch: 18/100] [200000/220643 particles] gen loss=0.504562, kld=11.030750, beta=0.100000, loss=0.504584
+# [Train Epoch: 18/100] [205024/220643 particles] gen loss=0.496463, kld=11.265789, beta=0.100000, loss=0.496485
+# [Train Epoch: 18/100] [210016/220643 particles] gen loss=0.499677, kld=10.591784, beta=0.100000, loss=0.499698
+# [Train Epoch: 18/100] [215008/220643 particles] gen loss=0.501631, kld=11.588307, beta=0.100000, loss=0.501654
+# [Train Epoch: 18/100] [220000/220643 particles] gen loss=0.499241, kld=11.136627, beta=0.100000, loss=0.499262
+# =====> Epoch: 18 Average gen loss = 0.498503, KLD = 10.932545, total loss = 0.498524; Finished in 2:20:03.952363
+# [Train Epoch: 19/100] [5024/220643 particles] gen loss=0.492743, kld=11.263592, beta=0.100000, loss=0.492765
+# [Train Epoch: 19/100] [10016/220643 particles] gen loss=0.506553, kld=10.957247, beta=0.100000, loss=0.506574
+# [Train Epoch: 19/100] [15008/220643 particles] gen loss=0.494418, kld=10.889898, beta=0.100000, loss=0.494440
+# [Train Epoch: 19/100] [20000/220643 particles] gen loss=0.498939, kld=11.318194, beta=0.100000, loss=0.498961
+# [Train Epoch: 19/100] [25024/220643 particles] gen loss=0.498074, kld=11.092865, beta=0.100000, loss=0.498096
+# [Train Epoch: 19/100] [30016/220643 particles] gen loss=0.500070, kld=10.253137, beta=0.100000, loss=0.500090
+# [Train Epoch: 19/100] [35008/220643 particles] gen loss=0.495514, kld=11.251505, beta=0.100000, loss=0.495536
+# [Train Epoch: 19/100] [40000/220643 particles] gen loss=0.497307, kld=11.590919, beta=0.100000, loss=0.497330
+# [Train Epoch: 19/100] [45024/220643 particles] gen loss=0.504334, kld=11.308273, beta=0.100000, loss=0.504356
+# [Train Epoch: 19/100] [50016/220643 particles] gen loss=0.500737, kld=11.286337, beta=0.100000, loss=0.500759
+# [Train Epoch: 19/100] [55008/220643 particles] gen loss=0.497048, kld=11.243298, beta=0.100000, loss=0.497070
+# [Train Epoch: 19/100] [60000/220643 particles] gen loss=0.502272, kld=11.382837, beta=0.100000, loss=0.502294
+# [Train Epoch: 19/100] [65024/220643 particles] gen loss=0.498962, kld=10.959335, beta=0.100000, loss=0.498984
+# [Train Epoch: 19/100] [70016/220643 particles] gen loss=0.509161, kld=10.477285, beta=0.100000, loss=0.509181
+# [Train Epoch: 19/100] [75008/220643 particles] gen loss=0.500006, kld=11.554447, beta=0.100000, loss=0.500028
+# [Train Epoch: 19/100] [80000/220643 particles] gen loss=0.497184, kld=10.965235, beta=0.100000, loss=0.497206
+# [Train Epoch: 19/100] [85024/220643 particles] gen loss=0.499649, kld=11.000463, beta=0.100000, loss=0.499671
+# [Train Epoch: 19/100] [90016/220643 particles] gen loss=0.499332, kld=12.105009, beta=0.100000, loss=0.499356
+# [Train Epoch: 19/100] [95008/220643 particles] gen loss=0.496417, kld=11.146832, beta=0.100000, loss=0.496439
+# [Train Epoch: 19/100] [100000/220643 particles] gen loss=0.495248, kld=10.464281, beta=0.100000, loss=0.495269
+# [Train Epoch: 19/100] [105024/220643 particles] gen loss=0.502727, kld=10.497203, beta=0.100000, loss=0.502748
+# [Train Epoch: 19/100] [110016/220643 particles] gen loss=0.492814, kld=11.153625, beta=0.100000, loss=0.492836
+# [Train Epoch: 19/100] [115008/220643 particles] gen loss=0.500079, kld=10.920455, beta=0.100000, loss=0.500100
+# [Train Epoch: 19/100] [120000/220643 particles] gen loss=0.495622, kld=10.756316, beta=0.100000, loss=0.495643
+# [Train Epoch: 19/100] [125024/220643 particles] gen loss=0.498540, kld=11.818630, beta=0.100000, loss=0.498563
+# [Train Epoch: 19/100] [130016/220643 particles] gen loss=0.499325, kld=11.803589, beta=0.100000, loss=0.499348
+# [Train Epoch: 19/100] [135008/220643 particles] gen loss=0.504490, kld=11.170652, beta=0.100000, loss=0.504512
+# [Train Epoch: 19/100] [140000/220643 particles] gen loss=0.503455, kld=10.460548, beta=0.100000, loss=0.503475
+# [Train Epoch: 19/100] [145024/220643 particles] gen loss=0.497302, kld=11.319029, beta=0.100000, loss=0.497324
+# [Train Epoch: 19/100] [150016/220643 particles] gen loss=0.491524, kld=11.139259, beta=0.100000, loss=0.491546
+# [Train Epoch: 19/100] [155008/220643 particles] gen loss=0.497860, kld=10.758953, beta=0.100000, loss=0.497881
+# [Train Epoch: 19/100] [160000/220643 particles] gen loss=0.493509, kld=11.080883, beta=0.100000, loss=0.493531
+# [Train Epoch: 19/100] [165024/220643 particles] gen loss=0.497240, kld=11.053202, beta=0.100000, loss=0.497262
+# [Train Epoch: 19/100] [170016/220643 particles] gen loss=0.498143, kld=10.190794, beta=0.100000, loss=0.498162
+# [Train Epoch: 19/100] [175008/220643 particles] gen loss=0.501572, kld=10.599737, beta=0.100000, loss=0.501593
+# [Train Epoch: 19/100] [180000/220643 particles] gen loss=0.502720, kld=11.388563, beta=0.100000, loss=0.502742
+# [Train Epoch: 19/100] [185024/220643 particles] gen loss=0.494942, kld=11.473713, beta=0.100000, loss=0.494965
+# [Train Epoch: 19/100] [190016/220643 particles] gen loss=0.501017, kld=10.660089, beta=0.100000, loss=0.501038
+# [Train Epoch: 19/100] [195008/220643 particles] gen loss=0.492277, kld=10.367901, beta=0.100000, loss=0.492298
+# [Train Epoch: 19/100] [200000/220643 particles] gen loss=0.501143, kld=10.881865, beta=0.100000, loss=0.501164
+# [Train Epoch: 19/100] [205024/220643 particles] gen loss=0.495195, kld=11.499498, beta=0.100000, loss=0.495217
+# [Train Epoch: 19/100] [210016/220643 particles] gen loss=0.504069, kld=10.867945, beta=0.100000, loss=0.504091
+# [Train Epoch: 19/100] [215008/220643 particles] gen loss=0.499592, kld=11.055930, beta=0.100000, loss=0.499613
+# [Train Epoch: 19/100] [220000/220643 particles] gen loss=0.501816, kld=11.202194, beta=0.100000, loss=0.501838
+# =====> Epoch: 19 Average gen loss = 0.498494, KLD = 11.061132, total loss = 0.498515; Finished in 2:20:01.708246
+# [Train Epoch: 20/100] [5024/220643 particles] gen loss=0.499728, kld=12.328860, beta=0.100000, loss=0.499752
+# [Train Epoch: 20/100] [10016/220643 particles] gen loss=0.499226, kld=11.667294, beta=0.100000, loss=0.499249
+# [Train Epoch: 20/100] [15008/220643 particles] gen loss=0.506821, kld=11.863937, beta=0.100000, loss=0.506844
+# [Train Epoch: 20/100] [20000/220643 particles] gen loss=0.496889, kld=10.782838, beta=0.100000, loss=0.496910
+# [Train Epoch: 20/100] [25024/220643 particles] gen loss=0.498240, kld=12.080422, beta=0.100000, loss=0.498264
+# [Train Epoch: 20/100] [30016/220643 particles] gen loss=0.500542, kld=11.902920, beta=0.100000, loss=0.500565
+# [Train Epoch: 20/100] [35008/220643 particles] gen loss=0.494195, kld=12.348034, beta=0.100000, loss=0.494219
+# [Train Epoch: 20/100] [40000/220643 particles] gen loss=0.502052, kld=12.090452, beta=0.100000, loss=0.502075
+# [Train Epoch: 20/100] [45024/220643 particles] gen loss=0.498822, kld=10.726442, beta=0.100000, loss=0.498843
+# [Train Epoch: 20/100] [50016/220643 particles] gen loss=0.500453, kld=11.611967, beta=0.100000, loss=0.500476
+# [Train Epoch: 20/100] [55008/220643 particles] gen loss=0.496199, kld=12.072424, beta=0.100000, loss=0.496222
+# [Train Epoch: 20/100] [60000/220643 particles] gen loss=0.499020, kld=10.941434, beta=0.100000, loss=0.499041
+# [Train Epoch: 20/100] [65024/220643 particles] gen loss=0.506399, kld=11.316807, beta=0.100000, loss=0.506421
+# [Train Epoch: 20/100] [70016/220643 particles] gen loss=0.506521, kld=11.589501, beta=0.100000, loss=0.506544
+# [Train Epoch: 20/100] [75008/220643 particles] gen loss=0.498303, kld=11.243317, beta=0.100000, loss=0.498324
+# [Train Epoch: 20/100] [80000/220643 particles] gen loss=0.497514, kld=11.918895, beta=0.100000, loss=0.497537
+# [Train Epoch: 20/100] [85024/220643 particles] gen loss=0.500292, kld=11.017382, beta=0.100000, loss=0.500313
+# [Train Epoch: 20/100] [90016/220643 particles] gen loss=0.494711, kld=10.732539, beta=0.100000, loss=0.494732
+# [Train Epoch: 20/100] [95008/220643 particles] gen loss=0.496236, kld=11.523514, beta=0.100000, loss=0.496259
+# [Train Epoch: 20/100] [100000/220643 particles] gen loss=0.494880, kld=10.582319, beta=0.100000, loss=0.494901
+# [Train Epoch: 20/100] [105024/220643 particles] gen loss=0.497208, kld=11.676809, beta=0.100000, loss=0.497231
+# [Train Epoch: 20/100] [110016/220643 particles] gen loss=0.503387, kld=10.153762, beta=0.100000, loss=0.503407
+# [Train Epoch: 20/100] [115008/220643 particles] gen loss=0.503174, kld=10.164297, beta=0.100000, loss=0.503194
+# [Train Epoch: 20/100] [120000/220643 particles] gen loss=0.501898, kld=10.644264, beta=0.100000, loss=0.501919
+# [Train Epoch: 20/100] [125024/220643 particles] gen loss=0.492031, kld=11.273466, beta=0.100000, loss=0.492053
+# [Train Epoch: 20/100] [130016/220643 particles] gen loss=0.497091, kld=10.701275, beta=0.100000, loss=0.497112
+# [Train Epoch: 20/100] [135008/220643 particles] gen loss=0.506943, kld=11.908704, beta=0.100000, loss=0.506966
+# [Train Epoch: 20/100] [140000/220643 particles] gen loss=0.496578, kld=11.054097, beta=0.100000, loss=0.496599
+# [Train Epoch: 20/100] [145024/220643 particles] gen loss=0.494993, kld=10.766560, beta=0.100000, loss=0.495014
+# [Train Epoch: 20/100] [150016/220643 particles] gen loss=0.500177, kld=11.187279, beta=0.100000, loss=0.500199
+# [Train Epoch: 20/100] [155008/220643 particles] gen loss=0.498394, kld=11.674700, beta=0.100000, loss=0.498417
+# [Train Epoch: 20/100] [160000/220643 particles] gen loss=0.493305, kld=10.807841, beta=0.100000, loss=0.493326
+# [Train Epoch: 20/100] [165024/220643 particles] gen loss=0.500316, kld=11.143399, beta=0.100000, loss=0.500337
+# [Train Epoch: 20/100] [170016/220643 particles] gen loss=0.502872, kld=11.266769, beta=0.100000, loss=0.502894
+# [Train Epoch: 20/100] [175008/220643 particles] gen loss=0.499176, kld=10.687645, beta=0.100000, loss=0.499196
+# [Train Epoch: 20/100] [180000/220643 particles] gen loss=0.502771, kld=11.888256, beta=0.100000, loss=0.502794
+# [Train Epoch: 20/100] [185024/220643 particles] gen loss=0.493646, kld=11.358082, beta=0.100000, loss=0.493668
+# [Train Epoch: 20/100] [190016/220643 particles] gen loss=0.497276, kld=10.584196, beta=0.100000, loss=0.497297
+# [Train Epoch: 20/100] [195008/220643 particles] gen loss=0.494468, kld=10.611506, beta=0.100000, loss=0.494489
+# [Train Epoch: 20/100] [200000/220643 particles] gen loss=0.500234, kld=10.664087, beta=0.100000, loss=0.500254
+# [Train Epoch: 20/100] [205024/220643 particles] gen loss=0.497042, kld=11.726450, beta=0.100000, loss=0.497065
+# [Train Epoch: 20/100] [210016/220643 particles] gen loss=0.499640, kld=11.490276, beta=0.100000, loss=0.499663
+# [Train Epoch: 20/100] [215008/220643 particles] gen loss=0.502753, kld=10.720722, beta=0.100000, loss=0.502774
+# [Train Epoch: 20/100] [220000/220643 particles] gen loss=0.501392, kld=10.991270, beta=0.100000, loss=0.501413
+# =====> Epoch: 20 Average gen loss = 0.498484, KLD = 11.223150, total loss = 0.498506; Finished in 2:59:06.468178
+Evaluating z
+# [Train Epoch: 21/100] [5024/220643 particles] gen loss=0.495555, kld=11.080963, beta=0.100000, loss=0.495577
+# [Train Epoch: 21/100] [10016/220643 particles] gen loss=0.508767, kld=11.611697, beta=0.100000, loss=0.508790
+# [Train Epoch: 21/100] [15008/220643 particles] gen loss=0.496296, kld=11.722695, beta=0.100000, loss=0.496319
+# [Train Epoch: 21/100] [20000/220643 particles] gen loss=0.502508, kld=11.411806, beta=0.100000, loss=0.502531
+# [Train Epoch: 21/100] [25024/220643 particles] gen loss=0.497847, kld=12.068811, beta=0.100000, loss=0.497871
+# [Train Epoch: 21/100] [30016/220643 particles] gen loss=0.498589, kld=11.077046, beta=0.100000, loss=0.498611
+# [Train Epoch: 21/100] [35008/220643 particles] gen loss=0.498847, kld=11.528185, beta=0.100000, loss=0.498870
+# [Train Epoch: 21/100] [40000/220643 particles] gen loss=0.502681, kld=11.442688, beta=0.100000, loss=0.502703
+# [Train Epoch: 21/100] [45024/220643 particles] gen loss=0.498688, kld=10.823668, beta=0.100000, loss=0.498709
+# [Train Epoch: 21/100] [50016/220643 particles] gen loss=0.498102, kld=10.979948, beta=0.100000, loss=0.498123
+# [Train Epoch: 21/100] [55008/220643 particles] gen loss=0.497133, kld=10.728935, beta=0.100000, loss=0.497154
+# [Train Epoch: 21/100] [60000/220643 particles] gen loss=0.497312, kld=12.383654, beta=0.100000, loss=0.497337
+# [Train Epoch: 21/100] [65024/220643 particles] gen loss=0.495788, kld=11.581620, beta=0.100000, loss=0.495811
+# [Train Epoch: 21/100] [70016/220643 particles] gen loss=0.497865, kld=12.233984, beta=0.100000, loss=0.497889
+# [Train Epoch: 21/100] [75008/220643 particles] gen loss=0.499058, kld=11.664266, beta=0.100000, loss=0.499080
+# [Train Epoch: 21/100] [80000/220643 particles] gen loss=0.503217, kld=11.082561, beta=0.100000, loss=0.503239
+# [Train Epoch: 21/100] [85024/220643 particles] gen loss=0.497665, kld=11.433731, beta=0.100000, loss=0.497687
+# [Train Epoch: 21/100] [90016/220643 particles] gen loss=0.493920, kld=11.057320, beta=0.100000, loss=0.493942
+# [Train Epoch: 21/100] [95008/220643 particles] gen loss=0.503923, kld=12.127646, beta=0.100000, loss=0.503946
+# [Train Epoch: 21/100] [100000/220643 particles] gen loss=0.494404, kld=11.125652, beta=0.100000, loss=0.494426
+# [Train Epoch: 21/100] [105024/220643 particles] gen loss=0.506293, kld=11.609027, beta=0.100000, loss=0.506315
+# [Train Epoch: 21/100] [110016/220643 particles] gen loss=0.492472, kld=10.927208, beta=0.100000, loss=0.492493
+# [Train Epoch: 21/100] [115008/220643 particles] gen loss=0.507512, kld=11.061955, beta=0.100000, loss=0.507534
+# [Train Epoch: 21/100] [120000/220643 particles] gen loss=0.495842, kld=10.833326, beta=0.100000, loss=0.495863
+# [Train Epoch: 21/100] [125024/220643 particles] gen loss=0.493807, kld=11.727705, beta=0.100000, loss=0.493830
+# [Train Epoch: 21/100] [130016/220643 particles] gen loss=0.502074, kld=10.757523, beta=0.100000, loss=0.502095
+# [Train Epoch: 21/100] [135008/220643 particles] gen loss=0.501964, kld=11.780020, beta=0.100000, loss=0.501987
+# [Train Epoch: 21/100] [140000/220643 particles] gen loss=0.498497, kld=10.813121, beta=0.100000, loss=0.498518
+# [Train Epoch: 21/100] [145024/220643 particles] gen loss=0.499487, kld=10.874242, beta=0.100000, loss=0.499508
+# [Train Epoch: 21/100] [150016/220643 particles] gen loss=0.495893, kld=10.891476, beta=0.100000, loss=0.495914
+# [Train Epoch: 21/100] [155008/220643 particles] gen loss=0.498974, kld=11.934027, beta=0.100000, loss=0.498997
+# [Train Epoch: 21/100] [160000/220643 particles] gen loss=0.499901, kld=11.922555, beta=0.100000, loss=0.499924
+# [Train Epoch: 21/100] [165024/220643 particles] gen loss=0.499413, kld=10.716806, beta=0.100000, loss=0.499434
+# [Train Epoch: 21/100] [170016/220643 particles] gen loss=0.498934, kld=10.850936, beta=0.100000, loss=0.498955
+# [Train Epoch: 21/100] [175008/220643 particles] gen loss=0.492488, kld=10.808865, beta=0.100000, loss=0.492509
+# [Train Epoch: 21/100] [180000/220643 particles] gen loss=0.498483, kld=10.994887, beta=0.100000, loss=0.498504
+# [Train Epoch: 21/100] [185024/220643 particles] gen loss=0.502423, kld=11.324697, beta=0.100000, loss=0.502445
+# [Train Epoch: 21/100] [190016/220643 particles] gen loss=0.493319, kld=10.257542, beta=0.100000, loss=0.493339
+# [Train Epoch: 21/100] [195008/220643 particles] gen loss=0.493014, kld=10.952871, beta=0.100000, loss=0.493036
+# [Train Epoch: 21/100] [200000/220643 particles] gen loss=0.492565, kld=12.006515, beta=0.100000, loss=0.492589
+# [Train Epoch: 21/100] [205024/220643 particles] gen loss=0.499548, kld=12.014975, beta=0.100000, loss=0.499571
+# [Train Epoch: 21/100] [210016/220643 particles] gen loss=0.500287, kld=10.755359, beta=0.100000, loss=0.500308
+# [Train Epoch: 21/100] [215008/220643 particles] gen loss=0.496391, kld=11.516272, beta=0.100000, loss=0.496414
+# [Train Epoch: 21/100] [220000/220643 particles] gen loss=0.506872, kld=11.073334, beta=0.100000, loss=0.506894
+# =====> Epoch: 21 Average gen loss = 0.498475, KLD = 11.376259, total loss = 0.498497; Finished in 3:31:58.120237
+# [Train Epoch: 22/100] [5024/220643 particles] gen loss=0.497457, kld=12.145741, beta=0.100000, loss=0.497480
+# [Train Epoch: 22/100] [10016/220643 particles] gen loss=0.499146, kld=11.173647, beta=0.100000, loss=0.499168
+# [Train Epoch: 22/100] [15008/220643 particles] gen loss=0.506107, kld=10.765659, beta=0.100000, loss=0.506128
+# [Train Epoch: 22/100] [20000/220643 particles] gen loss=0.498433, kld=10.699732, beta=0.100000, loss=0.498454
+# [Train Epoch: 22/100] [25024/220643 particles] gen loss=0.496270, kld=11.839425, beta=0.100000, loss=0.496293
+# [Train Epoch: 22/100] [30016/220643 particles] gen loss=0.496320, kld=11.703284, beta=0.100000, loss=0.496342
+# [Train Epoch: 22/100] [35008/220643 particles] gen loss=0.494312, kld=11.893901, beta=0.100000, loss=0.494335
+# [Train Epoch: 22/100] [40000/220643 particles] gen loss=0.494617, kld=12.554796, beta=0.100000, loss=0.494641
+# [Train Epoch: 22/100] [45024/220643 particles] gen loss=0.499224, kld=11.377494, beta=0.100000, loss=0.499246
+# [Train Epoch: 22/100] [50016/220643 particles] gen loss=0.496475, kld=11.805239, beta=0.100000, loss=0.496498
+# [Train Epoch: 22/100] [55008/220643 particles] gen loss=0.497651, kld=12.151403, beta=0.100000, loss=0.497674
+# [Train Epoch: 22/100] [60000/220643 particles] gen loss=0.503899, kld=10.824512, beta=0.100000, loss=0.503920
+# [Train Epoch: 22/100] [65024/220643 particles] gen loss=0.497761, kld=12.010649, beta=0.100000, loss=0.497784
+# [Train Epoch: 22/100] [70016/220643 particles] gen loss=0.501169, kld=11.474589, beta=0.100000, loss=0.501191
+# [Train Epoch: 22/100] [75008/220643 particles] gen loss=0.495012, kld=11.768229, beta=0.100000, loss=0.495035
+# [Train Epoch: 22/100] [80000/220643 particles] gen loss=0.499896, kld=12.216022, beta=0.100000, loss=0.499919
+# [Train Epoch: 22/100] [85024/220643 particles] gen loss=0.501029, kld=11.350452, beta=0.100000, loss=0.501051
+# [Train Epoch: 22/100] [90016/220643 particles] gen loss=0.497088, kld=12.134373, beta=0.100000, loss=0.497111
+# [Train Epoch: 22/100] [95008/220643 particles] gen loss=0.499372, kld=10.911777, beta=0.100000, loss=0.499393
+# [Train Epoch: 22/100] [100000/220643 particles] gen loss=0.496575, kld=10.693487, beta=0.100000, loss=0.496595
+# [Train Epoch: 22/100] [105024/220643 particles] gen loss=0.495358, kld=11.675438, beta=0.100000, loss=0.495381
+# [Train Epoch: 22/100] [110016/220643 particles] gen loss=0.499732, kld=11.425821, beta=0.100000, loss=0.499754
+# [Train Epoch: 22/100] [115008/220643 particles] gen loss=0.499084, kld=11.352312, beta=0.100000, loss=0.499106
+# [Train Epoch: 22/100] [120000/220643 particles] gen loss=0.498659, kld=11.596415, beta=0.100000, loss=0.498681
+# [Train Epoch: 22/100] [125024/220643 particles] gen loss=0.494497, kld=11.257305, beta=0.100000, loss=0.494519
+# [Train Epoch: 22/100] [130016/220643 particles] gen loss=0.497593, kld=11.296234, beta=0.100000, loss=0.497615
+# [Train Epoch: 22/100] [135008/220643 particles] gen loss=0.500690, kld=10.942640, beta=0.100000, loss=0.500711
+# [Train Epoch: 22/100] [140000/220643 particles] gen loss=0.499458, kld=11.525266, beta=0.100000, loss=0.499481
+# [Train Epoch: 22/100] [145024/220643 particles] gen loss=0.498413, kld=11.707972, beta=0.100000, loss=0.498435
+# [Train Epoch: 22/100] [150016/220643 particles] gen loss=0.498671, kld=11.211249, beta=0.100000, loss=0.498693
+# [Train Epoch: 22/100] [155008/220643 particles] gen loss=0.496368, kld=11.090799, beta=0.100000, loss=0.496390
+# [Train Epoch: 22/100] [160000/220643 particles] gen loss=0.495572, kld=11.519886, beta=0.100000, loss=0.495594
+# [Train Epoch: 22/100] [165024/220643 particles] gen loss=0.494806, kld=11.248857, beta=0.100000, loss=0.494828
+# [Train Epoch: 22/100] [170016/220643 particles] gen loss=0.488306, kld=10.900879, beta=0.100000, loss=0.488327
+# [Train Epoch: 22/100] [175008/220643 particles] gen loss=0.494381, kld=12.208639, beta=0.100000, loss=0.494405
+# [Train Epoch: 22/100] [180000/220643 particles] gen loss=0.502993, kld=10.472351, beta=0.100000, loss=0.503013
+# [Train Epoch: 22/100] [185024/220643 particles] gen loss=0.494536, kld=11.124810, beta=0.100000, loss=0.494557
+# [Train Epoch: 22/100] [190016/220643 particles] gen loss=0.509826, kld=11.944049, beta=0.100000, loss=0.509849
+# [Train Epoch: 22/100] [195008/220643 particles] gen loss=0.500366, kld=12.127489, beta=0.100000, loss=0.500390
+# [Train Epoch: 22/100] [200000/220643 particles] gen loss=0.498783, kld=11.690216, beta=0.100000, loss=0.498805
+# [Train Epoch: 22/100] [205024/220643 particles] gen loss=0.499317, kld=10.958101, beta=0.100000, loss=0.499338
+# [Train Epoch: 22/100] [210016/220643 particles] gen loss=0.495833, kld=12.092333, beta=0.100000, loss=0.495857
+# [Train Epoch: 22/100] [215008/220643 particles] gen loss=0.498488, kld=11.171571, beta=0.100000, loss=0.498510
+# [Train Epoch: 22/100] [220000/220643 particles] gen loss=0.493916, kld=11.317683, beta=0.100000, loss=0.493938
+# =====> Epoch: 22 Average gen loss = 0.498465, KLD = 11.518398, total loss = 0.498488; Finished in 3:28:57.130802
+# [Train Epoch: 23/100] [5024/220643 particles] gen loss=0.497249, kld=12.898999, beta=0.100000, loss=0.497274
+# [Train Epoch: 23/100] [10016/220643 particles] gen loss=0.501518, kld=11.864773, beta=0.100000, loss=0.501542
+# [Train Epoch: 23/100] [15008/220643 particles] gen loss=0.500743, kld=11.939265, beta=0.100000, loss=0.500766
+# [Train Epoch: 23/100] [20000/220643 particles] gen loss=0.496463, kld=12.024547, beta=0.100000, loss=0.496486
+# [Train Epoch: 23/100] [25024/220643 particles] gen loss=0.498805, kld=12.146754, beta=0.100000, loss=0.498829
+# [Train Epoch: 23/100] [30016/220643 particles] gen loss=0.499593, kld=11.762845, beta=0.100000, loss=0.499616
+# [Train Epoch: 23/100] [35008/220643 particles] gen loss=0.497055, kld=11.659717, beta=0.100000, loss=0.497078
+# [Train Epoch: 23/100] [40000/220643 particles] gen loss=0.499587, kld=11.970867, beta=0.100000, loss=0.499611
+# [Train Epoch: 23/100] [45024/220643 particles] gen loss=0.499441, kld=11.544111, beta=0.100000, loss=0.499464
+# [Train Epoch: 23/100] [50016/220643 particles] gen loss=0.501748, kld=12.727224, beta=0.100000, loss=0.501772
+# [Train Epoch: 23/100] [55008/220643 particles] gen loss=0.502949, kld=11.070933, beta=0.100000, loss=0.502971
+# [Train Epoch: 23/100] [60000/220643 particles] gen loss=0.497066, kld=11.948215, beta=0.100000, loss=0.497090
+# [Train Epoch: 23/100] [65024/220643 particles] gen loss=0.495685, kld=11.802454, beta=0.100000, loss=0.495708
+# [Train Epoch: 23/100] [70016/220643 particles] gen loss=0.497301, kld=11.562731, beta=0.100000, loss=0.497323
+# [Train Epoch: 23/100] [75008/220643 particles] gen loss=0.503804, kld=11.069098, beta=0.100000, loss=0.503826
+# [Train Epoch: 23/100] [80000/220643 particles] gen loss=0.502432, kld=11.472898, beta=0.100000, loss=0.502455
+# [Train Epoch: 23/100] [85024/220643 particles] gen loss=0.497146, kld=11.409246, beta=0.100000, loss=0.497168
+# [Train Epoch: 23/100] [90016/220643 particles] gen loss=0.498586, kld=11.913279, beta=0.100000, loss=0.498610
+# [Train Epoch: 23/100] [95008/220643 particles] gen loss=0.496842, kld=11.468893, beta=0.100000, loss=0.496864
+# [Train Epoch: 23/100] [100000/220643 particles] gen loss=0.496775, kld=12.069704, beta=0.100000, loss=0.496798
+# [Train Epoch: 23/100] [105024/220643 particles] gen loss=0.495581, kld=11.539626, beta=0.100000, loss=0.495604
+# [Train Epoch: 23/100] [110016/220643 particles] gen loss=0.501975, kld=12.024071, beta=0.100000, loss=0.501998
+# [Train Epoch: 23/100] [115008/220643 particles] gen loss=0.500367, kld=11.863632, beta=0.100000, loss=0.500390
+# [Train Epoch: 23/100] [120000/220643 particles] gen loss=0.492212, kld=11.471244, beta=0.100000, loss=0.492235
+# [Train Epoch: 23/100] [125024/220643 particles] gen loss=0.496866, kld=11.103590, beta=0.100000, loss=0.496887
+# [Train Epoch: 23/100] [130016/220643 particles] gen loss=0.501935, kld=12.232433, beta=0.100000, loss=0.501958
+# [Train Epoch: 23/100] [135008/220643 particles] gen loss=0.499605, kld=11.229862, beta=0.100000, loss=0.499627
+# [Train Epoch: 23/100] [140000/220643 particles] gen loss=0.498219, kld=11.613217, beta=0.100000, loss=0.498241
+# [Train Epoch: 23/100] [145024/220643 particles] gen loss=0.498326, kld=11.358879, beta=0.100000, loss=0.498348
+# [Train Epoch: 23/100] [150016/220643 particles] gen loss=0.499826, kld=11.295191, beta=0.100000, loss=0.499848
+# [Train Epoch: 23/100] [155008/220643 particles] gen loss=0.498172, kld=11.044771, beta=0.100000, loss=0.498193
+# [Train Epoch: 23/100] [160000/220643 particles] gen loss=0.490792, kld=12.074326, beta=0.100000, loss=0.490815
+# [Train Epoch: 23/100] [165024/220643 particles] gen loss=0.495011, kld=11.216304, beta=0.100000, loss=0.495032
+# [Train Epoch: 23/100] [170016/220643 particles] gen loss=0.496420, kld=11.600691, beta=0.100000, loss=0.496442
+# [Train Epoch: 23/100] [175008/220643 particles] gen loss=0.498952, kld=10.779488, beta=0.100000, loss=0.498973
+# [Train Epoch: 23/100] [180000/220643 particles] gen loss=0.499588, kld=10.675662, beta=0.100000, loss=0.499609
+# [Train Epoch: 23/100] [185024/220643 particles] gen loss=0.494616, kld=11.682720, beta=0.100000, loss=0.494639
+# [Train Epoch: 23/100] [190016/220643 particles] gen loss=0.496058, kld=11.782207, beta=0.100000, loss=0.496081
+# [Train Epoch: 23/100] [195008/220643 particles] gen loss=0.500117, kld=11.594013, beta=0.100000, loss=0.500140
+# [Train Epoch: 23/100] [200000/220643 particles] gen loss=0.495932, kld=11.927014, beta=0.100000, loss=0.495956
+# [Train Epoch: 23/100] [205024/220643 particles] gen loss=0.492936, kld=11.218445, beta=0.100000, loss=0.492958
+# [Train Epoch: 23/100] [210016/220643 particles] gen loss=0.495551, kld=12.607344, beta=0.100000, loss=0.495575
+# [Train Epoch: 23/100] [215008/220643 particles] gen loss=0.501993, kld=11.189883, beta=0.100000, loss=0.502014
+# [Train Epoch: 23/100] [220000/220643 particles] gen loss=0.498835, kld=11.577425, beta=0.100000, loss=0.498857
+# =====> Epoch: 23 Average gen loss = 0.498457, KLD = 11.671439, total loss = 0.498480; Finished in 3:31:47.905110
+# [Train Epoch: 24/100] [5024/220643 particles] gen loss=0.496244, kld=12.243959, beta=0.100000, loss=0.496268
+# [Train Epoch: 24/100] [10016/220643 particles] gen loss=0.492855, kld=11.677334, beta=0.100000, loss=0.492878
+# [Train Epoch: 24/100] [15008/220643 particles] gen loss=0.499494, kld=11.790889, beta=0.100000, loss=0.499516
+# [Train Epoch: 24/100] [20000/220643 particles] gen loss=0.497224, kld=12.851781, beta=0.100000, loss=0.497249
+# [Train Epoch: 24/100] [25024/220643 particles] gen loss=0.497431, kld=11.952740, beta=0.100000, loss=0.497455
+# [Train Epoch: 24/100] [30016/220643 particles] gen loss=0.494123, kld=11.085755, beta=0.100000, loss=0.494144
+# [Train Epoch: 24/100] [35008/220643 particles] gen loss=0.505527, kld=11.557650, beta=0.100000, loss=0.505549
+# [Train Epoch: 24/100] [40000/220643 particles] gen loss=0.502757, kld=11.862661, beta=0.100000, loss=0.502780
+# [Train Epoch: 24/100] [45024/220643 particles] gen loss=0.500379, kld=11.535629, beta=0.100000, loss=0.500401
+# [Train Epoch: 24/100] [50016/220643 particles] gen loss=0.494033, kld=12.389429, beta=0.100000, loss=0.494057
+# [Train Epoch: 24/100] [55008/220643 particles] gen loss=0.503466, kld=11.962191, beta=0.100000, loss=0.503489
+# [Train Epoch: 24/100] [60000/220643 particles] gen loss=0.496789, kld=12.512972, beta=0.100000, loss=0.496813
+# [Train Epoch: 24/100] [65024/220643 particles] gen loss=0.502388, kld=11.702200, beta=0.100000, loss=0.502411
+# [Train Epoch: 24/100] [70016/220643 particles] gen loss=0.499839, kld=12.181332, beta=0.100000, loss=0.499863
+# [Train Epoch: 24/100] [75008/220643 particles] gen loss=0.501112, kld=11.429589, beta=0.100000, loss=0.501134
+# [Train Epoch: 24/100] [80000/220643 particles] gen loss=0.499726, kld=12.204543, beta=0.100000, loss=0.499750
+# [Train Epoch: 24/100] [85024/220643 particles] gen loss=0.499878, kld=11.731178, beta=0.100000, loss=0.499900
+# [Train Epoch: 24/100] [90016/220643 particles] gen loss=0.507097, kld=11.939369, beta=0.100000, loss=0.507120
+# [Train Epoch: 24/100] [95008/220643 particles] gen loss=0.497175, kld=11.962807, beta=0.100000, loss=0.497198
+# [Train Epoch: 24/100] [100000/220643 particles] gen loss=0.506695, kld=11.537552, beta=0.100000, loss=0.506717
+# [Train Epoch: 24/100] [105024/220643 particles] gen loss=0.502770, kld=12.131472, beta=0.100000, loss=0.502794
+# [Train Epoch: 24/100] [110016/220643 particles] gen loss=0.501354, kld=11.970642, beta=0.100000, loss=0.501378
+# [Train Epoch: 24/100] [115008/220643 particles] gen loss=0.493443, kld=11.670729, beta=0.100000, loss=0.493465
+# [Train Epoch: 24/100] [120000/220643 particles] gen loss=0.498405, kld=12.081415, beta=0.100000, loss=0.498428
+# [Train Epoch: 24/100] [125024/220643 particles] gen loss=0.501976, kld=11.863058, beta=0.100000, loss=0.501999
+# [Train Epoch: 24/100] [130016/220643 particles] gen loss=0.494106, kld=11.945089, beta=0.100000, loss=0.494130
+# [Train Epoch: 24/100] [135008/220643 particles] gen loss=0.498276, kld=11.507099, beta=0.100000, loss=0.498298
+# [Train Epoch: 24/100] [140000/220643 particles] gen loss=0.498940, kld=12.109806, beta=0.100000, loss=0.498964
+# [Train Epoch: 24/100] [145024/220643 particles] gen loss=0.491831, kld=11.113306, beta=0.100000, loss=0.491852
+# [Train Epoch: 24/100] [150016/220643 particles] gen loss=0.495449, kld=12.141749, beta=0.100000, loss=0.495473
+# [Train Epoch: 24/100] [155008/220643 particles] gen loss=0.497365, kld=10.658742, beta=0.100000, loss=0.497385
+# [Train Epoch: 24/100] [160000/220643 particles] gen loss=0.499366, kld=11.192200, beta=0.100000, loss=0.499387
+# [Train Epoch: 24/100] [165024/220643 particles] gen loss=0.503086, kld=11.491728, beta=0.100000, loss=0.503109
+# [Train Epoch: 24/100] [170016/220643 particles] gen loss=0.491784, kld=12.059460, beta=0.100000, loss=0.491807
+# [Train Epoch: 24/100] [175008/220643 particles] gen loss=0.495882, kld=11.676546, beta=0.100000, loss=0.495904
+# [Train Epoch: 24/100] [180000/220643 particles] gen loss=0.502223, kld=11.139934, beta=0.100000, loss=0.502245
+# [Train Epoch: 24/100] [185024/220643 particles] gen loss=0.499296, kld=11.860932, beta=0.100000, loss=0.499319
+# [Train Epoch: 24/100] [190016/220643 particles] gen loss=0.490133, kld=11.510176, beta=0.100000, loss=0.490155
+# [Train Epoch: 24/100] [195008/220643 particles] gen loss=0.498112, kld=11.953362, beta=0.100000, loss=0.498135
+# [Train Epoch: 24/100] [200000/220643 particles] gen loss=0.499373, kld=11.353685, beta=0.100000, loss=0.499395
+# [Train Epoch: 24/100] [205024/220643 particles] gen loss=0.495184, kld=11.881166, beta=0.100000, loss=0.495207
+# [Train Epoch: 24/100] [210016/220643 particles] gen loss=0.500850, kld=11.039034, beta=0.100000, loss=0.500872
+# [Train Epoch: 24/100] [215008/220643 particles] gen loss=0.499781, kld=11.923317, beta=0.100000, loss=0.499804
+# [Train Epoch: 24/100] [220000/220643 particles] gen loss=0.497742, kld=12.239798, beta=0.100000, loss=0.497766
+# =====> Epoch: 24 Average gen loss = 0.498448, KLD = 11.813071, total loss = 0.498471; Finished in 3:30:35.449028
+# [Train Epoch: 25/100] [5024/220643 particles] gen loss=0.492625, kld=11.785180, beta=0.100000, loss=0.492648
+# [Train Epoch: 25/100] [10016/220643 particles] gen loss=0.497817, kld=11.697061, beta=0.100000, loss=0.497840
+# [Train Epoch: 25/100] [15008/220643 particles] gen loss=0.500406, kld=12.090640, beta=0.100000, loss=0.500430
+# [Train Epoch: 25/100] [20000/220643 particles] gen loss=0.502599, kld=12.276176, beta=0.100000, loss=0.502623
+# [Train Epoch: 25/100] [25024/220643 particles] gen loss=0.497134, kld=12.146608, beta=0.100000, loss=0.497157
+# [Train Epoch: 25/100] [30016/220643 particles] gen loss=0.500631, kld=12.460094, beta=0.100000, loss=0.500655
+# [Train Epoch: 25/100] [35008/220643 particles] gen loss=0.506212, kld=12.249668, beta=0.100000, loss=0.506235
+# [Train Epoch: 25/100] [40000/220643 particles] gen loss=0.496870, kld=12.248401, beta=0.100000, loss=0.496894
+# [Train Epoch: 25/100] [45024/220643 particles] gen loss=0.493464, kld=12.340604, beta=0.100000, loss=0.493488
+# [Train Epoch: 25/100] [50016/220643 particles] gen loss=0.496490, kld=11.824110, beta=0.100000, loss=0.496513
+# [Train Epoch: 25/100] [55008/220643 particles] gen loss=0.497126, kld=11.644697, beta=0.100000, loss=0.497149
+/home/mae2183/miniconda3/envs/cryodrgn/bin/cryodrgn train_vae results_cryodrgn/J264_real/inputs/particles.256.mrcs --poses results_cryodrgn/J264_real/inputs/poses.pkl --ctf results_cryodrgn/J264_real/inputs/ctf.pkl --ind results_cryodrgn/J264_real/inputs/ind_keep.pkl --zdim 10 --enc-dim 1024 --enc-layers 3 --dec-dim 1024 --dec-layers 3 --no-amp --load results_cryodrgn/J264_real/train_final_retry/weights.20.pkl -n 50 --lazy --num-workers 4 --batch-size 64 --checkpoint 5 --log-interval 5000 -o results_cryodrgn/J264_real/train_final_retry
+cryoDRGN 4.3.0
+Namespace(particles='/home/mae2183/cryoem-classification/results_cryodrgn/J264_real/inputs/particles.256.mrcs', outdir='/home/mae2183/cryoem-classification/results_cryodrgn/J264_real/train_final_retry', zdim=10, poses='/home/mae2183/cryoem-classification/results_cryodrgn/J264_real/inputs/poses.pkl', ctf='/home/mae2183/cryoem-classification/results_cryodrgn/J264_real/inputs/ctf.pkl', load='results_cryodrgn/J264_real/train_final_retry/weights.20.pkl', do_analysis=True, checkpoint=5, log_interval=5000, verbose=False, seed=21879, shuffle_seed=None, ind='/home/mae2183/cryoem-classification/results_cryodrgn/J264_real/inputs/ind_keep.pkl', invert_data=True, window=True, window_r=0.85, datadir=None, lazy=True, shuffler_size=0, num_workers=4, max_threads=16, ntilts=10, random_tilts=False, t_emb_dim=64, tlayers=3, tdim=1024, dose_per_tilt=None, angle_per_tilt=3, num_epochs=50, batch_size=64, wd=0, lr=0.0001, beta=None, beta_control=None, norm=None, amp=False, multigpu=False, do_pose_sgd=False, pretrain=1, emb_type='quat', pose_lr=0.0003, qlayers=3, qdim=1024, encode_mode='resid', enc_mask=None, use_real=False, players=3, pdim=1024, pe_type='gaussian', feat_sigma=0.5, pe_dim=None, domain='fourier', activation='relu', func=<function main at 0x7800f8e6e8c0>)
+Use cuda True
+Filtering image dataset with /home/mae2183/cryoem-classification/results_cryodrgn/J264_real/inputs/ind_keep.pkl
+Loading dataset from /home/mae2183/cryoem-classification/results_cryodrgn/J264_real/inputs/particles.256.mrcs
+Loading ctf params from /home/mae2183/cryoem-classification/results_cryodrgn/J264_real/inputs/ctf.pkl
+HetOnlyVAE(
+  (encoder): ResidLinearMLP(
+    (main): Sequential(
+      (0): MyLinear(in_features=51432, out_features=1024, bias=True)
+      (1): ReLU()
+      (2): ResidLinear(
+        (linear): MyLinear(in_features=1024, out_features=1024, bias=True)
+      )
+      (3): ReLU()
+      (4): ResidLinear(
+        (linear): MyLinear(in_features=1024, out_features=1024, bias=True)
+      )
+      (5): ReLU()
+      (6): ResidLinear(
+        (linear): MyLinear(in_features=1024, out_features=1024, bias=True)
+      )
+      (7): ReLU()
+      (8): MyLinear(in_features=1024, out_features=20, bias=True)
+    )
+  )
+  (decoder): FTPositionalDecoder(
+    (decoder): ResidLinearMLP(
+      (main): Sequential(
+        (0): MyLinear(in_features=778, out_features=1024, bias=True)
+        (1): ReLU()
+        (2): ResidLinear(
+          (linear): MyLinear(in_features=1024, out_features=1024, bias=True)
+        )
+        (3): ReLU()
+        (4): ResidLinear(
+          (linear): MyLinear(in_features=1024, out_features=1024, bias=True)
+        )
+        (5): ReLU()
+        (6): ResidLinear(
+          (linear): MyLinear(in_features=1024, out_features=1024, bias=True)
+        )
+        (7): ReLU()
+        (8): MyLinear(in_features=1024, out_features=2, bias=True)
+      )
+    )
+  )
+)
+59785238 parameters in model
+55836692 parameters in encoder
+3948546 parameters in decoder
+Loading checkpoint from results_cryodrgn/J264_real/train_final_retry/weights.20.pkl
+Using 4 workers for data loading
+# [Train Epoch: 21/50] [5056/220643 particles] gen loss=0.501504, kld=11.583214, beta=0.100000, loss=0.501526
+# [Train Epoch: 21/50] [10048/220643 particles] gen loss=0.499693, kld=10.980597, beta=0.100000, loss=0.499715
+# [Train Epoch: 21/50] [15040/220643 particles] gen loss=0.494758, kld=11.328680, beta=0.100000, loss=0.494780
+# [Train Epoch: 21/50] [20032/220643 particles] gen loss=0.498969, kld=11.703657, beta=0.100000, loss=0.498992
+# [Train Epoch: 21/50] [25024/220643 particles] gen loss=0.499549, kld=11.013504, beta=0.100000, loss=0.499571
+# [Train Epoch: 21/50] [30016/220643 particles] gen loss=0.497454, kld=11.664940, beta=0.100000, loss=0.497477
+# [Train Epoch: 21/50] [35008/220643 particles] gen loss=0.505012, kld=11.357523, beta=0.100000, loss=0.505034
+# [Train Epoch: 21/50] [40000/220643 particles] gen loss=0.499547, kld=11.494143, beta=0.100000, loss=0.499569
+# [Train Epoch: 21/50] [45056/220643 particles] gen loss=0.498979, kld=11.138393, beta=0.100000, loss=0.499001
+# [Train Epoch: 21/50] [50048/220643 particles] gen loss=0.494902, kld=11.193350, beta=0.100000, loss=0.494923
+# [Train Epoch: 21/50] [55040/220643 particles] gen loss=0.498130, kld=11.889881, beta=0.100000, loss=0.498153
+# [Train Epoch: 21/50] [60032/220643 particles] gen loss=0.504844, kld=11.528927, beta=0.100000, loss=0.504867
+# [Train Epoch: 21/50] [65024/220643 particles] gen loss=0.493910, kld=11.501184, beta=0.100000, loss=0.493932
+# [Train Epoch: 21/50] [70016/220643 particles] gen loss=0.498647, kld=11.467436, beta=0.100000, loss=0.498669
+# [Train Epoch: 21/50] [75008/220643 particles] gen loss=0.497080, kld=12.203304, beta=0.100000, loss=0.497104
+# [Train Epoch: 21/50] [80000/220643 particles] gen loss=0.493112, kld=11.412642, beta=0.100000, loss=0.493134
+# [Train Epoch: 21/50] [85056/220643 particles] gen loss=0.501281, kld=11.566374, beta=0.100000, loss=0.501304
+# [Train Epoch: 21/50] [90048/220643 particles] gen loss=0.499731, kld=11.085588, beta=0.100000, loss=0.499753
+# [Train Epoch: 21/50] [95040/220643 particles] gen loss=0.500058, kld=11.699816, beta=0.100000, loss=0.500081
+# [Train Epoch: 21/50] [100032/220643 particles] gen loss=0.502448, kld=11.657330, beta=0.100000, loss=0.502470
+# [Train Epoch: 21/50] [105024/220643 particles] gen loss=0.499137, kld=11.972713, beta=0.100000, loss=0.499160
+# [Train Epoch: 21/50] [110016/220643 particles] gen loss=0.503026, kld=11.599155, beta=0.100000, loss=0.503048
+# [Train Epoch: 21/50] [115008/220643 particles] gen loss=0.498172, kld=11.799978, beta=0.100000, loss=0.498195
+# [Train Epoch: 21/50] [120000/220643 particles] gen loss=0.496233, kld=11.457618, beta=0.100000, loss=0.496255
+# [Train Epoch: 21/50] [125056/220643 particles] gen loss=0.499791, kld=11.193301, beta=0.100000, loss=0.499813
+# [Train Epoch: 21/50] [130048/220643 particles] gen loss=0.499089, kld=10.626333, beta=0.100000, loss=0.499110
+# [Train Epoch: 21/50] [135040/220643 particles] gen loss=0.495758, kld=11.573889, beta=0.100000, loss=0.495780
+# [Train Epoch: 21/50] [140032/220643 particles] gen loss=0.499420, kld=11.571165, beta=0.100000, loss=0.499443
+# [Train Epoch: 21/50] [145024/220643 particles] gen loss=0.499296, kld=12.097022, beta=0.100000, loss=0.499319
+# [Train Epoch: 21/50] [150016/220643 particles] gen loss=0.499147, kld=11.473306, beta=0.100000, loss=0.499169
+# [Train Epoch: 21/50] [155008/220643 particles] gen loss=0.499789, kld=11.156607, beta=0.100000, loss=0.499811
+# [Train Epoch: 21/50] [160000/220643 particles] gen loss=0.499341, kld=11.503225, beta=0.100000, loss=0.499363
+# [Train Epoch: 21/50] [165056/220643 particles] gen loss=0.502371, kld=11.891333, beta=0.100000, loss=0.502394
+# [Train Epoch: 21/50] [170048/220643 particles] gen loss=0.495222, kld=11.549124, beta=0.100000, loss=0.495245
+# [Train Epoch: 21/50] [175040/220643 particles] gen loss=0.499859, kld=11.587928, beta=0.100000, loss=0.499882
+# [Train Epoch: 21/50] [180032/220643 particles] gen loss=0.501837, kld=11.454464, beta=0.100000, loss=0.501860
+# [Train Epoch: 21/50] [185024/220643 particles] gen loss=0.494898, kld=11.067822, beta=0.100000, loss=0.494919
+# [Train Epoch: 21/50] [190016/220643 particles] gen loss=0.498770, kld=11.074646, beta=0.100000, loss=0.498791
+# [Train Epoch: 21/50] [195008/220643 particles] gen loss=0.497768, kld=11.683477, beta=0.100000, loss=0.497791
+# [Train Epoch: 21/50] [200000/220643 particles] gen loss=0.502172, kld=11.878960, beta=0.100000, loss=0.502195
+# [Train Epoch: 21/50] [205056/220643 particles] gen loss=0.496709, kld=10.649410, beta=0.100000, loss=0.496730
+# [Train Epoch: 21/50] [210048/220643 particles] gen loss=0.498325, kld=11.437263, beta=0.100000, loss=0.498347
+# [Train Epoch: 21/50] [215040/220643 particles] gen loss=0.496832, kld=12.035444, beta=0.100000, loss=0.496855
+# [Train Epoch: 21/50] [220032/220643 particles] gen loss=0.502037, kld=11.305279, beta=0.100000, loss=0.502059
+# =====> Epoch: 21 Average gen loss = 0.498449, KLD = 11.542041, total loss = 0.498472; Finished in 1:08:00.887621
+# [Train Epoch: 22/50] [5056/220643 particles] gen loss=0.500407, kld=12.140485, beta=0.100000, loss=0.500430
+# [Train Epoch: 22/50] [10048/220643 particles] gen loss=0.499391, kld=11.693275, beta=0.100000, loss=0.499414
+# [Train Epoch: 22/50] [15040/220643 particles] gen loss=0.497930, kld=11.633406, beta=0.100000, loss=0.497953
+# [Train Epoch: 22/50] [20032/220643 particles] gen loss=0.497431, kld=12.204935, beta=0.100000, loss=0.497454
+# [Train Epoch: 22/50] [25024/220643 particles] gen loss=0.497593, kld=11.571568, beta=0.100000, loss=0.497616
+# [Train Epoch: 22/50] [30016/220643 particles] gen loss=0.494921, kld=11.994179, beta=0.100000, loss=0.494945
+# [Train Epoch: 22/50] [35008/220643 particles] gen loss=0.495509, kld=11.651548, beta=0.100000, loss=0.495532
+# [Train Epoch: 22/50] [40000/220643 particles] gen loss=0.498461, kld=12.277740, beta=0.100000, loss=0.498485
+# [Train Epoch: 22/50] [45056/220643 particles] gen loss=0.498414, kld=11.460232, beta=0.100000, loss=0.498436
+# [Train Epoch: 22/50] [50048/220643 particles] gen loss=0.495297, kld=11.581501, beta=0.100000, loss=0.495319
+# [Train Epoch: 22/50] [55040/220643 particles] gen loss=0.500388, kld=11.529982, beta=0.100000, loss=0.500411
+# [Train Epoch: 22/50] [60032/220643 particles] gen loss=0.501763, kld=11.860876, beta=0.100000, loss=0.501786
+# [Train Epoch: 22/50] [65024/220643 particles] gen loss=0.499448, kld=11.604928, beta=0.100000, loss=0.499470
+# [Train Epoch: 22/50] [70016/220643 particles] gen loss=0.500464, kld=11.736703, beta=0.100000, loss=0.500487
+# [Train Epoch: 22/50] [75008/220643 particles] gen loss=0.497064, kld=12.198189, beta=0.100000, loss=0.497087
+# [Train Epoch: 22/50] [80000/220643 particles] gen loss=0.496400, kld=11.449102, beta=0.100000, loss=0.496422
+# [Train Epoch: 22/50] [85056/220643 particles] gen loss=0.494106, kld=11.518717, beta=0.100000, loss=0.494129
+# [Train Epoch: 22/50] [90048/220643 particles] gen loss=0.499554, kld=10.928670, beta=0.100000, loss=0.499576
+# [Train Epoch: 22/50] [95040/220643 particles] gen loss=0.500439, kld=12.315796, beta=0.100000, loss=0.500463
+# [Train Epoch: 22/50] [100032/220643 particles] gen loss=0.499854, kld=12.037993, beta=0.100000, loss=0.499877
+# [Train Epoch: 22/50] [105024/220643 particles] gen loss=0.498064, kld=11.476038, beta=0.100000, loss=0.498086
+# [Train Epoch: 22/50] [110016/220643 particles] gen loss=0.500808, kld=12.468864, beta=0.100000, loss=0.500832
+# [Train Epoch: 22/50] [115008/220643 particles] gen loss=0.501541, kld=11.719907, beta=0.100000, loss=0.501564
+# [Train Epoch: 22/50] [120000/220643 particles] gen loss=0.497194, kld=11.627441, beta=0.100000, loss=0.497217
+# [Train Epoch: 22/50] [125056/220643 particles] gen loss=0.502146, kld=11.944168, beta=0.100000, loss=0.502169
+# [Train Epoch: 22/50] [130048/220643 particles] gen loss=0.499916, kld=11.979871, beta=0.100000, loss=0.499939
+# [Train Epoch: 22/50] [135040/220643 particles] gen loss=0.501897, kld=11.599831, beta=0.100000, loss=0.501920
+# [Train Epoch: 22/50] [140032/220643 particles] gen loss=0.497353, kld=11.163586, beta=0.100000, loss=0.497375
+# [Train Epoch: 22/50] [145024/220643 particles] gen loss=0.494234, kld=12.120934, beta=0.100000, loss=0.494258
+# [Train Epoch: 22/50] [150016/220643 particles] gen loss=0.499457, kld=11.649365, beta=0.100000, loss=0.499479
+# [Train Epoch: 22/50] [155008/220643 particles] gen loss=0.499512, kld=11.761907, beta=0.100000, loss=0.499535
+# [Train Epoch: 22/50] [160000/220643 particles] gen loss=0.500189, kld=11.645246, beta=0.100000, loss=0.500212
+# [Train Epoch: 22/50] [165056/220643 particles] gen loss=0.499854, kld=11.596958, beta=0.100000, loss=0.499876
+# [Train Epoch: 22/50] [170048/220643 particles] gen loss=0.498995, kld=12.640944, beta=0.100000, loss=0.499019
+# [Train Epoch: 22/50] [175040/220643 particles] gen loss=0.496496, kld=12.275810, beta=0.100000, loss=0.496520
+# [Train Epoch: 22/50] [180032/220643 particles] gen loss=0.496709, kld=11.630308, beta=0.100000, loss=0.496731
+# [Train Epoch: 22/50] [185024/220643 particles] gen loss=0.501033, kld=13.231334, beta=0.100000, loss=0.501059
+# [Train Epoch: 22/50] [190016/220643 particles] gen loss=0.495958, kld=11.537033, beta=0.100000, loss=0.495980
+# [Train Epoch: 22/50] [195008/220643 particles] gen loss=0.501065, kld=11.489996, beta=0.100000, loss=0.501087
+# [Train Epoch: 22/50] [200000/220643 particles] gen loss=0.492693, kld=11.672100, beta=0.100000, loss=0.492716
+# [Train Epoch: 22/50] [205056/220643 particles] gen loss=0.498386, kld=11.917004, beta=0.100000, loss=0.498409
+# [Train Epoch: 22/50] [210048/220643 particles] gen loss=0.500086, kld=11.793180, beta=0.100000, loss=0.500109
+# [Train Epoch: 22/50] [215040/220643 particles] gen loss=0.497608, kld=11.944235, beta=0.100000, loss=0.497632
+# [Train Epoch: 22/50] [220032/220643 particles] gen loss=0.502369, kld=11.622149, beta=0.100000, loss=0.502392
+# =====> Epoch: 22 Average gen loss = 0.498432, KLD = 11.810761, total loss = 0.498455; Finished in 1:17:10.087721
+# [Train Epoch: 23/50] [5056/220643 particles] gen loss=0.499775, kld=12.238369, beta=0.100000, loss=0.499799
+# [Train Epoch: 23/50] [10048/220643 particles] gen loss=0.501893, kld=11.635468, beta=0.100000, loss=0.501916
+# [Train Epoch: 23/50] [15040/220643 particles] gen loss=0.500687, kld=12.086783, beta=0.100000, loss=0.500711
+# [Train Epoch: 23/50] [20032/220643 particles] gen loss=0.503396, kld=12.580500, beta=0.100000, loss=0.503420
+# [Train Epoch: 23/50] [25024/220643 particles] gen loss=0.498388, kld=11.905649, beta=0.100000, loss=0.498411
+# [Train Epoch: 23/50] [30016/220643 particles] gen loss=0.499316, kld=12.400051, beta=0.100000, loss=0.499340
+# [Train Epoch: 23/50] [35008/220643 particles] gen loss=0.498139, kld=11.837967, beta=0.100000, loss=0.498162
+# [Train Epoch: 23/50] [40000/220643 particles] gen loss=0.497800, kld=11.884567, beta=0.100000, loss=0.497824
+# [Train Epoch: 23/50] [45056/220643 particles] gen loss=0.503920, kld=11.755152, beta=0.100000, loss=0.503943
+# [Train Epoch: 23/50] [50048/220643 particles] gen loss=0.500393, kld=12.549580, beta=0.100000, loss=0.500418
+# [Train Epoch: 23/50] [55040/220643 particles] gen loss=0.497927, kld=12.314004, beta=0.100000, loss=0.497951
+# [Train Epoch: 23/50] [60032/220643 particles] gen loss=0.498039, kld=12.083399, beta=0.100000, loss=0.498063
+# [Train Epoch: 23/50] [65024/220643 particles] gen loss=0.497394, kld=12.280979, beta=0.100000, loss=0.497418
+# [Train Epoch: 23/50] [70016/220643 particles] gen loss=0.500554, kld=11.717327, beta=0.100000, loss=0.500576
+# [Train Epoch: 23/50] [75008/220643 particles] gen loss=0.493829, kld=11.885082, beta=0.100000, loss=0.493852
+# [Train Epoch: 23/50] [80000/220643 particles] gen loss=0.499414, kld=11.634787, beta=0.100000, loss=0.499437
+# [Train Epoch: 23/50] [85056/220643 particles] gen loss=0.496659, kld=12.370926, beta=0.100000, loss=0.496683
+# [Train Epoch: 23/50] [90048/220643 particles] gen loss=0.497259, kld=12.001309, beta=0.100000, loss=0.497283
+# [Train Epoch: 23/50] [95040/220643 particles] gen loss=0.496291, kld=11.991491, beta=0.100000, loss=0.496314
+# [Train Epoch: 23/50] [100032/220643 particles] gen loss=0.500037, kld=11.873871, beta=0.100000, loss=0.500060
+# [Train Epoch: 23/50] [105024/220643 particles] gen loss=0.503880, kld=11.927785, beta=0.100000, loss=0.503903
+# [Train Epoch: 23/50] [110016/220643 particles] gen loss=0.500842, kld=11.637684, beta=0.100000, loss=0.500864
+# [Train Epoch: 23/50] [115008/220643 particles] gen loss=0.499341, kld=11.750581, beta=0.100000, loss=0.499364
+# [Train Epoch: 23/50] [120000/220643 particles] gen loss=0.498916, kld=12.367434, beta=0.100000, loss=0.498940
+# [Train Epoch: 23/50] [125056/220643 particles] gen loss=0.500464, kld=11.397918, beta=0.100000, loss=0.500486
+# [Train Epoch: 23/50] [130048/220643 particles] gen loss=0.496310, kld=11.390569, beta=0.100000, loss=0.496332
+# [Train Epoch: 23/50] [135040/220643 particles] gen loss=0.497361, kld=11.837208, beta=0.100000, loss=0.497384
+# [Train Epoch: 23/50] [140032/220643 particles] gen loss=0.502755, kld=12.256683, beta=0.100000, loss=0.502779
+# [Train Epoch: 23/50] [145024/220643 particles] gen loss=0.502073, kld=11.996414, beta=0.100000, loss=0.502096
+# [Train Epoch: 23/50] [150016/220643 particles] gen loss=0.498106, kld=12.300772, beta=0.100000, loss=0.498130
+# [Train Epoch: 23/50] [155008/220643 particles] gen loss=0.500972, kld=11.550270, beta=0.100000, loss=0.500994
+# [Train Epoch: 23/50] [160000/220643 particles] gen loss=0.498311, kld=12.022004, beta=0.100000, loss=0.498334
+# [Train Epoch: 23/50] [165056/220643 particles] gen loss=0.490220, kld=11.793609, beta=0.100000, loss=0.490243
+# [Train Epoch: 23/50] [170048/220643 particles] gen loss=0.497426, kld=11.366440, beta=0.100000, loss=0.497448
+# [Train Epoch: 23/50] [175040/220643 particles] gen loss=0.496372, kld=11.359421, beta=0.100000, loss=0.496394
+# [Train Epoch: 23/50] [180032/220643 particles] gen loss=0.496556, kld=12.122713, beta=0.100000, loss=0.496580
+# [Train Epoch: 23/50] [185024/220643 particles] gen loss=0.496474, kld=12.507792, beta=0.100000, loss=0.496499
+# [Train Epoch: 23/50] [190016/220643 particles] gen loss=0.503953, kld=12.094820, beta=0.100000, loss=0.503976
+# [Train Epoch: 23/50] [195008/220643 particles] gen loss=0.495327, kld=11.559643, beta=0.100000, loss=0.495350
+# [Train Epoch: 23/50] [200000/220643 particles] gen loss=0.495217, kld=11.869757, beta=0.100000, loss=0.495240
+# [Train Epoch: 23/50] [205056/220643 particles] gen loss=0.498292, kld=11.692890, beta=0.100000, loss=0.498314
+# [Train Epoch: 23/50] [210048/220643 particles] gen loss=0.498085, kld=11.682704, beta=0.100000, loss=0.498108

@@ -1,0 +1,75 @@
+nohup: ignoring input
+(INFO) (train_vae.py) (04-Jul-2026 12:25:13) /home/mae2183/miniconda3/envs/cryodrgn/bin/cryodrgn train_vae results_cryodrgn/J1442_real/inputs/particles.128.mrcs --poses results_cryodrgn/J1442_real/inputs/poses.pkl --ctf results_cryodrgn/J1442_real/inputs/ctf.pkl --zdim 10 -n 50 --enc-dim 256 --enc-layers 3 --dec-dim 256 --dec-layers 3 --no-amp --num-workers 16 --batch-size 32 --load results_cryodrgn/J1442_real/pilot_z10/weights.18.pkl -o results_cryodrgn/J1442_real/pilot_z10
+(INFO) (train_vae.py) (04-Jul-2026 12:25:13) cryoDRGN 4.3.0
+(INFO) (train_vae.py) (04-Jul-2026 12:25:13) Namespace(particles='/home/mae2183/cryoem-classification/results_cryodrgn/J1442_real/inputs/particles.128.mrcs', outdir='/home/mae2183/cryoem-classification/results_cryodrgn/J1442_real/pilot_z10', zdim=10, poses='/home/mae2183/cryoem-classification/results_cryodrgn/J1442_real/inputs/poses.pkl', ctf='/home/mae2183/cryoem-classification/results_cryodrgn/J1442_real/inputs/ctf.pkl', load='results_cryodrgn/J1442_real/pilot_z10/weights.18.pkl', do_analysis=True, checkpoint=1, log_interval=1000, verbose=False, seed=62927, shuffle_seed=None, ind=None, invert_data=True, window=True, window_r=0.85, datadir=None, lazy=False, shuffler_size=0, num_workers=16, max_threads=16, ntilts=10, random_tilts=False, t_emb_dim=64, tlayers=3, tdim=1024, dose_per_tilt=None, angle_per_tilt=3, num_epochs=50, batch_size=32, wd=0, lr=0.0001, beta=None, beta_control=None, norm=None, amp=False, multigpu=False, do_pose_sgd=False, pretrain=1, emb_type='quat', pose_lr=0.0003, qlayers=3, qdim=256, encode_mode='resid', enc_mask=None, use_real=False, players=3, pdim=256, pe_type='gaussian', feat_sigma=0.5, pe_dim=None, domain='fourier', activation='relu', func=<function main at 0x7fcfb68e68c0>)
+(INFO) (train_vae.py) (04-Jul-2026 12:25:13) Use cuda True
+(INFO) (train_vae.py) (04-Jul-2026 12:25:13) Loading dataset from /home/mae2183/cryoem-classification/results_cryodrgn/J1442_real/inputs/particles.128.mrcs
+(INFO) (dataset.py) (04-Jul-2026 12:25:26) Normalizing HT by 0 +/- 63.01006317138672
+(INFO) (dataset.py) (04-Jul-2026 12:25:26) Normalized real space images by 0.0006625046953558922 +/- 0.49061059951782227
+(INFO) (train_vae.py) (04-Jul-2026 12:25:26) Loading ctf params from /home/mae2183/cryoem-classification/results_cryodrgn/J1442_real/inputs/ctf.pkl
+(INFO) (ctf.py) (04-Jul-2026 12:25:26) Image size (pix)  : 128
+(INFO) (ctf.py) (04-Jul-2026 12:25:26) A/pix             : 2.075000047683716
+(INFO) (ctf.py) (04-Jul-2026 12:25:26) DefocusU (A)      : 15058.4287109375
+(INFO) (ctf.py) (04-Jul-2026 12:25:26) DefocusV (A)      : 14862.46875
+(INFO) (ctf.py) (04-Jul-2026 12:25:26) Dfang (deg)       : -10.690818786621094
+(INFO) (ctf.py) (04-Jul-2026 12:25:26) voltage (kV)      : 300.0
+(INFO) (ctf.py) (04-Jul-2026 12:25:26) cs (mm)           : 2.700000047683716
+(INFO) (ctf.py) (04-Jul-2026 12:25:26) w                 : 0.10000000149011612
+(INFO) (ctf.py) (04-Jul-2026 12:25:26) Phase shift (deg) : 0.0
+(INFO) (train_vae.py) (04-Jul-2026 12:25:26) HetOnlyVAE(
+  (encoder): ResidLinearMLP(
+    (main): Sequential(
+      (0): MyLinear(in_features=12852, out_features=256, bias=True)
+      (1): ReLU()
+      (2): ResidLinear(
+        (linear): MyLinear(in_features=256, out_features=256, bias=True)
+      )
+      (3): ReLU()
+      (4): ResidLinear(
+        (linear): MyLinear(in_features=256, out_features=256, bias=True)
+      )
+      (5): ReLU()
+      (6): ResidLinear(
+        (linear): MyLinear(in_features=256, out_features=256, bias=True)
+      )
+      (7): ReLU()
+      (8): MyLinear(in_features=256, out_features=20, bias=True)
+    )
+  )
+  (decoder): FTPositionalDecoder(
+    (decoder): ResidLinearMLP(
+      (main): Sequential(
+        (0): MyLinear(in_features=394, out_features=256, bias=True)
+        (1): ReLU()
+        (2): ResidLinear(
+          (linear): MyLinear(in_features=256, out_features=256, bias=True)
+        )
+        (3): ReLU()
+        (4): ResidLinear(
+          (linear): MyLinear(in_features=256, out_features=256, bias=True)
+        )
+        (5): ReLU()
+        (6): ResidLinear(
+          (linear): MyLinear(in_features=256, out_features=256, bias=True)
+        )
+        (7): ReLU()
+        (8): MyLinear(in_features=256, out_features=2, bias=True)
+      )
+    )
+  )
+)
+(INFO) (train_vae.py) (04-Jul-2026 12:25:26) 3791894 parameters in model
+(INFO) (train_vae.py) (04-Jul-2026 12:25:26) 3492884 parameters in encoder
+(INFO) (train_vae.py) (04-Jul-2026 12:25:26) 299010 parameters in decoder
+(WARNING) (utils.py) (04-Jul-2026 12:25:26) Warning: /home/mae2183/cryoem-classification/results_cryodrgn/J1442_real/pilot_z10/config.yaml already exists. Overwriting.
+(INFO) (train_vae.py) (04-Jul-2026 12:25:27) Loading checkpoint from results_cryodrgn/J1442_real/pilot_z10/weights.18.pkl
+(INFO) (train_vae.py) (04-Jul-2026 12:25:27) Using 16 workers for data loading
+Traceback (most recent call last):
+  File "<string>", line 1, in <module>
+  File "/home/mae2183/miniconda3/envs/cryodrgn/lib/python3.10/multiprocessing/spawn.py", line 116, in spawn_main
+    exitcode = _main(fd, parent_sentinel)
+  File "/home/mae2183/miniconda3/envs/cryodrgn/lib/python3.10/multiprocessing/spawn.py", line 126, in _main
+    self = reduction.pickle.load(from_parent)
+_pickle.UnpicklingError: pickle data was truncated
+/home/mae2183/miniconda3/envs/cryodrgn/lib/python3.10/multiprocessing/resource_tracker.py:224: UserWarning: resource_tracker: There appear to be 32 leaked semaphore objects to clean up at shutdown
+  warnings.warn('resource_tracker: There appear to be %d '

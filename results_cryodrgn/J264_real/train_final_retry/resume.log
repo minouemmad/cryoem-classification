@@ -1,0 +1,201 @@
+nohup: ignoring input
+(INFO) (train_vae.py) (06-Jul-2026 12:40:44) /home/mae2183/miniconda3/envs/cryodrgn/bin/cryodrgn train_vae results_cryodrgn/J264_real/inputs/particles.256.mrcs --poses results_cryodrgn/J264_real/inputs/poses.pkl --ctf results_cryodrgn/J264_real/inputs/ctf.pkl --ind results_cryodrgn/J264_real/inputs/ind_keep.pkl --zdim 10 --enc-dim 1024 --enc-layers 3 --dec-dim 1024 --dec-layers 3 --no-amp --load results_cryodrgn/J264_real/train_final_retry/weights.20.pkl -n 50 --lazy --num-workers 4 --batch-size 64 --checkpoint 5 --log-interval 5000 -o results_cryodrgn/J264_real/train_final_retry
+(INFO) (train_vae.py) (06-Jul-2026 12:40:44) cryoDRGN 4.3.0
+(INFO) (train_vae.py) (06-Jul-2026 12:40:44) Namespace(particles='/home/mae2183/cryoem-classification/results_cryodrgn/J264_real/inputs/particles.256.mrcs', outdir='/home/mae2183/cryoem-classification/results_cryodrgn/J264_real/train_final_retry', zdim=10, poses='/home/mae2183/cryoem-classification/results_cryodrgn/J264_real/inputs/poses.pkl', ctf='/home/mae2183/cryoem-classification/results_cryodrgn/J264_real/inputs/ctf.pkl', load='results_cryodrgn/J264_real/train_final_retry/weights.20.pkl', do_analysis=True, checkpoint=5, log_interval=5000, verbose=False, seed=21879, shuffle_seed=None, ind='/home/mae2183/cryoem-classification/results_cryodrgn/J264_real/inputs/ind_keep.pkl', invert_data=True, window=True, window_r=0.85, datadir=None, lazy=True, shuffler_size=0, num_workers=4, max_threads=16, ntilts=10, random_tilts=False, t_emb_dim=64, tlayers=3, tdim=1024, dose_per_tilt=None, angle_per_tilt=3, num_epochs=50, batch_size=64, wd=0, lr=0.0001, beta=None, beta_control=None, norm=None, amp=False, multigpu=False, do_pose_sgd=False, pretrain=1, emb_type='quat', pose_lr=0.0003, qlayers=3, qdim=1024, encode_mode='resid', enc_mask=None, use_real=False, players=3, pdim=1024, pe_type='gaussian', feat_sigma=0.5, pe_dim=None, domain='fourier', activation='relu', func=<function main at 0x7800f8e6e8c0>)
+(INFO) (train_vae.py) (06-Jul-2026 12:40:44) Use cuda True
+(INFO) (train_vae.py) (06-Jul-2026 12:40:44) Filtering image dataset with /home/mae2183/cryoem-classification/results_cryodrgn/J264_real/inputs/ind_keep.pkl
+(INFO) (train_vae.py) (06-Jul-2026 12:40:44) Loading dataset from /home/mae2183/cryoem-classification/results_cryodrgn/J264_real/inputs/particles.256.mrcs
+(INFO) (dataset.py) (06-Jul-2026 12:40:46) Normalizing HT by 0 +/- 106.52123260498047
+(INFO) (dataset.py) (06-Jul-2026 12:40:46) Normalized real space images by 0.001208232599310577 +/- 0.4147873818874359
+(INFO) (train_vae.py) (06-Jul-2026 12:40:46) Loading ctf params from /home/mae2183/cryoem-classification/results_cryodrgn/J264_real/inputs/ctf.pkl
+(INFO) (ctf.py) (06-Jul-2026 12:40:46) Image size (pix)  : 256
+(INFO) (ctf.py) (06-Jul-2026 12:40:46) A/pix             : 1.037500023841858
+(INFO) (ctf.py) (06-Jul-2026 12:40:46) DefocusU (A)      : 8314.6259765625
+(INFO) (ctf.py) (06-Jul-2026 12:40:46) DefocusV (A)      : 8228.4775390625
+(INFO) (ctf.py) (06-Jul-2026 12:40:46) Dfang (deg)       : 26.81955337524414
+(INFO) (ctf.py) (06-Jul-2026 12:40:46) voltage (kV)      : 300.0
+(INFO) (ctf.py) (06-Jul-2026 12:40:46) cs (mm)           : 2.700000047683716
+(INFO) (ctf.py) (06-Jul-2026 12:40:46) w                 : 0.10000000149011612
+(INFO) (ctf.py) (06-Jul-2026 12:40:46) Phase shift (deg) : 0.0
+(INFO) (train_vae.py) (06-Jul-2026 12:40:46) HetOnlyVAE(
+  (encoder): ResidLinearMLP(
+    (main): Sequential(
+      (0): MyLinear(in_features=51432, out_features=1024, bias=True)
+      (1): ReLU()
+      (2): ResidLinear(
+        (linear): MyLinear(in_features=1024, out_features=1024, bias=True)
+      )
+      (3): ReLU()
+      (4): ResidLinear(
+        (linear): MyLinear(in_features=1024, out_features=1024, bias=True)
+      )
+      (5): ReLU()
+      (6): ResidLinear(
+        (linear): MyLinear(in_features=1024, out_features=1024, bias=True)
+      )
+      (7): ReLU()
+      (8): MyLinear(in_features=1024, out_features=20, bias=True)
+    )
+  )
+  (decoder): FTPositionalDecoder(
+    (decoder): ResidLinearMLP(
+      (main): Sequential(
+        (0): MyLinear(in_features=778, out_features=1024, bias=True)
+        (1): ReLU()
+        (2): ResidLinear(
+          (linear): MyLinear(in_features=1024, out_features=1024, bias=True)
+        )
+        (3): ReLU()
+        (4): ResidLinear(
+          (linear): MyLinear(in_features=1024, out_features=1024, bias=True)
+        )
+        (5): ReLU()
+        (6): ResidLinear(
+          (linear): MyLinear(in_features=1024, out_features=1024, bias=True)
+        )
+        (7): ReLU()
+        (8): MyLinear(in_features=1024, out_features=2, bias=True)
+      )
+    )
+  )
+)
+(INFO) (train_vae.py) (06-Jul-2026 12:40:46) 59785238 parameters in model
+(INFO) (train_vae.py) (06-Jul-2026 12:40:46) 55836692 parameters in encoder
+(INFO) (train_vae.py) (06-Jul-2026 12:40:46) 3948546 parameters in decoder
+(WARNING) (utils.py) (06-Jul-2026 12:40:46) Warning: /home/mae2183/cryoem-classification/results_cryodrgn/J264_real/train_final_retry/config.yaml already exists. Overwriting.
+(INFO) (train_vae.py) (06-Jul-2026 12:40:47) Loading checkpoint from results_cryodrgn/J264_real/train_final_retry/weights.20.pkl
+(INFO) (train_vae.py) (06-Jul-2026 12:40:47) Using 4 workers for data loading
+(INFO) (train_vae.py) (06-Jul-2026 12:43:32) # [Train Epoch: 21/50] [5056/220643 particles] gen loss=0.501504, kld=11.583214, beta=0.100000, loss=0.501526
+(INFO) (train_vae.py) (06-Jul-2026 12:45:03) # [Train Epoch: 21/50] [10048/220643 particles] gen loss=0.499693, kld=10.980597, beta=0.100000, loss=0.499715
+(INFO) (train_vae.py) (06-Jul-2026 12:46:33) # [Train Epoch: 21/50] [15040/220643 particles] gen loss=0.494758, kld=11.328680, beta=0.100000, loss=0.494780
+(INFO) (train_vae.py) (06-Jul-2026 12:48:04) # [Train Epoch: 21/50] [20032/220643 particles] gen loss=0.498969, kld=11.703657, beta=0.100000, loss=0.498992
+(INFO) (train_vae.py) (06-Jul-2026 12:49:35) # [Train Epoch: 21/50] [25024/220643 particles] gen loss=0.499549, kld=11.013504, beta=0.100000, loss=0.499571
+(INFO) (train_vae.py) (06-Jul-2026 12:51:06) # [Train Epoch: 21/50] [30016/220643 particles] gen loss=0.497454, kld=11.664940, beta=0.100000, loss=0.497477
+(INFO) (train_vae.py) (06-Jul-2026 12:52:36) # [Train Epoch: 21/50] [35008/220643 particles] gen loss=0.505012, kld=11.357523, beta=0.100000, loss=0.505034
+(INFO) (train_vae.py) (06-Jul-2026 12:54:07) # [Train Epoch: 21/50] [40000/220643 particles] gen loss=0.499547, kld=11.494143, beta=0.100000, loss=0.499569
+(INFO) (train_vae.py) (06-Jul-2026 12:55:39) # [Train Epoch: 21/50] [45056/220643 particles] gen loss=0.498979, kld=11.138393, beta=0.100000, loss=0.499001
+(INFO) (train_vae.py) (06-Jul-2026 12:57:09) # [Train Epoch: 21/50] [50048/220643 particles] gen loss=0.494902, kld=11.193350, beta=0.100000, loss=0.494923
+(INFO) (train_vae.py) (06-Jul-2026 12:58:40) # [Train Epoch: 21/50] [55040/220643 particles] gen loss=0.498130, kld=11.889881, beta=0.100000, loss=0.498153
+(INFO) (train_vae.py) (06-Jul-2026 13:00:11) # [Train Epoch: 21/50] [60032/220643 particles] gen loss=0.504844, kld=11.528927, beta=0.100000, loss=0.504867
+(INFO) (train_vae.py) (06-Jul-2026 13:01:41) # [Train Epoch: 21/50] [65024/220643 particles] gen loss=0.493910, kld=11.501184, beta=0.100000, loss=0.493932
+(INFO) (train_vae.py) (06-Jul-2026 13:03:12) # [Train Epoch: 21/50] [70016/220643 particles] gen loss=0.498647, kld=11.467436, beta=0.100000, loss=0.498669
+(INFO) (train_vae.py) (06-Jul-2026 13:04:43) # [Train Epoch: 21/50] [75008/220643 particles] gen loss=0.497080, kld=12.203304, beta=0.100000, loss=0.497104
+(INFO) (train_vae.py) (06-Jul-2026 13:06:14) # [Train Epoch: 21/50] [80000/220643 particles] gen loss=0.493112, kld=11.412642, beta=0.100000, loss=0.493134
+(INFO) (train_vae.py) (06-Jul-2026 13:07:45) # [Train Epoch: 21/50] [85056/220643 particles] gen loss=0.501281, kld=11.566374, beta=0.100000, loss=0.501304
+(INFO) (train_vae.py) (06-Jul-2026 13:09:16) # [Train Epoch: 21/50] [90048/220643 particles] gen loss=0.499731, kld=11.085588, beta=0.100000, loss=0.499753
+(INFO) (train_vae.py) (06-Jul-2026 13:10:47) # [Train Epoch: 21/50] [95040/220643 particles] gen loss=0.500058, kld=11.699816, beta=0.100000, loss=0.500081
+(INFO) (train_vae.py) (06-Jul-2026 13:12:17) # [Train Epoch: 21/50] [100032/220643 particles] gen loss=0.502448, kld=11.657330, beta=0.100000, loss=0.502470
+(INFO) (train_vae.py) (06-Jul-2026 13:13:48) # [Train Epoch: 21/50] [105024/220643 particles] gen loss=0.499137, kld=11.972713, beta=0.100000, loss=0.499160
+(INFO) (train_vae.py) (06-Jul-2026 13:15:19) # [Train Epoch: 21/50] [110016/220643 particles] gen loss=0.503026, kld=11.599155, beta=0.100000, loss=0.503048
+(INFO) (train_vae.py) (06-Jul-2026 13:16:49) # [Train Epoch: 21/50] [115008/220643 particles] gen loss=0.498172, kld=11.799978, beta=0.100000, loss=0.498195
+(INFO) (train_vae.py) (06-Jul-2026 13:18:20) # [Train Epoch: 21/50] [120000/220643 particles] gen loss=0.496233, kld=11.457618, beta=0.100000, loss=0.496255
+(INFO) (train_vae.py) (06-Jul-2026 13:19:52) # [Train Epoch: 21/50] [125056/220643 particles] gen loss=0.499791, kld=11.193301, beta=0.100000, loss=0.499813
+(INFO) (train_vae.py) (06-Jul-2026 13:21:23) # [Train Epoch: 21/50] [130048/220643 particles] gen loss=0.499089, kld=10.626333, beta=0.100000, loss=0.499110
+(INFO) (train_vae.py) (06-Jul-2026 13:22:53) # [Train Epoch: 21/50] [135040/220643 particles] gen loss=0.495758, kld=11.573889, beta=0.100000, loss=0.495780
+(INFO) (train_vae.py) (06-Jul-2026 13:24:24) # [Train Epoch: 21/50] [140032/220643 particles] gen loss=0.499420, kld=11.571165, beta=0.100000, loss=0.499443
+(INFO) (train_vae.py) (06-Jul-2026 13:25:54) # [Train Epoch: 21/50] [145024/220643 particles] gen loss=0.499296, kld=12.097022, beta=0.100000, loss=0.499319
+(INFO) (train_vae.py) (06-Jul-2026 13:27:25) # [Train Epoch: 21/50] [150016/220643 particles] gen loss=0.499147, kld=11.473306, beta=0.100000, loss=0.499169
+(INFO) (train_vae.py) (06-Jul-2026 13:28:56) # [Train Epoch: 21/50] [155008/220643 particles] gen loss=0.499789, kld=11.156607, beta=0.100000, loss=0.499811
+(INFO) (train_vae.py) (06-Jul-2026 13:30:26) # [Train Epoch: 21/50] [160000/220643 particles] gen loss=0.499341, kld=11.503225, beta=0.100000, loss=0.499363
+(INFO) (train_vae.py) (06-Jul-2026 13:31:58) # [Train Epoch: 21/50] [165056/220643 particles] gen loss=0.502371, kld=11.891333, beta=0.100000, loss=0.502394
+(INFO) (train_vae.py) (06-Jul-2026 13:33:29) # [Train Epoch: 21/50] [170048/220643 particles] gen loss=0.495222, kld=11.549124, beta=0.100000, loss=0.495245
+(INFO) (train_vae.py) (06-Jul-2026 13:35:00) # [Train Epoch: 21/50] [175040/220643 particles] gen loss=0.499859, kld=11.587928, beta=0.100000, loss=0.499882
+(INFO) (train_vae.py) (06-Jul-2026 13:36:30) # [Train Epoch: 21/50] [180032/220643 particles] gen loss=0.501837, kld=11.454464, beta=0.100000, loss=0.501860
+(INFO) (train_vae.py) (06-Jul-2026 13:38:01) # [Train Epoch: 21/50] [185024/220643 particles] gen loss=0.494898, kld=11.067822, beta=0.100000, loss=0.494919
+(INFO) (train_vae.py) (06-Jul-2026 13:39:31) # [Train Epoch: 21/50] [190016/220643 particles] gen loss=0.498770, kld=11.074646, beta=0.100000, loss=0.498791
+(INFO) (train_vae.py) (06-Jul-2026 13:41:02) # [Train Epoch: 21/50] [195008/220643 particles] gen loss=0.497768, kld=11.683477, beta=0.100000, loss=0.497791
+(INFO) (train_vae.py) (06-Jul-2026 13:42:33) # [Train Epoch: 21/50] [200000/220643 particles] gen loss=0.502172, kld=11.878960, beta=0.100000, loss=0.502195
+(INFO) (train_vae.py) (06-Jul-2026 13:44:04) # [Train Epoch: 21/50] [205056/220643 particles] gen loss=0.496709, kld=10.649410, beta=0.100000, loss=0.496730
+(INFO) (train_vae.py) (06-Jul-2026 13:45:35) # [Train Epoch: 21/50] [210048/220643 particles] gen loss=0.498325, kld=11.437263, beta=0.100000, loss=0.498347
+(INFO) (train_vae.py) (06-Jul-2026 13:47:06) # [Train Epoch: 21/50] [215040/220643 particles] gen loss=0.496832, kld=12.035444, beta=0.100000, loss=0.496855
+(INFO) (train_vae.py) (06-Jul-2026 13:48:36) # [Train Epoch: 21/50] [220032/220643 particles] gen loss=0.502037, kld=11.305279, beta=0.100000, loss=0.502059
+[W706 13:48:48.564641373 CudaIPCTypes.cpp:16] Producer process has been terminated before all shared CUDA tensors released. See Note [Sharing CUDA tensors]
+(INFO) (train_vae.py) (06-Jul-2026 13:48:48) # =====> Epoch: 21 Average gen loss = 0.498449, KLD = 11.542041, total loss = 0.498472; Finished in 1:08:00.887621
+(INFO) (train_vae.py) (06-Jul-2026 13:50:24) # [Train Epoch: 22/50] [5056/220643 particles] gen loss=0.500407, kld=12.140485, beta=0.100000, loss=0.500430
+(INFO) (train_vae.py) (06-Jul-2026 13:51:55) # [Train Epoch: 22/50] [10048/220643 particles] gen loss=0.499391, kld=11.693275, beta=0.100000, loss=0.499414
+(INFO) (train_vae.py) (06-Jul-2026 13:53:25) # [Train Epoch: 22/50] [15040/220643 particles] gen loss=0.497930, kld=11.633406, beta=0.100000, loss=0.497953
+(INFO) (train_vae.py) (06-Jul-2026 13:54:56) # [Train Epoch: 22/50] [20032/220643 particles] gen loss=0.497431, kld=12.204935, beta=0.100000, loss=0.497454
+(INFO) (train_vae.py) (06-Jul-2026 13:56:26) # [Train Epoch: 22/50] [25024/220643 particles] gen loss=0.497593, kld=11.571568, beta=0.100000, loss=0.497616
+(INFO) (train_vae.py) (06-Jul-2026 13:57:57) # [Train Epoch: 22/50] [30016/220643 particles] gen loss=0.494921, kld=11.994179, beta=0.100000, loss=0.494945
+(INFO) (train_vae.py) (06-Jul-2026 13:59:28) # [Train Epoch: 22/50] [35008/220643 particles] gen loss=0.495509, kld=11.651548, beta=0.100000, loss=0.495532
+(INFO) (train_vae.py) (06-Jul-2026 14:00:58) # [Train Epoch: 22/50] [40000/220643 particles] gen loss=0.498461, kld=12.277740, beta=0.100000, loss=0.498485
+(INFO) (train_vae.py) (06-Jul-2026 14:02:30) # [Train Epoch: 22/50] [45056/220643 particles] gen loss=0.498414, kld=11.460232, beta=0.100000, loss=0.498436
+(INFO) (train_vae.py) (06-Jul-2026 14:04:01) # [Train Epoch: 22/50] [50048/220643 particles] gen loss=0.495297, kld=11.581501, beta=0.100000, loss=0.495319
+(INFO) (train_vae.py) (06-Jul-2026 14:05:31) # [Train Epoch: 22/50] [55040/220643 particles] gen loss=0.500388, kld=11.529982, beta=0.100000, loss=0.500411
+(INFO) (train_vae.py) (06-Jul-2026 14:07:02) # [Train Epoch: 22/50] [60032/220643 particles] gen loss=0.501763, kld=11.860876, beta=0.100000, loss=0.501786
+(INFO) (train_vae.py) (06-Jul-2026 14:08:32) # [Train Epoch: 22/50] [65024/220643 particles] gen loss=0.499448, kld=11.604928, beta=0.100000, loss=0.499470
+(INFO) (train_vae.py) (06-Jul-2026 14:10:03) # [Train Epoch: 22/50] [70016/220643 particles] gen loss=0.500464, kld=11.736703, beta=0.100000, loss=0.500487
+(INFO) (train_vae.py) (06-Jul-2026 14:11:34) # [Train Epoch: 22/50] [75008/220643 particles] gen loss=0.497064, kld=12.198189, beta=0.100000, loss=0.497087
+(INFO) (train_vae.py) (06-Jul-2026 14:13:05) # [Train Epoch: 22/50] [80000/220643 particles] gen loss=0.496400, kld=11.449102, beta=0.100000, loss=0.496422
+(INFO) (train_vae.py) (06-Jul-2026 14:14:36) # [Train Epoch: 22/50] [85056/220643 particles] gen loss=0.494106, kld=11.518717, beta=0.100000, loss=0.494129
+(INFO) (train_vae.py) (06-Jul-2026 14:16:07) # [Train Epoch: 22/50] [90048/220643 particles] gen loss=0.499554, kld=10.928670, beta=0.100000, loss=0.499576
+(INFO) (train_vae.py) (06-Jul-2026 14:17:37) # [Train Epoch: 22/50] [95040/220643 particles] gen loss=0.500439, kld=12.315796, beta=0.100000, loss=0.500463
+(INFO) (train_vae.py) (06-Jul-2026 14:19:08) # [Train Epoch: 22/50] [100032/220643 particles] gen loss=0.499854, kld=12.037993, beta=0.100000, loss=0.499877
+(INFO) (train_vae.py) (06-Jul-2026 14:21:11) # [Train Epoch: 22/50] [105024/220643 particles] gen loss=0.498064, kld=11.476038, beta=0.100000, loss=0.498086
+(INFO) (train_vae.py) (06-Jul-2026 14:23:02) # [Train Epoch: 22/50] [110016/220643 particles] gen loss=0.500808, kld=12.468864, beta=0.100000, loss=0.500832
+(INFO) (train_vae.py) (06-Jul-2026 14:24:33) # [Train Epoch: 22/50] [115008/220643 particles] gen loss=0.501541, kld=11.719907, beta=0.100000, loss=0.501564
+(INFO) (train_vae.py) (06-Jul-2026 14:26:03) # [Train Epoch: 22/50] [120000/220643 particles] gen loss=0.497194, kld=11.627441, beta=0.100000, loss=0.497217
+(INFO) (train_vae.py) (06-Jul-2026 14:27:42) # [Train Epoch: 22/50] [125056/220643 particles] gen loss=0.502146, kld=11.944168, beta=0.100000, loss=0.502169
+(INFO) (train_vae.py) (06-Jul-2026 14:29:56) # [Train Epoch: 22/50] [130048/220643 particles] gen loss=0.499916, kld=11.979871, beta=0.100000, loss=0.499939
+(INFO) (train_vae.py) (06-Jul-2026 14:31:45) # [Train Epoch: 22/50] [135040/220643 particles] gen loss=0.501897, kld=11.599831, beta=0.100000, loss=0.501920
+(INFO) (train_vae.py) (06-Jul-2026 14:33:50) # [Train Epoch: 22/50] [140032/220643 particles] gen loss=0.497353, kld=11.163586, beta=0.100000, loss=0.497375
+(INFO) (train_vae.py) (06-Jul-2026 14:35:55) # [Train Epoch: 22/50] [145024/220643 particles] gen loss=0.494234, kld=12.120934, beta=0.100000, loss=0.494258
+(INFO) (train_vae.py) (06-Jul-2026 14:37:49) # [Train Epoch: 22/50] [150016/220643 particles] gen loss=0.499457, kld=11.649365, beta=0.100000, loss=0.499479
+(INFO) (train_vae.py) (06-Jul-2026 14:40:03) # [Train Epoch: 22/50] [155008/220643 particles] gen loss=0.499512, kld=11.761907, beta=0.100000, loss=0.499535
+(INFO) (train_vae.py) (06-Jul-2026 14:41:38) # [Train Epoch: 22/50] [160000/220643 particles] gen loss=0.500189, kld=11.645246, beta=0.100000, loss=0.500212
+(INFO) (train_vae.py) (06-Jul-2026 14:43:54) # [Train Epoch: 22/50] [165056/220643 particles] gen loss=0.499854, kld=11.596958, beta=0.100000, loss=0.499876
+(INFO) (train_vae.py) (06-Jul-2026 14:45:48) # [Train Epoch: 22/50] [170048/220643 particles] gen loss=0.498995, kld=12.640944, beta=0.100000, loss=0.499019
+(INFO) (train_vae.py) (06-Jul-2026 14:47:53) # [Train Epoch: 22/50] [175040/220643 particles] gen loss=0.496496, kld=12.275810, beta=0.100000, loss=0.496520
+(INFO) (train_vae.py) (06-Jul-2026 14:49:59) # [Train Epoch: 22/50] [180032/220643 particles] gen loss=0.496709, kld=11.630308, beta=0.100000, loss=0.496731
+(INFO) (train_vae.py) (06-Jul-2026 14:51:43) # [Train Epoch: 22/50] [185024/220643 particles] gen loss=0.501033, kld=13.231334, beta=0.100000, loss=0.501059
+(INFO) (train_vae.py) (06-Jul-2026 14:53:58) # [Train Epoch: 22/50] [190016/220643 particles] gen loss=0.495958, kld=11.537033, beta=0.100000, loss=0.495980
+(INFO) (train_vae.py) (06-Jul-2026 14:55:40) # [Train Epoch: 22/50] [195008/220643 particles] gen loss=0.501065, kld=11.489996, beta=0.100000, loss=0.501087
+(INFO) (train_vae.py) (06-Jul-2026 14:57:47) # [Train Epoch: 22/50] [200000/220643 particles] gen loss=0.492693, kld=11.672100, beta=0.100000, loss=0.492716
+(INFO) (train_vae.py) (06-Jul-2026 14:59:52) # [Train Epoch: 22/50] [205056/220643 particles] gen loss=0.498386, kld=11.917004, beta=0.100000, loss=0.498409
+(INFO) (train_vae.py) (06-Jul-2026 15:01:50) # [Train Epoch: 22/50] [210048/220643 particles] gen loss=0.500086, kld=11.793180, beta=0.100000, loss=0.500109
+(INFO) (train_vae.py) (06-Jul-2026 15:04:03) # [Train Epoch: 22/50] [215040/220643 particles] gen loss=0.497608, kld=11.944235, beta=0.100000, loss=0.497632
+(INFO) (train_vae.py) (06-Jul-2026 15:05:39) # [Train Epoch: 22/50] [220032/220643 particles] gen loss=0.502369, kld=11.622149, beta=0.100000, loss=0.502392
+[W706 15:05:58.535653496 CudaIPCTypes.cpp:16] Producer process has been terminated before all shared CUDA tensors released. See Note [Sharing CUDA tensors]
+(INFO) (train_vae.py) (06-Jul-2026 15:05:58) # =====> Epoch: 22 Average gen loss = 0.498432, KLD = 11.810761, total loss = 0.498455; Finished in 1:17:10.087721
+(INFO) (train_vae.py) (06-Jul-2026 15:08:19) # [Train Epoch: 23/50] [5056/220643 particles] gen loss=0.499775, kld=12.238369, beta=0.100000, loss=0.499799
+(INFO) (train_vae.py) (06-Jul-2026 15:10:00) # [Train Epoch: 23/50] [10048/220643 particles] gen loss=0.501893, kld=11.635468, beta=0.100000, loss=0.501916
+(INFO) (train_vae.py) (06-Jul-2026 15:12:09) # [Train Epoch: 23/50] [15040/220643 particles] gen loss=0.500687, kld=12.086783, beta=0.100000, loss=0.500711
+(INFO) (train_vae.py) (06-Jul-2026 15:14:11) # [Train Epoch: 23/50] [20032/220643 particles] gen loss=0.503396, kld=12.580500, beta=0.100000, loss=0.503420
+(INFO) (train_vae.py) (06-Jul-2026 15:15:42) # [Train Epoch: 23/50] [25024/220643 particles] gen loss=0.498388, kld=11.905649, beta=0.100000, loss=0.498411
+(INFO) (train_vae.py) (06-Jul-2026 15:17:49) # [Train Epoch: 23/50] [30016/220643 particles] gen loss=0.499316, kld=12.400051, beta=0.100000, loss=0.499340
+(INFO) (train_vae.py) (06-Jul-2026 15:20:06) # [Train Epoch: 23/50] [35008/220643 particles] gen loss=0.498139, kld=11.837967, beta=0.100000, loss=0.498162
+(INFO) (train_vae.py) (06-Jul-2026 15:21:49) # [Train Epoch: 23/50] [40000/220643 particles] gen loss=0.497800, kld=11.884567, beta=0.100000, loss=0.497824
+(INFO) (train_vae.py) (06-Jul-2026 15:24:09) # [Train Epoch: 23/50] [45056/220643 particles] gen loss=0.503920, kld=11.755152, beta=0.100000, loss=0.503943
+(INFO) (train_vae.py) (06-Jul-2026 15:26:27) # [Train Epoch: 23/50] [50048/220643 particles] gen loss=0.500393, kld=12.549580, beta=0.100000, loss=0.500418
+(INFO) (train_vae.py) (06-Jul-2026 15:28:03) # [Train Epoch: 23/50] [55040/220643 particles] gen loss=0.497927, kld=12.314004, beta=0.100000, loss=0.497951
+(INFO) (train_vae.py) (06-Jul-2026 15:30:18) # [Train Epoch: 23/50] [60032/220643 particles] gen loss=0.498039, kld=12.083399, beta=0.100000, loss=0.498063
+(INFO) (train_vae.py) (06-Jul-2026 15:32:35) # [Train Epoch: 23/50] [65024/220643 particles] gen loss=0.497394, kld=12.280979, beta=0.100000, loss=0.497418
+(INFO) (train_vae.py) (06-Jul-2026 15:34:20) # [Train Epoch: 23/50] [70016/220643 particles] gen loss=0.500554, kld=11.717327, beta=0.100000, loss=0.500576
+(INFO) (train_vae.py) (06-Jul-2026 15:36:39) # [Train Epoch: 23/50] [75008/220643 particles] gen loss=0.493829, kld=11.885082, beta=0.100000, loss=0.493852
+(INFO) (train_vae.py) (06-Jul-2026 15:38:43) # [Train Epoch: 23/50] [80000/220643 particles] gen loss=0.499414, kld=11.634787, beta=0.100000, loss=0.499437
+(INFO) (train_vae.py) (06-Jul-2026 15:40:42) # [Train Epoch: 23/50] [85056/220643 particles] gen loss=0.496659, kld=12.370926, beta=0.100000, loss=0.496683
+(INFO) (train_vae.py) (06-Jul-2026 15:42:58) # [Train Epoch: 23/50] [90048/220643 particles] gen loss=0.497259, kld=12.001309, beta=0.100000, loss=0.497283
+(INFO) (train_vae.py) (06-Jul-2026 15:44:52) # [Train Epoch: 23/50] [95040/220643 particles] gen loss=0.496291, kld=11.991491, beta=0.100000, loss=0.496314
+(INFO) (train_vae.py) (06-Jul-2026 15:46:59) # [Train Epoch: 23/50] [100032/220643 particles] gen loss=0.500037, kld=11.873871, beta=0.100000, loss=0.500060
+(INFO) (train_vae.py) (06-Jul-2026 15:49:14) # [Train Epoch: 23/50] [105024/220643 particles] gen loss=0.503880, kld=11.927785, beta=0.100000, loss=0.503903
+(INFO) (train_vae.py) (06-Jul-2026 15:51:00) # [Train Epoch: 23/50] [110016/220643 particles] gen loss=0.500842, kld=11.637684, beta=0.100000, loss=0.500864
+(INFO) (train_vae.py) (06-Jul-2026 15:53:19) # [Train Epoch: 23/50] [115008/220643 particles] gen loss=0.499341, kld=11.750581, beta=0.100000, loss=0.499364
+(INFO) (train_vae.py) (06-Jul-2026 15:55:34) # [Train Epoch: 23/50] [120000/220643 particles] gen loss=0.498916, kld=12.367434, beta=0.100000, loss=0.498940
+(INFO) (train_vae.py) (06-Jul-2026 15:57:11) # [Train Epoch: 23/50] [125056/220643 particles] gen loss=0.500464, kld=11.397918, beta=0.100000, loss=0.500486
+(INFO) (train_vae.py) (06-Jul-2026 15:59:29) # [Train Epoch: 23/50] [130048/220643 particles] gen loss=0.496310, kld=11.390569, beta=0.100000, loss=0.496332
+(INFO) (train_vae.py) (06-Jul-2026 16:01:47) # [Train Epoch: 23/50] [135040/220643 particles] gen loss=0.497361, kld=11.837208, beta=0.100000, loss=0.497384
+(INFO) (train_vae.py) (06-Jul-2026 16:03:27) # [Train Epoch: 23/50] [140032/220643 particles] gen loss=0.502755, kld=12.256683, beta=0.100000, loss=0.502779
+(INFO) (train_vae.py) (06-Jul-2026 16:05:42) # [Train Epoch: 23/50] [145024/220643 particles] gen loss=0.502073, kld=11.996414, beta=0.100000, loss=0.502096
+(INFO) (train_vae.py) (06-Jul-2026 16:07:56) # [Train Epoch: 23/50] [150016/220643 particles] gen loss=0.498106, kld=12.300772, beta=0.100000, loss=0.498130
+(INFO) (train_vae.py) (06-Jul-2026 16:09:48) # [Train Epoch: 23/50] [155008/220643 particles] gen loss=0.500972, kld=11.550270, beta=0.100000, loss=0.500994
+(INFO) (train_vae.py) (06-Jul-2026 16:12:02) # [Train Epoch: 23/50] [160000/220643 particles] gen loss=0.498311, kld=12.022004, beta=0.100000, loss=0.498334
+(INFO) (train_vae.py) (06-Jul-2026 16:14:06) # [Train Epoch: 23/50] [165056/220643 particles] gen loss=0.490220, kld=11.793609, beta=0.100000, loss=0.490243
+(INFO) (train_vae.py) (06-Jul-2026 16:15:37) # [Train Epoch: 23/50] [170048/220643 particles] gen loss=0.497426, kld=11.366440, beta=0.100000, loss=0.497448
+(INFO) (train_vae.py) (06-Jul-2026 16:17:45) # [Train Epoch: 23/50] [175040/220643 particles] gen loss=0.496372, kld=11.359421, beta=0.100000, loss=0.496394
+(INFO) (train_vae.py) (06-Jul-2026 16:20:14) # [Train Epoch: 23/50] [180032/220643 particles] gen loss=0.496556, kld=12.122713, beta=0.100000, loss=0.496580
+(INFO) (train_vae.py) (06-Jul-2026 16:21:45) # [Train Epoch: 23/50] [185024/220643 particles] gen loss=0.496474, kld=12.507792, beta=0.100000, loss=0.496499
+(INFO) (train_vae.py) (06-Jul-2026 16:23:23) # [Train Epoch: 23/50] [190016/220643 particles] gen loss=0.503953, kld=12.094820, beta=0.100000, loss=0.503976
+(INFO) (train_vae.py) (06-Jul-2026 16:25:45) # [Train Epoch: 23/50] [195008/220643 particles] gen loss=0.495327, kld=11.559643, beta=0.100000, loss=0.495350
+(INFO) (train_vae.py) (06-Jul-2026 16:27:59) # [Train Epoch: 23/50] [200000/220643 particles] gen loss=0.495217, kld=11.869757, beta=0.100000, loss=0.495240
+(INFO) (train_vae.py) (06-Jul-2026 16:29:55) # [Train Epoch: 23/50] [205056/220643 particles] gen loss=0.498292, kld=11.692890, beta=0.100000, loss=0.498314
+(INFO) (train_vae.py) (06-Jul-2026 16:32:14) # [Train Epoch: 23/50] [210048/220643 particles] gen loss=0.498085, kld=11.682704, beta=0.100000, loss=0.498108
