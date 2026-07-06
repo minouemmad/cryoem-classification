@@ -10,8 +10,6 @@ cmd:
 - results_cryodrgn/J1442_real/inputs/ind_keep.pkl
 - --zdim
 - '10'
-- -n
-- '100'
 - --enc-dim
 - '1024'
 - --enc-layers
@@ -21,8 +19,15 @@ cmd:
 - --dec-layers
 - '3'
 - --no-amp
+- --load
+- results_cryodrgn/J1442_real/train_final/weights.5.pkl
+- -n
+- '50'
+- --lazy
+- --num-workers
+- '4'
 - --batch-size
-- '32'
+- '64'
 - --checkpoint
 - '5'
 - --log-interval
@@ -65,6 +70,6 @@ model_args:
     tdim: 1024
     tlayers: 3
   zdim: 10
-seed: 64804
-time: 2026-07-05 19:40:56.503112
+seed: 11235
+time: 2026-07-06 12:52:30.230769
 version: 4.3.0

@@ -1098,3 +1098,13 @@ Evaluating z
 # [Train Epoch: 18/100] [30000/301770 particles] gen loss=0.506387, kld=8.860670, beta=0.100000, loss=0.506404
 # [Train Epoch: 18/100] [35016/301770 particles] gen loss=0.495387, kld=8.895554, beta=0.100000, loss=0.495404
 # [Train Epoch: 18/100] [40008/301770 particles] gen loss=0.490856, kld=8.646299, beta=0.100000, loss=0.490873
+# [Train Epoch: 18/100] [45000/301770 particles] gen loss=0.493833, kld=10.419296, beta=0.100000, loss=0.493853
+# [Train Epoch: 18/100] [50016/301770 particles] gen loss=0.494180, kld=8.972800, beta=0.100000, loss=0.494198
+# [Train Epoch: 18/100] [55008/301770 particles] gen loss=0.508396, kld=9.034904, beta=0.100000, loss=0.508414
+# [Train Epoch: 18/100] [60000/301770 particles] gen loss=0.501049, kld=8.789515, beta=0.100000, loss=0.501066
+# [Train Epoch: 18/100] [65016/301770 particles] gen loss=0.498257, kld=8.943862, beta=0.100000, loss=0.498274
+# [Train Epoch: 18/100] [70008/301770 particles] gen loss=0.504547, kld=9.023498, beta=0.100000, loss=0.504565
+# [Train Epoch: 18/100] [75000/301770 particles] gen loss=0.494289, kld=9.118230, beta=0.100000, loss=0.494307
+# [Train Epoch: 18/100] [80016/301770 particles] gen loss=0.501458, kld=8.307917, beta=0.100000, loss=0.501474
+# [Train Epoch: 18/100] [85008/301770 particles] gen loss=0.494629, kld=9.224771, beta=0.100000, loss=0.494647
+# [Train Epoch: 18/100] [90000/301770 particles] gen loss=0.495927, kld=9.057131, beta=0.100000, loss=0.495944
