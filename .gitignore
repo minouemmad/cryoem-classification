@@ -27,3 +27,5 @@ cryodrgn-py310/
 .DS_Store
 Thumbs.db
 results_cryodrgn/*/inputs/*.mrcs
+results_cryodrgn/
+*.pkl
