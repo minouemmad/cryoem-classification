@@ -95,6 +95,36 @@ def lowpass(v, apix, res_A):
     return gaussian_filter(v.astype(np.float32), sigma)
 
 
+def masked_ssim(a, b, mask):
+    """Global structural-similarity index (SSIM) over masked voxels. A
+    non-resolution metric: rewards matching local means/contrast/covariance,
+    1.0 = identical, ~0 = unrelated."""
+    x = a[mask].astype(np.float64)
+    y = b[mask].astype(np.float64)
+    L = max(x.max() - x.min(), y.max() - y.min(), 1e-8)
+    c1, c2 = (0.01 * L) ** 2, (0.03 * L) ** 2
+    mx, my = x.mean(), y.mean()
+    vx, vy = x.var(), y.var()
+    cov = ((x - mx) * (y - my)).mean()
+    return float(((2 * mx * my + c1) * (2 * cov + c2)) /
+                 ((mx * mx + my * my + c1) * (vx + vy + c2)))
+
+
+def masked_nmi(a, b, mask, bins=64):
+    """Normalised mutual information of the two maps' intensities inside the mask
+    (non-resolution, non-linear dependence). 0 = independent, 1 = identical."""
+    x, y = a[mask], b[mask]
+    hist, _, _ = np.histogram2d(x, y, bins=bins)
+    pxy = hist / hist.sum()
+    px, py = pxy.sum(1), pxy.sum(0)
+    nz = pxy > 0
+    hxy = -(pxy[nz] * np.log(pxy[nz])).sum()
+    hx = -(px[px > 0] * np.log(px[px > 0])).sum()
+    hy = -(py[py > 0] * np.log(py[py > 0])).sum()
+    mi = hx + hy - hxy
+    return float(2 * mi / (hx + hy)) if (hx + hy) > 0 else 0.0
+
+
 def compare_to_ref(ref, mov, apix, align_box, n_rot, lp_A):
     """Rigid-body align `mov` onto `ref` (pairwise) then score their agreement.
     Returns aligned mov + metrics.  Score = mean FSC over shells out to 1/8 A
@@ -248,6 +278,10 @@ def pair_deepdive(mover, cs, aligned_mov, ref_vol, apix, win, out, tag,
     lcc_med = float(np.nanmedian(lcc_in))
     lcc_lo = float(np.nanpercentile(lcc_in, 10))
     cc = cross_correlation(lowpass(vb, apix, 8.0), lowpass(va, apix, 8.0), mask)
+    va_n = normalise_in_mask(va, mask)
+    vb_n = normalise_in_mask(vb, mask)
+    ssim = masked_ssim(vb_n, va_n, mask)
+    nmi = masked_nmi(vb, va, mask)
 
     write_mrc(os.path.join(out, f"{tag}_localcorr.mrc"), np.nan_to_num(lcc), apix)
 
@@ -277,7 +311,7 @@ def pair_deepdive(mover, cs, aligned_mov, ref_vol, apix, win, out, tag,
     print(f"  [plot] {p}")
     return {"pair": tag, "cc": cc, "fsc05_A": res05, "fsc0143_A": res143,
             "diff_rms": diff_rms, "local_corr_median": lcc_med,
-            "local_corr_p10": lcc_lo}
+            "local_corr_p10": lcc_lo, "ssim": ssim, "nmi": nmi}
 
 
 # --------------------------------------------------------------------------- #
@@ -408,14 +442,18 @@ def write_summary(results, out):
             lines.append(f"| {a['map']} | **{a['best_match']}** | {a['score']:.2f} "
                          f"| {a['cc']:.2f} | {a['fsc0143_A']:.1f} | "
                          f"{a['align_rot_deg']:.0f} | {ru} |")
-        lines += ["", "### Matched-pair differences", "",
-                  "| pair | CC | FSC0.5 (A) | FSC0.143 (A) | diff RMS | "
-                  "local-agree median | local-agree p10 |",
-                  "|---|---|---|---|---|---|---|"]
+        lines += ["", "### Matched-pair differences "
+                  "(non-resolution structural metrics emphasised)", "",
+                  "CC/SSIM/NMI/local-agree: higher = more similar; diff RMS: "
+                  "lower = more similar. FSC columns kept for reference only.", "",
+                  "| pair | CC | SSIM | NMI | local-agree median | local-agree p10 "
+                  "| diff RMS | FSC0.143 (A) |",
+                  "|---|---|---|---|---|---|---|---|"]
         for p in r["matched_pairs"]:
-            lines.append(f"| {p['pair']} | {p['cc']:.3f} | {p['fsc05_A']:.1f} | "
-                         f"{p['fsc0143_A']:.1f} | {p['diff_rms']:.2f} | "
-                         f"{p['local_corr_median']:.2f} | {p['local_corr_p10']:.2f} |")
+            lines.append(f"| {p['pair']} | {p['cc']:.3f} | {p['ssim']:.3f} | "
+                         f"{p['nmi']:.3f} | {p['local_corr_median']:.2f} | "
+                         f"{p['local_corr_p10']:.2f} | {p['diff_rms']:.2f} | "
+                         f"{p['fsc0143_A']:.1f} |")
         lines.append("")
     p = os.path.join(out, "map_comparison_summary.md")
     with open(p, "w", encoding="utf-8") as fh:

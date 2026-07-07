@@ -1,0 +1,69 @@
+{
+  "n_particles": 300437,
+  "pca_explained_var": [
+    0.14587438069370842,
+    0.11019856816764846,
+    0.1078942796033492
+  ],
+  "free_energy_wells": {
+    "PC1": {
+      "n_wells": 1,
+      "barriers_kt": []
+    },
+    "PC2": {
+      "n_wells": 1,
+      "barriers_kt": []
+    },
+    "PC3": {
+      "n_wells": 1,
+      "barriers_kt": []
+    }
+  },
+  "class_most_confused": {
+    "SC": {
+      "partner": "AC",
+      "neighbour_frac": 0.064,
+      "self_frac_knn": 0.777,
+      "self_frac_gmm": 0.862
+    },
+    "AC": {
+      "partner": "SEPD",
+      "neighbour_frac": 0.081,
+      "self_frac_knn": 0.697,
+      "self_frac_gmm": 0.777
+    },
+    "AO": {
+      "partner": "SEPD",
+      "neighbour_frac": 0.154,
+      "self_frac_knn": 0.603,
+      "self_frac_gmm": 0.728
+    },
+    "SEPD": {
+      "partner": "AO",
+      "neighbour_frac": 0.114,
+      "self_frac_knn": 0.576,
+      "self_frac_gmm": 0.591
+    },
+    "AEPD": {
+      "partner": "V-shaped",
+      "neighbour_frac": 0.129,
+      "self_frac_knn": 0.543,
+      "self_frac_gmm": 0.577
+    },
+    "V-shaped": {
+      "partner": "AEPD",
+      "neighbour_frac": 0.329,
+      "self_frac_knn": 0.21,
+      "self_frac_gmm": 0.197
+    }
+  },
+  "core": null,
+  "class_names": {
+    "6": "SC",
+    "7": "AC",
+    "8": "AO",
+    "9": "SEPD",
+    "10": "AEPD",
+    "11": "V-shaped"
+  }
+}
