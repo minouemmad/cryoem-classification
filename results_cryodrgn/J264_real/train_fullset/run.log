@@ -1108,3 +1108,228 @@ Evaluating z
 # [Train Epoch: 18/100] [80016/301770 particles] gen loss=0.501458, kld=8.307917, beta=0.100000, loss=0.501474
 # [Train Epoch: 18/100] [85008/301770 particles] gen loss=0.494629, kld=9.224771, beta=0.100000, loss=0.494647
 # [Train Epoch: 18/100] [90000/301770 particles] gen loss=0.495927, kld=9.057131, beta=0.100000, loss=0.495944
+/home/mae2183/miniconda3/envs/cryodrgn/bin/cryodrgn train_vae results_cryodrgn/J264_real/inputs/particles.256.mrcs --poses results_cryodrgn/J264_real/inputs/poses.pkl --ctf results_cryodrgn/J264_real/inputs/ctf.pkl --zdim 10 --enc-dim 1024 --enc-layers 3 --dec-dim 1024 --dec-layers 3 --no-amp --load results_cryodrgn/J264_real/train_fullset/weights.15.pkl -n 50 --lazy --num-workers 4 --batch-size 64 --checkpoint 5 --log-interval 5000 -o results_cryodrgn/J264_real/train_fullset
+cryoDRGN 4.3.0
+Namespace(particles='/home/mae2183/cryoem-classification/results_cryodrgn/J264_real/inputs/particles.256.mrcs', outdir='/home/mae2183/cryoem-classification/results_cryodrgn/J264_real/train_fullset', zdim=10, poses='/home/mae2183/cryoem-classification/results_cryodrgn/J264_real/inputs/poses.pkl', ctf='/home/mae2183/cryoem-classification/results_cryodrgn/J264_real/inputs/ctf.pkl', load='results_cryodrgn/J264_real/train_fullset/weights.15.pkl', do_analysis=True, checkpoint=5, log_interval=5000, verbose=False, seed=22177, shuffle_seed=None, ind=None, invert_data=True, window=True, window_r=0.85, datadir=None, lazy=True, shuffler_size=0, num_workers=4, max_threads=16, ntilts=10, random_tilts=False, t_emb_dim=64, tlayers=3, tdim=1024, dose_per_tilt=None, angle_per_tilt=3, num_epochs=50, batch_size=64, wd=0, lr=0.0001, beta=None, beta_control=None, norm=None, amp=False, multigpu=False, do_pose_sgd=False, pretrain=1, emb_type='quat', pose_lr=0.0003, qlayers=3, qdim=1024, encode_mode='resid', enc_mask=None, use_real=False, players=3, pdim=1024, pe_type='gaussian', feat_sigma=0.5, pe_dim=None, domain='fourier', activation='relu', func=<function main at 0x753605ab68c0>)
+Use cuda True
+Loading dataset from /home/mae2183/cryoem-classification/results_cryodrgn/J264_real/inputs/particles.256.mrcs
+Loading ctf params from /home/mae2183/cryoem-classification/results_cryodrgn/J264_real/inputs/ctf.pkl
+HetOnlyVAE(
+  (encoder): ResidLinearMLP(
+    (main): Sequential(
+      (0): MyLinear(in_features=51432, out_features=1024, bias=True)
+      (1): ReLU()
+      (2): ResidLinear(
+        (linear): MyLinear(in_features=1024, out_features=1024, bias=True)
+      )
+      (3): ReLU()
+      (4): ResidLinear(
+        (linear): MyLinear(in_features=1024, out_features=1024, bias=True)
+      )
+      (5): ReLU()
+      (6): ResidLinear(
+        (linear): MyLinear(in_features=1024, out_features=1024, bias=True)
+      )
+      (7): ReLU()
+      (8): MyLinear(in_features=1024, out_features=20, bias=True)
+    )
+  )
+  (decoder): FTPositionalDecoder(
+    (decoder): ResidLinearMLP(
+      (main): Sequential(
+        (0): MyLinear(in_features=778, out_features=1024, bias=True)
+        (1): ReLU()
+        (2): ResidLinear(
+          (linear): MyLinear(in_features=1024, out_features=1024, bias=True)
+        )
+        (3): ReLU()
+        (4): ResidLinear(
+          (linear): MyLinear(in_features=1024, out_features=1024, bias=True)
+        )
+        (5): ReLU()
+        (6): ResidLinear(
+          (linear): MyLinear(in_features=1024, out_features=1024, bias=True)
+        )
+        (7): ReLU()
+        (8): MyLinear(in_features=1024, out_features=2, bias=True)
+      )
+    )
+  )
+)
+59785238 parameters in model
+55836692 parameters in encoder
+3948546 parameters in decoder
+Loading checkpoint from results_cryodrgn/J264_real/train_fullset/weights.15.pkl
+Using 4 workers for data loading
+/home/mae2183/miniconda3/envs/cryodrgn/bin/cryodrgn train_vae results_cryodrgn/J264_real/inputs/particles.256.mrcs --poses results_cryodrgn/J264_real/inputs/poses.pkl --ctf results_cryodrgn/J264_real/inputs/ctf.pkl --zdim 10 --enc-dim 1024 --enc-layers 3 --dec-dim 1024 --dec-layers 3 --no-amp --load results_cryodrgn/J264_real/train_fullset/weights.15.pkl -n 50 --lazy --num-workers 4 --batch-size 64 --checkpoint 5 --log-interval 5000 -o results_cryodrgn/J264_real/train_fullset
+cryoDRGN 4.3.0
+Namespace(particles='/home/mae2183/cryoem-classification/results_cryodrgn/J264_real/inputs/particles.256.mrcs', outdir='/home/mae2183/cryoem-classification/results_cryodrgn/J264_real/train_fullset', zdim=10, poses='/home/mae2183/cryoem-classification/results_cryodrgn/J264_real/inputs/poses.pkl', ctf='/home/mae2183/cryoem-classification/results_cryodrgn/J264_real/inputs/ctf.pkl', load='results_cryodrgn/J264_real/train_fullset/weights.15.pkl', do_analysis=True, checkpoint=5, log_interval=5000, verbose=False, seed=17596, shuffle_seed=None, ind=None, invert_data=True, window=True, window_r=0.85, datadir=None, lazy=True, shuffler_size=0, num_workers=4, max_threads=16, ntilts=10, random_tilts=False, t_emb_dim=64, tlayers=3, tdim=1024, dose_per_tilt=None, angle_per_tilt=3, num_epochs=50, batch_size=64, wd=0, lr=0.0001, beta=None, beta_control=None, norm=None, amp=False, multigpu=False, do_pose_sgd=False, pretrain=1, emb_type='quat', pose_lr=0.0003, qlayers=3, qdim=1024, encode_mode='resid', enc_mask=None, use_real=False, players=3, pdim=1024, pe_type='gaussian', feat_sigma=0.5, pe_dim=None, domain='fourier', activation='relu', func=<function main at 0x79e0c3bf68c0>)
+Use cuda True
+Loading dataset from /home/mae2183/cryoem-classification/results_cryodrgn/J264_real/inputs/particles.256.mrcs
+Loading ctf params from /home/mae2183/cryoem-classification/results_cryodrgn/J264_real/inputs/ctf.pkl
+HetOnlyVAE(
+  (encoder): ResidLinearMLP(
+    (main): Sequential(
+      (0): MyLinear(in_features=51432, out_features=1024, bias=True)
+      (1): ReLU()
+      (2): ResidLinear(
+        (linear): MyLinear(in_features=1024, out_features=1024, bias=True)
+      )
+      (3): ReLU()
+      (4): ResidLinear(
+        (linear): MyLinear(in_features=1024, out_features=1024, bias=True)
+      )
+      (5): ReLU()
+      (6): ResidLinear(
+        (linear): MyLinear(in_features=1024, out_features=1024, bias=True)
+      )
+      (7): ReLU()
+      (8): MyLinear(in_features=1024, out_features=20, bias=True)
+    )
+  )
+  (decoder): FTPositionalDecoder(
+    (decoder): ResidLinearMLP(
+      (main): Sequential(
+        (0): MyLinear(in_features=778, out_features=1024, bias=True)
+        (1): ReLU()
+        (2): ResidLinear(
+          (linear): MyLinear(in_features=1024, out_features=1024, bias=True)
+        )
+        (3): ReLU()
+        (4): ResidLinear(
+          (linear): MyLinear(in_features=1024, out_features=1024, bias=True)
+        )
+        (5): ReLU()
+        (6): ResidLinear(
+          (linear): MyLinear(in_features=1024, out_features=1024, bias=True)
+        )
+        (7): ReLU()
+        (8): MyLinear(in_features=1024, out_features=2, bias=True)
+      )
+    )
+  )
+)
+59785238 parameters in model
+55836692 parameters in encoder
+3948546 parameters in decoder
+Loading checkpoint from results_cryodrgn/J264_real/train_fullset/weights.15.pkl
+Using 4 workers for data loading
+/home/mae2183/miniconda3/envs/cryodrgn/bin/cryodrgn train_vae results_cryodrgn/J264_real/inputs/particles.256.mrcs --poses results_cryodrgn/J264_real/inputs/poses.pkl --ctf results_cryodrgn/J264_real/inputs/ctf.pkl --zdim 10 --enc-dim 1024 --enc-layers 3 --dec-dim 1024 --dec-layers 3 --no-amp --load results_cryodrgn/J264_real/train_fullset/weights.15.pkl -n 50 --lazy --num-workers 4 --batch-size 64 --checkpoint 5 --log-interval 5000 -o results_cryodrgn/J264_real/train_fullset
+cryoDRGN 4.3.0
+Namespace(particles='/home/mae2183/cryoem-classification/results_cryodrgn/J264_real/inputs/particles.256.mrcs', outdir='/home/mae2183/cryoem-classification/results_cryodrgn/J264_real/train_fullset', zdim=10, poses='/home/mae2183/cryoem-classification/results_cryodrgn/J264_real/inputs/poses.pkl', ctf='/home/mae2183/cryoem-classification/results_cryodrgn/J264_real/inputs/ctf.pkl', load='results_cryodrgn/J264_real/train_fullset/weights.15.pkl', do_analysis=True, checkpoint=5, log_interval=5000, verbose=False, seed=6251, shuffle_seed=None, ind=None, invert_data=True, window=True, window_r=0.85, datadir=None, lazy=True, shuffler_size=0, num_workers=4, max_threads=16, ntilts=10, random_tilts=False, t_emb_dim=64, tlayers=3, tdim=1024, dose_per_tilt=None, angle_per_tilt=3, num_epochs=50, batch_size=64, wd=0, lr=0.0001, beta=None, beta_control=None, norm=None, amp=False, multigpu=False, do_pose_sgd=False, pretrain=1, emb_type='quat', pose_lr=0.0003, qlayers=3, qdim=1024, encode_mode='resid', enc_mask=None, use_real=False, players=3, pdim=1024, pe_type='gaussian', feat_sigma=0.5, pe_dim=None, domain='fourier', activation='relu', func=<function main at 0x709e83a468c0>)
+Use cuda True
+Loading dataset from /home/mae2183/cryoem-classification/results_cryodrgn/J264_real/inputs/particles.256.mrcs
+/home/mae2183/miniconda3/envs/cryodrgn/bin/cryodrgn train_vae results_cryodrgn/J264_real/inputs/particles.256.mrcs --poses results_cryodrgn/J264_real/inputs/poses.pkl --ctf results_cryodrgn/J264_real/inputs/ctf.pkl --zdim 10 --enc-dim 1024 --enc-layers 3 --dec-dim 1024 --dec-layers 3 --no-amp --load results_cryodrgn/J264_real/train_fullset/weights.15.pkl -n 50 --lazy --num-workers 4 --batch-size 64 --checkpoint 5 --log-interval 5000 -o results_cryodrgn/J264_real/train_fullset
+cryoDRGN 4.3.0
+Namespace(particles='/home/mae2183/cryoem-classification/results_cryodrgn/J264_real/inputs/particles.256.mrcs', outdir='/home/mae2183/cryoem-classification/results_cryodrgn/J264_real/train_fullset', zdim=10, poses='/home/mae2183/cryoem-classification/results_cryodrgn/J264_real/inputs/poses.pkl', ctf='/home/mae2183/cryoem-classification/results_cryodrgn/J264_real/inputs/ctf.pkl', load='results_cryodrgn/J264_real/train_fullset/weights.15.pkl', do_analysis=True, checkpoint=5, log_interval=5000, verbose=False, seed=61731, shuffle_seed=None, ind=None, invert_data=True, window=True, window_r=0.85, datadir=None, lazy=True, shuffler_size=0, num_workers=4, max_threads=16, ntilts=10, random_tilts=False, t_emb_dim=64, tlayers=3, tdim=1024, dose_per_tilt=None, angle_per_tilt=3, num_epochs=50, batch_size=64, wd=0, lr=0.0001, beta=None, beta_control=None, norm=None, amp=False, multigpu=False, do_pose_sgd=False, pretrain=1, emb_type='quat', pose_lr=0.0003, qlayers=3, qdim=1024, encode_mode='resid', enc_mask=None, use_real=False, players=3, pdim=1024, pe_type='gaussian', feat_sigma=0.5, pe_dim=None, domain='fourier', activation='relu', func=<function main at 0x7354d0ba68c0>)
+Use cuda True
+Loading dataset from /home/mae2183/cryoem-classification/results_cryodrgn/J264_real/inputs/particles.256.mrcs
+Loading ctf params from /home/mae2183/cryoem-classification/results_cryodrgn/J264_real/inputs/ctf.pkl
+HetOnlyVAE(
+  (encoder): ResidLinearMLP(
+    (main): Sequential(
+      (0): MyLinear(in_features=51432, out_features=1024, bias=True)
+      (1): ReLU()
+      (2): ResidLinear(
+        (linear): MyLinear(in_features=1024, out_features=1024, bias=True)
+      )
+      (3): ReLU()
+      (4): ResidLinear(
+        (linear): MyLinear(in_features=1024, out_features=1024, bias=True)
+      )
+      (5): ReLU()
+      (6): ResidLinear(
+        (linear): MyLinear(in_features=1024, out_features=1024, bias=True)
+      )
+      (7): ReLU()
+      (8): MyLinear(in_features=1024, out_features=20, bias=True)
+    )
+  )
+  (decoder): FTPositionalDecoder(
+    (decoder): ResidLinearMLP(
+      (main): Sequential(
+        (0): MyLinear(in_features=778, out_features=1024, bias=True)
+        (1): ReLU()
+        (2): ResidLinear(
+          (linear): MyLinear(in_features=1024, out_features=1024, bias=True)
+        )
+        (3): ReLU()
+        (4): ResidLinear(
+          (linear): MyLinear(in_features=1024, out_features=1024, bias=True)
+        )
+        (5): ReLU()
+        (6): ResidLinear(
+          (linear): MyLinear(in_features=1024, out_features=1024, bias=True)
+        )
+        (7): ReLU()
+        (8): MyLinear(in_features=1024, out_features=2, bias=True)
+      )
+    )
+  )
+)
+59785238 parameters in model
+55836692 parameters in encoder
+3948546 parameters in decoder
+Loading checkpoint from results_cryodrgn/J264_real/train_fullset/weights.15.pkl
+Using 4 workers for data loading
+# [Train Epoch: 16/50] [5056/301770 particles] gen loss=0.496685, kld=8.809897, beta=0.100000, loss=0.496702
+# [Train Epoch: 16/50] [10048/301770 particles] gen loss=0.495956, kld=9.244702, beta=0.100000, loss=0.495974
+# [Train Epoch: 16/50] [15040/301770 particles] gen loss=0.502556, kld=9.180754, beta=0.100000, loss=0.502574
+# [Train Epoch: 16/50] [20032/301770 particles] gen loss=0.496388, kld=8.610312, beta=0.100000, loss=0.496405
+# [Train Epoch: 16/50] [25024/301770 particles] gen loss=0.499911, kld=9.263737, beta=0.100000, loss=0.499929
+# [Train Epoch: 16/50] [30016/301770 particles] gen loss=0.498761, kld=8.581147, beta=0.100000, loss=0.498777
+# [Train Epoch: 16/50] [35008/301770 particles] gen loss=0.496930, kld=8.734182, beta=0.100000, loss=0.496947
+# [Train Epoch: 16/50] [40000/301770 particles] gen loss=0.494440, kld=8.797916, beta=0.100000, loss=0.494458
+# [Train Epoch: 16/50] [45056/301770 particles] gen loss=0.497331, kld=8.985548, beta=0.100000, loss=0.497349
+# [Train Epoch: 16/50] [50048/301770 particles] gen loss=0.498574, kld=9.214073, beta=0.100000, loss=0.498591
+# [Train Epoch: 16/50] [55040/301770 particles] gen loss=0.497618, kld=8.928298, beta=0.100000, loss=0.497635
+# [Train Epoch: 16/50] [60032/301770 particles] gen loss=0.496343, kld=8.752224, beta=0.100000, loss=0.496361
+# [Train Epoch: 16/50] [65024/301770 particles] gen loss=0.498640, kld=8.908738, beta=0.100000, loss=0.498657
+# [Train Epoch: 16/50] [70016/301770 particles] gen loss=0.499254, kld=8.652262, beta=0.100000, loss=0.499270
+# [Train Epoch: 16/50] [75008/301770 particles] gen loss=0.501846, kld=8.780665, beta=0.100000, loss=0.501863
+# [Train Epoch: 16/50] [80000/301770 particles] gen loss=0.497002, kld=9.064110, beta=0.100000, loss=0.497019
+# [Train Epoch: 16/50] [85056/301770 particles] gen loss=0.496972, kld=9.303785, beta=0.100000, loss=0.496990
+# [Train Epoch: 16/50] [90048/301770 particles] gen loss=0.498757, kld=9.021456, beta=0.100000, loss=0.498775
+# [Train Epoch: 16/50] [95040/301770 particles] gen loss=0.501133, kld=8.680541, beta=0.100000, loss=0.501150
+# [Train Epoch: 16/50] [100032/301770 particles] gen loss=0.497877, kld=9.035502, beta=0.100000, loss=0.497894
+# [Train Epoch: 16/50] [105024/301770 particles] gen loss=0.492937, kld=9.096053, beta=0.100000, loss=0.492954
+# [Train Epoch: 16/50] [110016/301770 particles] gen loss=0.500134, kld=9.062969, beta=0.100000, loss=0.500152
+# [Train Epoch: 16/50] [115008/301770 particles] gen loss=0.497552, kld=8.849279, beta=0.100000, loss=0.497569
+# [Train Epoch: 16/50] [120000/301770 particles] gen loss=0.494599, kld=8.828720, beta=0.100000, loss=0.494616
+# [Train Epoch: 16/50] [125056/301770 particles] gen loss=0.502441, kld=8.792419, beta=0.100000, loss=0.502458
+# [Train Epoch: 16/50] [130048/301770 particles] gen loss=0.499127, kld=9.204914, beta=0.100000, loss=0.499144
+# [Train Epoch: 16/50] [135040/301770 particles] gen loss=0.499022, kld=9.088346, beta=0.100000, loss=0.499040
+# [Train Epoch: 16/50] [140032/301770 particles] gen loss=0.500430, kld=9.176327, beta=0.100000, loss=0.500447
+# [Train Epoch: 16/50] [145024/301770 particles] gen loss=0.497749, kld=8.756502, beta=0.100000, loss=0.497766
+# [Train Epoch: 16/50] [150016/301770 particles] gen loss=0.502626, kld=8.971239, beta=0.100000, loss=0.502644
+# [Train Epoch: 16/50] [155008/301770 particles] gen loss=0.499255, kld=8.771980, beta=0.100000, loss=0.499272
+# [Train Epoch: 16/50] [160000/301770 particles] gen loss=0.500999, kld=8.720541, beta=0.100000, loss=0.501015
+# [Train Epoch: 16/50] [165056/301770 particles] gen loss=0.495647, kld=8.630537, beta=0.100000, loss=0.495664
+# [Train Epoch: 16/50] [170048/301770 particles] gen loss=0.496304, kld=9.065588, beta=0.100000, loss=0.496321
+# [Train Epoch: 16/50] [175040/301770 particles] gen loss=0.498836, kld=8.891452, beta=0.100000, loss=0.498853
+# [Train Epoch: 16/50] [180032/301770 particles] gen loss=0.501054, kld=8.800579, beta=0.100000, loss=0.501071
+# [Train Epoch: 16/50] [185024/301770 particles] gen loss=0.497494, kld=8.787739, beta=0.100000, loss=0.497511
+# [Train Epoch: 16/50] [190016/301770 particles] gen loss=0.500250, kld=8.648057, beta=0.100000, loss=0.500267
+# [Train Epoch: 16/50] [195008/301770 particles] gen loss=0.497960, kld=8.750834, beta=0.100000, loss=0.497977
+# [Train Epoch: 16/50] [200000/301770 particles] gen loss=0.498503, kld=8.800718, beta=0.100000, loss=0.498520
+# [Train Epoch: 16/50] [205056/301770 particles] gen loss=0.499999, kld=8.819069, beta=0.100000, loss=0.500016
+# [Train Epoch: 16/50] [210048/301770 particles] gen loss=0.499917, kld=9.035981, beta=0.100000, loss=0.499934
+# [Train Epoch: 16/50] [215040/301770 particles] gen loss=0.498596, kld=9.832151, beta=0.100000, loss=0.498615
+# [Train Epoch: 16/50] [220032/301770 particles] gen loss=0.499797, kld=9.167112, beta=0.100000, loss=0.499815
+# [Train Epoch: 16/50] [225024/301770 particles] gen loss=0.498765, kld=9.026991, beta=0.100000, loss=0.498782
+# [Train Epoch: 16/50] [230016/301770 particles] gen loss=0.497880, kld=9.142923, beta=0.100000, loss=0.497898
+# [Train Epoch: 16/50] [235008/301770 particles] gen loss=0.499937, kld=8.777851, beta=0.100000, loss=0.499954
+# [Train Epoch: 16/50] [240000/301770 particles] gen loss=0.497387, kld=8.700081, beta=0.100000, loss=0.497404
+# [Train Epoch: 16/50] [245056/301770 particles] gen loss=0.497384, kld=8.769840, beta=0.100000, loss=0.497402
+# [Train Epoch: 16/50] [250048/301770 particles] gen loss=0.504941, kld=8.919430, beta=0.100000, loss=0.504958
+# [Train Epoch: 16/50] [255040/301770 particles] gen loss=0.498173, kld=9.084839, beta=0.100000, loss=0.498191
+# [Train Epoch: 16/50] [260032/301770 particles] gen loss=0.498848, kld=8.648636, beta=0.100000, loss=0.498865
+# [Train Epoch: 16/50] [265024/301770 particles] gen loss=0.494949, kld=8.865116, beta=0.100000, loss=0.494966
+# [Train Epoch: 16/50] [270016/301770 particles] gen loss=0.503134, kld=8.901092, beta=0.100000, loss=0.503151
+# [Train Epoch: 16/50] [275008/301770 particles] gen loss=0.498587, kld=9.269207, beta=0.100000, loss=0.498605
+# [Train Epoch: 16/50] [280000/301770 particles] gen loss=0.498066, kld=8.762358, beta=0.100000, loss=0.498083
+# [Train Epoch: 16/50] [285056/301770 particles] gen loss=0.497004, kld=8.923546, beta=0.100000, loss=0.497021
+# [Train Epoch: 16/50] [290048/301770 particles] gen loss=0.497656, kld=9.320004, beta=0.100000, loss=0.497674
+# [Train Epoch: 16/50] [295040/301770 particles] gen loss=0.501232, kld=9.007036, beta=0.100000, loss=0.501249
+# [Train Epoch: 16/50] [300032/301770 particles] gen loss=0.497118, kld=8.671792, beta=0.100000, loss=0.497135
+# =====> Epoch: 16 Average gen loss = 0.498472, KLD = 8.878844, total loss = 0.498489; Finished in 1:33:43.158133
