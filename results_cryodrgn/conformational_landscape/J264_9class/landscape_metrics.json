@@ -1,0 +1,104 @@
+{
+  "n_particles": 299745,
+  "pca_explained_var": [
+    0.14584854451942797,
+    0.11036246738066587,
+    0.10875335658549908
+  ],
+  "free_energy_wells": {
+    "PC1": {
+      "n_wells": 1,
+      "barriers_kt": []
+    },
+    "PC2": {
+      "n_wells": 1,
+      "barriers_kt": []
+    },
+    "PC3": {
+      "n_wells": 1,
+      "barriers_kt": []
+    }
+  },
+  "class_most_confused": {
+    "SC": {
+      "partner": "AEPD",
+      "neighbour_frac": 0.042,
+      "self_frac_knn": 0.924,
+      "self_frac_gmm": 0.979
+    },
+    "AC": {
+      "partner": "V-shaped",
+      "neighbour_frac": 0.019,
+      "self_frac_knn": 0.939,
+      "self_frac_gmm": 0.97
+    },
+    "AO": {
+      "partner": "SEPD",
+      "neighbour_frac": 0.113,
+      "self_frac_knn": 0.841,
+      "self_frac_gmm": 0.957
+    },
+    "SEPD": {
+      "partner": "AO",
+      "neighbour_frac": 0.078,
+      "self_frac_knn": 0.72,
+      "self_frac_gmm": 0.871
+    },
+    "AEPD": {
+      "partner": "V-shaped",
+      "neighbour_frac": 0.141,
+      "self_frac_knn": 0.654,
+      "self_frac_gmm": 0.852
+    },
+    "V-shaped": {
+      "partner": "AEPD",
+      "neighbour_frac": 0.374,
+      "self_frac_knn": 0.275,
+      "self_frac_gmm": 0.57
+    },
+    "NBD1-less": {
+      "partner": "SEPD",
+      "neighbour_frac": 0.41,
+      "self_frac_knn": 0.188,
+      "self_frac_gmm": 0.355
+    },
+    "NBD2-less": {
+      "partner": "SEPD",
+      "neighbour_frac": 0.358,
+      "self_frac_knn": 0.235,
+      "self_frac_gmm": 0.481
+    },
+    "NBD1-less-wide": {
+      "partner": "AEPD",
+      "neighbour_frac": 0.333,
+      "self_frac_knn": 0.029,
+      "self_frac_gmm": 0.073
+    }
+  },
+  "core": {
+    "kept_classes": [
+      "SC",
+      "AC",
+      "AO",
+      "SEPD",
+      "AEPD",
+      "V-shaped"
+    ],
+    "explained_var": [
+      0.13343932560943186,
+      0.11685019424255151,
+      0.11051723317461029
+    ]
+  },
+  "class_names": {
+    "6": "SC",
+    "7": "AC",
+    "8": "AO",
+    "9": "SEPD",
+    "10": "AEPD",
+    "11": "V-shaped",
+    "12": "NBD1-less",
+    "13": "NBD2-less",
+    "14": "NBD1-less-wide"
+  }
+}

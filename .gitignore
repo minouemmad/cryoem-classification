@@ -29,3 +29,6 @@ Thumbs.db
 results_cryodrgn/*/inputs/*.mrcs
 results_cryodrgn/
 *.pkl
+
+# oversized regenerable cryoDRGN intermediates (exceed GitHub 100MB)
+**/_passthrough_kept.npy
