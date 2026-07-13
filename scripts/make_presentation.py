@@ -29,7 +29,7 @@ DGRAY  = RGBColor(0x40, 0x40, 0x40)
 
 FIGS = {
     "scatter":      ROOT / "results_cryosparc/diagnostics/pairwise_posterior_scatter_J1442.png",
-    "cs_confusion": ROOT / "results_cryosparc/J1442/confusion/confusion_soft_posterior.png",
+    "cs_confusion": ROOT / "results_cryosparc/J1442/confusion/confusion_gmm_equalprior.png",
     "pca_j1442":    ROOT / "results_cryodrgn/J1442/fullset_D256_z10_ep100/analyze.50/z_pca_marginals.png",
     "pca_j264":     ROOT / "results_cryodrgn/J264/fullset_D256_z10_ep50/analyze.50/z_pca_marginals.png",
     "land_k3_a":    ROOT / "results_cryodrgn/J1442/fullset_D256_z10_ep100/landscape_k3/panel_A_landscape.png",
@@ -354,15 +354,16 @@ The result: the mean max-posterior drops from 99.2% (biased) to 36.2% (debiased)
 
     add_image(s, "cs_confusion", 8.45, 1.15, width=4.65)
     caption(s,
-        "Soft-posterior confusion (GMM pipeline).\n"
-        "P6 diagonal 0.40, P7 = 0.31, P8 = 0.38.\n"
-        "All > 0.33 baseline → REAL class signal.\n"
-        "Off-diagonal 0.29–0.36 → genuine overlap.\n"
-        "Note: axis label 'True' is a misnomer here\n"
-        "— both are observed, not ground truth.\n\n"
-        "GMM formula:  p(x) = Σₖ πₖ · 𝒩(x ; μₖ, Σₖ)\n"
-        "Fit to ALR-transformed probability vectors.",
-        8.45, 4.6, 4.65, 1.85)
+        "GMM equal-prior confusion — the GMM fit output.\n"
+        "Rows = CryoSPARC class; cols = GMM hard assignment\n"
+        "under equal-prior decision rule (pure geometry).\n"
+        "P6 diagonal 0.87 → well-separated in GMM space.\n"
+        "P7 = 0.69, P8 = 0.59 → more GMM overlap, P7/P8\n"
+        "share a region of the ALR-posterior landscape.\n\n"
+        "This is the DIRECT output of fitting the Gaussian\n"
+        "Mixture Model — how well the 3 fitted Gaussians\n"
+        "separate under an unbiased equal-prior rule.",
+        8.45, 4.6, 4.65, 2.3)
     set_notes(s, """SPEAKING NOTES — Slide 7 (GMM + Scatter + Confusion)
 These two panels together tell the full story of what CryoSPARC's honest posteriors look like.
 
@@ -372,7 +373,7 @@ IMPORTANT — and I want to be clear about this: there IS real class signal here
 
 BUT — much of the data is still near the center (0.33, 0.33), meaning many individual particles are genuinely ambiguous. These aren't particles where the algorithm is wrong — they're particles that truly sit between conformational states.
 
-RIGHT: The confusion matrix quantifies this exactly. Diagonal 0.40/0.31/0.38 confirms signal; off-diagonal 0.29–0.36 confirms overlap.
+RIGHT: The GMM equal-prior confusion matrix. This IS the direct output of the GMM model. Under an equal-prior decision rule (no weight bias) the diagonal is P6=0.87, P7=0.69, P8=0.59. "Equal-prior" means we ask: ignoring how many particles are in each class, if we sampled a new particle from each Gaussian component, how often would it be classified back to the right class? This measures pure Gaussian geometry. P7 and P8 each have ~30-40% confusion with other classes — confirming they're the most overlapping states — while P6 is the most distinct (87% self-assignment).
 
 The GMM pipeline fits Gaussian bell curves to these distributions. This lets us:
 - Compute soft class memberships (how likely each particle is in each cluster)
