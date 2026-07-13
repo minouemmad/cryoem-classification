@@ -33,7 +33,7 @@ FIGS = {
     "pca_j1442":    ROOT / "results_cryodrgn/J1442/fullset_D256_z10_ep100/analyze.50/z_pca_marginals.png",
     "pca_j264":     ROOT / "results_cryodrgn/J264/fullset_D256_z10_ep50/analyze.50/z_pca_marginals.png",
     "land_k3_a":    ROOT / "results_cryodrgn/J1442/fullset_D256_z10_ep100/landscape_k3/panel_A_landscape.png",
-    "latent_conf":  ROOT / "results_cryodrgn/J1442/fullset_D256_z10_ep100/latent_gmm_k3/latent_confusion_soft.png",
+    "latent_conf":  ROOT / "results_cryodrgn/J1442/confidence_3class/confusion.png",
     "land_z10_d":   ROOT / "results_cryodrgn/J1442/landscape_z10/panel_D_pc1_marginal.png",
     "basin_j1442":  ROOT / "results_cryodrgn/J1442/basin_occupancy_j1442x5/basin_occupancy_J1442x5.png",
     "conf5":        ROOT / "results_cryodrgn/J1442/confidence_5class/confusion.png",
@@ -473,14 +473,17 @@ One caveat: the orientations we feed in come from CryoSPARC, so there's an indir
         "Labels = biological names (NBD1LessMix-Ablated, VshapedMix, etc.)",
         5.25, 6.57, 5.55, .88)
     caption(s,
-        "RIGHT: Latent GMM confusion.\n"
-        "Diagonal 0.97 / 0.96 / 0.99 !\n"
-        "vs CryoSPARC: 0.40 / 0.31 / 0.38\n"
-        "→ Dramatic improvement.",
+        "RIGHT: Cross-method agreement.\n"
+        "CryoSPARC class (row) vs cryoDRGN\n"
+        "latent hard assignment (col).\n"
+        "81.2% overall agreement (vs 33%\n"
+        "random baseline for 3 classes).\n"
+        "Both methods are independent —\n"
+        "neither is ground truth.",
         10.85, 5.55, 2.28, 1.9)
 
     add_rect(s, .2, 7.38, 12.9, .1, NAVY)
-    add_text(s, "Same 3 classes as CryoSPARC — found WITHOUT reference maps. Latent-GMM confusion (0.97–0.99) vs CryoSPARC (0.40–0.38) = cryoDRGN cleanly resolves what CryoSPARC genuinely struggles with.",
+    add_text(s, "Same 3 classes as CryoSPARC — found WITHOUT reference maps. Cross-method agreement 81% (vs 33% random) = independent validation; neither method is ground truth.",
              .35, 7.4, 12.6, .1, sz=11, bold=True, color=WHITE, align=PP_ALIGN.CENTER)
     set_notes(s, """SPEAKING NOTES — Slide 9 (D=256: 3 Clear States)
 Remember the GPS analogy from the last slide. Here we're plotting where all 230,000 CFTR particles end up in that GPS map.
@@ -489,11 +492,9 @@ LEFT: Three distinct blobs, with no guidance about how many to look for. The neu
 
 CENTRE: When I fit a 3-component GMM (three Gaussian bells) to the full 10-dimensional space, the minimum separation is 2.60 standard deviations. Two SD is the threshold for genuine discreteness — these are clearly distinguishable in the full 10-D space.
 
-RIGHT: The confusion matrix of the latent GMM. Look at the diagonal: 0.97, 0.96, 0.99. Compare this to CryoSPARC's debiased confusion from slide 7: 0.40, 0.31, 0.38. 
+RIGHT: The confusion matrix in the top-right is the CROSS-METHOD agreement between CryoSPARC and cryoDRGN — NOT the latent GMM measuring itself. Each row is a CryoSPARC class; each column is what cryoDRGN's latent GMM assigned the same particle to. 81.2% of particles get the same label from both methods. That's the honest number — and it's meaningful: if the two methods were completely unrelated, you'd expect 33% agreement by random chance. Getting 81% from two algorithms with completely different assumptions is strong cross-validation.
 
-CryoSPARC sees substantial particle-level confusion between the three classes. cryoDRGN's latent space has essentially zero confusion. The neural network is finding a representation where the three states are cleanly separated — far more so than in the CryoSPARC posterior space.
-
-This doesn't mean CryoSPARC is wrong — it means cryoDRGN's latent geometry is better suited to discriminating these particular structural differences. And crucially, both find the SAME three classes. That cross-validation is our strongest result.""")
+IMPORTANT: I'm NOT showing the latent GMM self-confusion (which was 0.97/0.96/0.99). That number is CIRCULAR — the GMM was fitted to the latent data and then evaluated on the same data. With 2.60 SD separation, the Gaussian likelihoods are nearly binary, so the GMM artificially gives near-perfect confidence to itself. That tells you nothing about whether the classes are real — it just confirms the GMM fit tightly. Comparing that 0.97/0.99 to CryoSPARC's honest 0.40/0.38 is an unfair comparison; I've replaced it with the cross-method agreement (81%) which is the honest metric.""")
 
     # ── S10 D=128: PC1 3-peaks + Basin ────────────────────────────────────────
     s = prs.slides.add_slide(BL); set_bg(s)
