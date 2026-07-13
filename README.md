@@ -1,67 +1,67 @@
-# CFTR Cryo-EM Classification-Uncertainty Pipeline
+﻿# CFTR Cryo-EM Classification & Conformational Landscape Pipeline
 
-Quantifies **how trustworthy** CryoSPARC heterogeneous-refinement class assignments
-are, and corrects conformational populations for class confusion — entirely in
-probability-assignment space (no raw particle images required).
+Combines **CryoSPARC heterogeneous-refinement uncertainty quantification** (GMM pipeline) with **cryoDRGN neural-network conformational-landscape analysis** to characterise drug-bound CFTR conformations.
 
-The core question: when CryoSPARC assigns a particle to class *i* with some
-posterior, how often *would* it land in class *j*? That confusion is used to
-(a) report honest per-class populations with uncertainty and (b) export
-low-misassignment particle subsets for downstream refinement.
+**Core scientific result:** Two independent methods (CryoSPARC + cryoDRGN D=256 converged) both recover the same **3 core conformational states** of CFTR+Trikafta. CryoSPARC posteriors are near-uniform after debiasing (mean max-posterior ~0.36, genuinely ambiguous), while cryoDRGN's 10-D latent GMM separates the 3 states at **2.60 SD** (>2 = discrete).
 
 ## Repository layout
 
 ```
-run_pipeline.py        Main entry point: .cs -> GMM -> confusion -> populations -> exports
-gmm_pipeline/          Core library (see gmm_pipeline/README.md for the method)
-scripts/               Standalone tools, grouped by purpose:
-  pipeline/              GMM bootstrap, re-plotting, particle exports, ensembles
-  maps/                  Map comparison (CC/FSC), alignment, density diagnostics, 3DVA
-  cryodrgn/              cryoDRGN driver, latent-space comparison, synthetic demo
-  diagnostics/           Posterior/Gaussian sanity plots, uncertainty-model comparisons
-data/                  CryoSPARC .cs inputs (J1112 full particle stacks, J1497 posteriors, legacy reference jobs)
-results_J1069/         Per-dataset outputs (confusion/, populations/, gmm/, exports/, ...)
-results_J1112/         Cross-job analysis: J1112 (overconfident, K=5) vs J1497 (honest, single E-step)
-results_J1442/
-results_J1497/
-results_cryodrgn/      cryoDRGN runs and demos
-docs/                  Reference PDFs and generated proposal
-diagnostics/           Posterior-quality figures
+run_pipeline.py            GMM pipeline: .cs -> ALR -> GMM -> confusion -> populations -> exports
+scripts/
+  gmm_pipeline/            Core library: data_io, preprocess, gmm_fit, confusion, uncertainty, plots
+  pipeline/                Particle exports, GMM bootstrap, ensembles, re-plotting
+  maps/                    Map comparison (CC/FSC), ChimeraX alignment, density diagnostics, 3DVA
+  cryodrgn/                cryoDRGN analysis: landscape, basin occupancy, free energy, cluster export
+    class_names.py           Biological class labels (J1442/J1497/J264/J325) -- single source of truth
+  diagnostics/             Posterior sanity plots, uncertainty comparisons, pairwise scatter
+data/                      CryoSPARC .cs inputs by job ID
+results_cryodrgn/
+  J1442/                   K=3, 230,396 particles
+    fullset_D256_z10_ep100/  CONVERGED D=256 run; K=3 GMM min sep 2.60 SD; use this
+      latent_gmm_k3/          GMM assignments; cluster_exports/ has .cs per component
+      landscape_k3/           PCA landscape; panel_D shows 3 PC1 peaks
+      landscape_k5/           K=5 (min sep 0.79 SD -- over-partitioned)
+    fullset_D128_z10_ep100/  D=128 original run (landscape_z10 shows 3-modal PC1)
+    purified_D256_z10_ep50/  Purified subset (ind), 50 epochs
+    confidence_3class/       CryoSPARC vs cryoDRGN cross-method confusion (K=3)
+    confidence_5class/       K=5 confusion; P9->P8 44%, P10->P6 49% (sub-states)
+  J264/                    K=9, 301,770 particles
+    fullset_D256_z10_ep50/   CONVERGED D=256; F(PC1)=1 continuous basin; all 9 classes B1=1.00
+      landscape_k9/           Class-labelled landscape with bio names
+      free_energy/            Free energy figure: single well, CONTINUOUS
+      basin_occupancy/        2D watershed: 1 basin
+    purified_D256_z10_ep75/  Purified subset, 75 epochs
+results_cryosparc/         CryoSPARC analysis, map comparisons, diagnostics
+docs/
+  WORKFLOW.md                End-to-end analysis workflow
+  CFTR_cryoDRGN_presentation.pptx  15-slide presentation (bio background -> methods -> results)
 ```
 
-See [docs/WORKFLOW.md](docs/WORKFLOW.md) for the end-to-end workflow and
-[scripts/README.md](scripts/README.md) for what each script does.
+## Biological class names (see scripts/cryodrgn/class_names.py)
+
+| Dataset | Index | Name |
+|---------|-------|------|
+| J1442/J1497 | P6 | NBD1LessMix-Ablated |
+| J1442/J1497 | P7 | NBD1LessWide-Ablated |
+| J1442/J1497 | P8 | VshapedMix |
+| J1442/J1497 | P9 | NBD2Less-Ablated |
+| J1442/J1497 | P10 | AltNBD1-ArdeconComposite-Ablated |
+| J264/J325 | P6-P14 | SC, AC, AO, SEPD, AEPD, V-shaped, NBD1-less, NBD2-less, NBD1-less-wide |
 
 ## Quick start
 
 ```powershell
-pip install numpy pandas scipy scikit-learn matplotlib seaborn
+# GMM pipeline (no GPU)
+python run_pipeline.py --cs data/cryosparc_P25_J1442_00000_particles.cs --n-dummies 6 --outdir results_J1442
 
-python run_pipeline.py `
-  --cs data/cryosparc_P25_J1442_00000_particles.cs `
-  --n-dummies 6 --transform alr --covariance full `
-  --mc-samples 50000 --n-boot 30 --reps 0 1 2 3 `
-  --outdir results_J1442
+# cryoDRGN landscape from existing latents (no GPU, no PYTHONPATH needed)
+cryodrgn-py310\Scripts\python.exe scripts\cryodrgn\cryodrgn_landscape.py `
+    --z results_cryodrgn\J1442\fullset_D256_z10_ep100\z.100.pkl `
+    --passthrough-cs data\cryosparc_P25_J1442_passthrough_particles_all_classes.cs `
+    --cs data\cryosparc_P25_J1442_00000_particles.cs `
+    --n-dummies 6 --protein-idx 6 7 8 -k 3 --dataset J1442 `
+    -o results_cryodrgn\J1442\fullset_D256_z10_ep100\landscape_k3
 ```
 
-Only the `alignments3D_multi/class_posterior` field (an `N x K` matrix of
-per-particle class posteriors) is used. You specify which columns are dummy vs.
-protein classes via `--n-dummies` or `--protein-idx`.
-
-Outputs land in `<outdir>/{confusion,populations,gmm,exports,sanity}/`. The
-**primary** result is `confusion/confusion_soft_posterior.*` and the
-bootstrap-corrected fractions in `populations/conformational_populations.*`.
-
-## Datasets in this workspace
-
-| Dataset | Classes | Notes |
-|---------|---------|-------|
-| J1069   | 3 (6 dummy + P6/P7/P8) | Converged hetero-refinement |
-| J1442   | 3 (6 dummy + P6/P7/P8) | Converged hetero-refinement; also has 3DVA latents |
-| J1497   | 5 (6 dummy + P6–P10)   | 5-class outgroup |
-
-## Documentation
-
-* [gmm_pipeline/README.md](gmm_pipeline/README.md) — method, modules, outputs.
-* [docs/WORKFLOW.md](docs/WORKFLOW.md) — full analysis workflow.
-* [scripts/README.md](scripts/README.md) — script reference.
+See [docs/WORKFLOW.md](docs/WORKFLOW.md) for the full workflow.

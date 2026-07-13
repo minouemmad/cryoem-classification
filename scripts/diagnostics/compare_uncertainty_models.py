@@ -39,7 +39,9 @@ from sklearn.preprocessing import StandardScaler
 from sklearn.model_selection import train_test_split
 
 REPO = Path(__file__).resolve().parents[2]
-sys.path.insert(0, str(REPO))
+for _p in (REPO, REPO / "scripts"):  # repo root + scripts/ (holds gmm_pipeline)
+    if str(_p) not in sys.path:
+        sys.path.insert(0, str(_p))
 
 HETERO_POST = REPO / "results_J1442" / "gmm" / "posterior_protein.npy"
 HETERO_RESP = REPO / "results_J1442" / "gmm" / "responsibilities.npy"

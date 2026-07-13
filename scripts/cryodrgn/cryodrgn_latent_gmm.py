@@ -55,9 +55,11 @@ import sys
 
 import numpy as np
 
-_REPO = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-if _REPO not in sys.path:
-    sys.path.insert(0, _REPO)
+_SCRIPTS = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))  # scripts/ holds gmm_pipeline
+_REPO = os.path.dirname(_SCRIPTS)
+for _p in (_REPO, _SCRIPTS):
+    if _p not in sys.path:
+        sys.path.insert(0, _p)
 
 import matplotlib
 
@@ -68,9 +70,9 @@ from sklearn.metrics import silhouette_score
 from sklearn.mixture import GaussianMixture
 from sklearn.preprocessing import StandardScaler
 
-from gmm_pipeline.confusion import soft_posterior_confusion
-from gmm_pipeline.data_io import load_posteriors
-from gmm_pipeline.uncertainty import deconvolve_populations, observed_populations
+from scripts.gmm_pipeline.confusion import soft_posterior_confusion
+from scripts.gmm_pipeline.data_io import load_posteriors
+from scripts.gmm_pipeline.uncertainty import deconvolve_populations, observed_populations
 
 EPS = 1e-12
 

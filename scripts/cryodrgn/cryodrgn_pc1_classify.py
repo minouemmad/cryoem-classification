@@ -37,8 +37,9 @@ import sys
 import numpy as np
 
 _HERE = os.path.dirname(os.path.abspath(__file__))
-_REPO = os.path.dirname(os.path.dirname(_HERE))
-for _p in (_REPO, _HERE):
+_SCRIPTS = os.path.dirname(_HERE)  # scripts/ holds gmm_pipeline
+_REPO = os.path.dirname(_SCRIPTS)
+for _p in (_REPO, _SCRIPTS, _HERE):
     if _p not in sys.path:
         sys.path.insert(0, _p)
 
@@ -54,7 +55,7 @@ from sklearn.mixture import GaussianMixture
 from sklearn.preprocessing import StandardScaler
 
 import cryodrgn_latent_gmm as clg
-from gmm_pipeline.confusion import soft_posterior_confusion
+from scripts.gmm_pipeline.confusion import soft_posterior_confusion
 
 
 # --------------------------------------------------------------------------- #

@@ -31,9 +31,11 @@ import sys
 
 import numpy as np
 
-_REPO = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-if _REPO not in sys.path:
-    sys.path.insert(0, _REPO)
+_SCRIPTS = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))  # scripts/ holds gmm_pipeline
+_REPO = os.path.dirname(_SCRIPTS)
+for _p in (_REPO, _SCRIPTS):
+    if _p not in sys.path:
+        sys.path.insert(0, _p)
 
 
 def _save_cs(path: str, arr: np.ndarray) -> None:

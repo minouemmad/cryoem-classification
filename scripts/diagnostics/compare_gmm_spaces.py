@@ -33,8 +33,10 @@ from sklearn.metrics import silhouette_score
 import sys
 
 REPO = Path(__file__).resolve().parents[2]
-sys.path.insert(0, str(REPO))
-from gmm_pipeline.preprocess import alr_transform
+for _p in (REPO, REPO / "scripts"):  # repo root + scripts/ (holds gmm_pipeline)
+    if str(_p) not in sys.path:
+        sys.path.insert(0, str(_p))
+from scripts.gmm_pipeline.preprocess import alr_transform
 
 LATENT_CS = (
     REPO / "data" / "J1442_3DVA" / "all_particles"

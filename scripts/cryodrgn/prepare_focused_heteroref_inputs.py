@@ -42,8 +42,9 @@ import numpy as np
 from scipy.ndimage import binary_closing, binary_dilation, gaussian_filter, label
 
 _HERE = os.path.dirname(os.path.abspath(__file__))
-_REPO = os.path.dirname(os.path.dirname(_HERE))
-for p in (_REPO, _HERE):
+_SCRIPTS = os.path.dirname(_HERE)  # scripts/ holds gmm_pipeline
+_REPO = os.path.dirname(_SCRIPTS)
+for p in (_REPO, _SCRIPTS, _HERE):
     if p not in sys.path:
         sys.path.insert(0, p)
 

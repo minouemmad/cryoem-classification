@@ -57,8 +57,12 @@ from sklearn.metrics import (
     normalized_mutual_info_score,
 )
 from sklearn.metrics.cluster import contingency_matrix
-
-from gmm_pipeline import alr_transform, fit_gmm, load_posteriors
+import sys
+_ROOT = Path(__file__).resolve().parents[2]
+for _p in (_ROOT, _ROOT / "scripts"):  # repo root + scripts/ (holds gmm_pipeline)
+    if str(_p) not in sys.path:
+        sys.path.insert(0, str(_p))
+from scripts.gmm_pipeline import alr_transform, fit_gmm, load_posteriors
 
 # P6 = green, P7 = red, P8 = blue (matches the rest of the project)
 _COLORS = ["#2ca02c", "#d62728", "#1f77b4", "#9467bd", "#ff7f0e", "#8c564b"]

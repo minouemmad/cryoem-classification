@@ -37,8 +37,11 @@ import matplotlib.colors as mcolors
 import matplotlib.pyplot as plt
 from matplotlib.patches import Ellipse
 
-sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
-from gmm_pipeline import load_posteriors
+_ROOT = Path(__file__).resolve().parents[2]
+for _p in (_ROOT, _ROOT / "scripts"):  # repo root + scripts/ (holds gmm_pipeline)
+    if str(_p) not in sys.path:
+        sys.path.insert(0, str(_p))
+from scripts.gmm_pipeline import load_posteriors
 
 
 # Colours matching the reference figure: P6 green, P7 red, P8 blue.

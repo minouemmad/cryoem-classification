@@ -20,9 +20,11 @@ import sys
 
 import numpy as np
 
-_REPO = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-if _REPO not in sys.path:
-    sys.path.insert(0, _REPO)
+_SCRIPTS = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))  # scripts/ holds gmm_pipeline
+_REPO = os.path.dirname(_SCRIPTS)
+for _p in (_REPO, _SCRIPTS):
+    if _p not in sys.path:
+        sys.path.insert(0, _p)
 
 import matplotlib
 matplotlib.use("Agg")
@@ -129,7 +131,7 @@ def build_references(args):
     if args.gt_labels:
         refs["ground_truth"] = np.asarray(load_pkl(args.gt_labels)).astype(int)
     if args.cs:
-        from gmm_pipeline.data_io import load_posteriors
+        from scripts.gmm_pipeline.data_io import load_posteriors
         post = load_posteriors(args.cs, n_dummies=args.n_dummies)
         refs["cryosparc_class"] = post.hard_class.astype(int)
         protein_idx = post.protein_idx

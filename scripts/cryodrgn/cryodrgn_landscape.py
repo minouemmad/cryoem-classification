@@ -25,11 +25,11 @@ What you get (results dir):
 Run with the cryoDRGN env from repo root::
 
     python scripts/cryodrgn/cryodrgn_landscape.py \
-      --z results_cryodrgn/J1442_real/train_z10/z.100.pkl \
+      --z results_cryodrgn/J1442/train_z10/z.100.pkl \
       --passthrough-cs data/cryosparc_P25_J1442_passthrough_particles_all_classes.cs \
       --cs data/cryosparc_P25_J1442_00000_particles.cs \
       --n-dummies 6 --protein-idx 6 7 8 -k 3 --k-fine 8 \
-      -o results_cryodrgn/J1442_real/landscape_z10
+      -o results_cryodrgn/J1442/landscape_z10
 """
 from __future__ import annotations
 
@@ -40,8 +40,9 @@ import sys
 import numpy as np
 
 _HERE = os.path.dirname(os.path.abspath(__file__))
-_REPO = os.path.dirname(os.path.dirname(_HERE))
-for p in (_REPO, _HERE):
+_SCRIPTS = os.path.dirname(_HERE)  # scripts/ holds gmm_pipeline
+_REPO = os.path.dirname(_SCRIPTS)
+for p in (_REPO, _SCRIPTS, _HERE):
     if p not in sys.path:
         sys.path.insert(0, p)
 
@@ -50,12 +51,14 @@ import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 from matplotlib.patches import Ellipse
+from matplotlib.lines import Line2D
 from sklearn.decomposition import PCA
 from sklearn.mixture import GaussianMixture
 from sklearn.preprocessing import StandardScaler
 
 # Reuse the loading/alignment already written for the analysis script.
 import cryodrgn_latent_gmm as clg
+import class_names as cnames
 
 
 # --------------------------------------------------------------------------- #
@@ -73,7 +76,7 @@ def project_gaussian(mean, cov, pca):
     return mean2, cov2
 
 
-def draw_ellipse(ax, mean2, cov2, color, label=None, nsigs=(1.0, 2.0)):
+def draw_ellipse(ax, mean2, cov2, color, label=None, nsigs=(1.0, 2.0), annotate=True):
     vals, vecs = np.linalg.eigh(cov2)
     order = vals.argsort()[::-1]
     vals, vecs = vals[order], vecs[:, order]
@@ -86,7 +89,7 @@ def draw_ellipse(ax, mean2, cov2, color, label=None, nsigs=(1.0, 2.0)):
         ax.add_patch(e)
     ax.plot(*mean2, marker="*", ms=14, color=color, mec="black", mew=0.6,
             zorder=5)
-    if label:
+    if label and annotate:
         ax.annotate(label, mean2, textcoords="offset points", xytext=(8, 8),
                     fontsize=11, fontweight="bold", color=color,
                     path_effects=None)
@@ -98,17 +101,31 @@ def landscape_panel(ax, scores, gmm_xs, pca, labels=None, palette=None):
                    bins="log", mincnt=1)
     K = len(gmm_xs.means_)
     palette = palette or plt.cm.tab10(np.linspace(0, 1, max(K, 3)))
+    handles = []
     for i in range(K):
         m2, c2 = project_gaussian(gmm_xs.means_[i], gmm_xs.covariances_[i], pca)
+        color = palette[i % len(palette)]
         lab = labels[i] if labels else f"g{i}  ({gmm_xs.weights_[i]*100:.0f}%)"
-        draw_ellipse(ax, m2, c2, palette[i % len(palette)], label=lab)
+        draw_ellipse(ax, m2, c2, color, label=lab, annotate=False)
+        handles.append(Line2D([0], [0], color=color, lw=2.5, marker="*",
+                              mec="black", mew=0.5, ms=10, label=lab))
+    ax.legend(handles=handles, fontsize=8, loc="upper right", framealpha=0.9)
     ax.set_xlabel("PC1 (dominant conformational axis)")
     ax.set_ylabel("PC2")
     return hb
 
 
-def pc1_marginal(ax, scores, gmm_xs, pca, palette=None, labels=None):
-    """Panel D: 1-D density along PC1 + each component's projected bell curve."""
+def pc1_marginal(ax, scores, gmm_xs, pca, palette=None, labels=None, seed=0):
+    """Panel D: 1-D density along PC1 with one bell curve per class.
+
+    The full-latent GMM component that sits in the centre is broad in the
+    *other* latent dimensions, so its marginal onto PC1 is wide and flat and
+    under-fits the sharp central PC1 peak.  This panel is specifically about how
+    many peaks separate along PC1, so we fit a K-component GMM directly on the
+    PC1 scores -- each bell then tracks its own peak.  The 1-D components are
+    matched back to the CryoSPARC-class colours/labels by their PC1 ordering
+    (the axis is monotone in class along PC1).
+    """
     x = scores[:, 0]
     lo, hi = np.percentile(x, [0.2, 99.8])
     grid = np.linspace(lo, hi, 400)
@@ -116,15 +133,25 @@ def pc1_marginal(ax, scores, gmm_xs, pca, palette=None, labels=None):
             edgecolor="none", label="all particles")
     K = len(gmm_xs.means_)
     palette = palette or plt.cm.tab10(np.linspace(0, 1, max(K, 3)))
+
+    # PC1 position of each full-latent component carries the class alignment.
+    mu1_full = np.array([pca.transform(gmm_xs.means_[i].reshape(1, -1))[0, 0]
+                         for i in range(K)])
+    g1 = GaussianMixture(K, covariance_type="full", n_init=10,
+                         random_state=seed).fit(x.reshape(-1, 1))
+    mu1 = g1.means_.ravel()
+    var1 = g1.covariances_.reshape(K)
+    wts = g1.weights_
+    # order[i] = 1-D component matched to full-latent (class) component i
+    order = np.argsort(mu1)[np.argsort(np.argsort(mu1_full))]
+
     total = np.zeros_like(grid)
-    w1 = pca.components_[0]  # PC1 direction in standardized space
     for i in range(K):
-        mu1 = pca.transform(gmm_xs.means_[i].reshape(1, -1))[0, 0]
-        var1 = float(w1 @ gmm_xs.covariances_[i] @ w1)
-        wgt = gmm_xs.weights_[i]
-        pdf = wgt * np.exp(-0.5 * (grid - mu1) ** 2 / var1) / np.sqrt(2 * np.pi * var1)
+        j = order[i]
+        pdf = wts[j] * np.exp(-0.5 * (grid - mu1[j]) ** 2 / var1[j]) \
+            / np.sqrt(2 * np.pi * var1[j])
         total += pdf
-        leg = labels[i] if labels else f"comp {i} ({wgt*100:.0f}%)"
+        leg = labels[i] if labels else f"comp {i} ({wts[j]*100:.0f}%)"
         ax.plot(grid, pdf, color=palette[i % len(palette)], lw=2, label=leg)
     ax.plot(grid, total, color="black", lw=2.2, ls="--", label="GMM sum")
     ax.set_xlabel("PC1 score")
@@ -141,6 +168,9 @@ def main():
     ap.add_argument("--cs", required=True)
     ap.add_argument("--n-dummies", type=int, default=6)
     ap.add_argument("--protein-idx", type=int, nargs="+", default=[6, 7, 8])
+    ap.add_argument("--dataset", default=None,
+                    help="J1442/J1497/J264/J325 for biological class names "
+                         "(auto-detected from --cs path if omitted)")
     ap.add_argument("-k", type=int, default=3,
                     help="components for the labelled landscape (matches CryoSPARC classes)")
     ap.add_argument("--k-fine", type=int, default=8,
@@ -174,15 +204,25 @@ def main():
     # align_components returns (perm, T) where drgn[:, perm] matches CryoSPARC,
     # i.e. CryoSPARC class j <-> GMM component perm[j]. We want the inverse:
     # for GMM component i, its CryoSPARC class is inv_perm[i].
-    perm, _T = clg.align_components(cryo_post, resp)
-    inv_perm = np.empty_like(perm)
-    inv_perm[perm] = np.arange(len(perm))
-    class_names = [f"P{j}" for j in args.protein_idx]
-    labels = [f"{class_names[inv_perm[i]]} ({gmm.weights_[i]*100:.0f}%)"
-              for i in range(args.k)]
-    # consistent colour per CryoSPARC class
-    class_colors = plt.cm.Set1(np.linspace(0, 1, max(len(class_names), 3)))
-    comp_colors = [class_colors[inv_perm[i]] for i in range(args.k)]
+    dset = args.dataset or cnames.guess_dataset(args.cs, args.z, args.outdir)
+    class_ids = [f"P{j}" for j in args.protein_idx]          # short, for row order
+    class_names = cnames.labels_for(dset, args.protein_idx)  # display, with bio name
+    n_cls = len(args.protein_idx)
+    class_colors = plt.cm.Set1(np.linspace(0, 1, max(n_cls, 3)))
+    if args.k == n_cls:
+        # one GMM component per CryoSPARC class -> align + label by class name
+        perm, _T = clg.align_components(cryo_post, resp)
+        inv_perm = np.empty_like(perm)
+        inv_perm[perm] = np.arange(len(perm))
+        labels = [f"{class_names[inv_perm[i]]} ({gmm.weights_[i]*100:.0f}%)"
+                  for i in range(args.k)]
+        comp_colors = [class_colors[inv_perm[i]] for i in range(args.k)]
+        peaks_order = [class_ids[inv_perm[i]] for i in range(args.k)]
+    else:
+        # K != #classes -> components are not 1:1 with classes; label generically
+        labels = [f"comp {i} ({gmm.weights_[i]*100:.0f}%)" for i in range(args.k)]
+        comp_colors = list(plt.cm.tab10(np.linspace(0, 1, max(args.k, 3))))
+        peaks_order = [f"comp{i}" for i in range(args.k)]
 
     hard_gmm = resp.argmax(1)
 
@@ -195,7 +235,6 @@ def main():
     # write GMM component means as z-vectors for cryodrgn eval_vol
     # inverse-transform from standardized space back to original z space
     peaks_z = scaler.inverse_transform(gmm.means_)  # (K, zdim)
-    peaks_order = [class_names[inv_perm[i]] for i in range(args.k)]
     z_peaks_path = os.path.join(args.outdir, "z_gmm_peaks.txt")
     np.savetxt(z_peaks_path, peaks_z, fmt="%.10e")
     print(f"[peaks] wrote GMM peak z-vectors -> {z_peaks_path}")

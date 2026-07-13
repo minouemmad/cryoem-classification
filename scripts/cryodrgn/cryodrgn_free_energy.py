@@ -46,8 +46,9 @@ import sys
 import numpy as np
 
 _HERE = os.path.dirname(os.path.abspath(__file__))
-_REPO = os.path.dirname(os.path.dirname(_HERE))
-for p in (_REPO, _HERE):
+_SCRIPTS = os.path.dirname(_HERE)  # scripts/ holds gmm_pipeline
+_REPO = os.path.dirname(_SCRIPTS)
+for p in (_REPO, _SCRIPTS, _HERE):
     if p not in sys.path:
         sys.path.insert(0, p)
 
@@ -60,6 +61,7 @@ from sklearn.decomposition import PCA
 from sklearn.preprocessing import StandardScaler
 
 import cryodrgn_latent_gmm as clg
+import class_names as cnames
 
 
 # --------------------------------------------------------------------------- #
@@ -213,7 +215,8 @@ def plot_dataset(res, protein_idx, outdir):
     minima = res["_minima"]
     cryo_hard = res["_cryo_hard"]
     scores = res["_scores"]
-    class_names = [f"P{j}" for j in protein_idx]
+    _dset = cnames.guess_dataset(res.get("label", ""), str(outdir))
+    class_names = cnames.labels_for(_dset, protein_idx)
     colors = plt.cm.Set1(np.linspace(0, 1, max(len(class_names), 3)))
 
     fig, axes = plt.subplots(2, 2, figsize=(15, 11))

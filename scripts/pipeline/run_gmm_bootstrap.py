@@ -5,10 +5,13 @@ import pandas as pd
 from pathlib import Path
 from sklearn.mixture import GaussianMixture
 
-sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
-from gmm_pipeline import gmm_confusion_equalprior, bootstrap_gmm_parameters
-from gmm_pipeline.preprocess import alr_transform
-from gmm_pipeline.plots import plot_confusion
+_ROOT = Path(__file__).resolve().parents[2]
+for _p in (_ROOT, _ROOT / "scripts"):  # repo root + scripts/ (holds gmm_pipeline)
+    if str(_p) not in sys.path:
+        sys.path.insert(0, str(_p))
+from scripts.gmm_pipeline import gmm_confusion_equalprior, bootstrap_gmm_parameters
+from scripts.gmm_pipeline.preprocess import alr_transform
+from scripts.gmm_pipeline.plots import plot_confusion
 
 configs = [
     ("results_J1442", 3, [6, 7, 8]),

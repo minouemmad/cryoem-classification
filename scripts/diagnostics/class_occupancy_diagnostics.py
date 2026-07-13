@@ -35,10 +35,11 @@ from pathlib import Path
 import numpy as np
 
 ROOT = Path(__file__).resolve().parents[2]
-if str(ROOT) not in sys.path:
-    sys.path.insert(0, str(ROOT))
+for _p in (ROOT, ROOT / "scripts"):  # repo root + scripts/ (holds gmm_pipeline)
+    if str(_p) not in sys.path:
+        sys.path.insert(0, str(_p))
 
-from gmm_pipeline import load_posteriors, alr_transform  # noqa: E402
+from scripts.gmm_pipeline import load_posteriors, alr_transform  # noqa: E402
 
 try:
     from sklearn.mixture import GaussianMixture

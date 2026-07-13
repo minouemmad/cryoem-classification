@@ -40,7 +40,10 @@ import numpy as np
 import pandas as pd
 
 import sys
-sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
+_ROOT = Path(__file__).resolve().parents[2]
+for _p in (_ROOT, _ROOT / "scripts"):  # repo root + scripts/ (holds gmm_pipeline)
+    if str(_p) not in sys.path:
+        sys.path.insert(0, str(_p))
 from scripts.compare_maps import load_map, radial_fsc, masked_cc
 
 LABELS = ["P6", "P7", "P8"]
