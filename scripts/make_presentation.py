@@ -1,1054 +1,724 @@
-"""Generate the CFTR conformational heterogeneity presentation.
+"""CFTR cryoDRGN presentation — 14 slides, all user edits applied Jul 13 2026.
 
 Run from repo root with the .venv Python::
 
     python scripts/make_presentation.py
 """
 from __future__ import annotations
-
-import os
-import sys
+import os, sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT / "scripts"))
 
 from pptx import Presentation
-from pptx.util import Inches, Pt, Emu
+from pptx.util import Inches, Pt
 from pptx.dml.color import RGBColor
 from pptx.enum.text import PP_ALIGN
-from pptx.oxml.ns import qn
-import lxml.etree as etree
 
-# ── colour palette ──────────────────────────────────────────────────────────
-NAVY    = RGBColor(0x1A, 0x3A, 0x6C)
-BLUE    = RGBColor(0x2E, 0x75, 0xB6)
-ORANGE  = RGBColor(0xC5, 0x5A, 0x11)
-GREEN   = RGBColor(0x37, 0x86, 0x3A)
-WHITE   = RGBColor(0xFF, 0xFF, 0xFF)
-LGRAY   = RGBColor(0xF0, 0xF0, 0xF0)
-DGRAY   = RGBColor(0x40, 0x40, 0x40)
-BLACK   = RGBColor(0x00, 0x00, 0x00)
+NAVY   = RGBColor(0x1A, 0x3A, 0x6C)
+BLUE   = RGBColor(0x2E, 0x75, 0xB6)
+ORANGE = RGBColor(0xC5, 0x5A, 0x11)
+GREEN  = RGBColor(0x37, 0x86, 0x3A)
+TEAL   = RGBColor(0x1E, 0x86, 0x8E)
+GOLD   = RGBColor(0xB8, 0x92, 0x00)
+WHITE  = RGBColor(0xFF, 0xFF, 0xFF)
+LGRAY  = RGBColor(0xF0, 0xF0, 0xF0)
+MGRAY  = RGBColor(0xCC, 0xCC, 0xCC)
+DGRAY  = RGBColor(0x40, 0x40, 0x40)
 
-# ── figure paths ────────────────────────────────────────────────────────────
 FIGS = {
-    "scatter":     ROOT / "results_cryosparc/diagnostics/pairwise_posterior_scatter_J1442.png",
-    "pca_j1442":   ROOT / "results_cryodrgn/J1442/fullset_D256_z10_ep100/analyze.50/z_pca_marginals.png",
-    "pca_j264":    ROOT / "results_cryodrgn/J264/fullset_D256_z10_ep50/analyze.50/z_pca_marginals.png",
-    "land_k3_a":   ROOT / "results_cryodrgn/J1442/fullset_D256_z10_ep100/landscape_k3/panel_A_landscape.png",
-    "land_k3_d":   ROOT / "results_cryodrgn/J1442/fullset_D256_z10_ep100/landscape_k3/panel_D_pc1_marginal.png",
-    "land_z10_d":  ROOT / "results_cryodrgn/J1442/landscape_z10/panel_D_pc1_marginal.png",
-    "land_z10_b":  ROOT / "results_cryodrgn/J1442/landscape_z10/panel_B_cryosparc_class.png",
-    "conf5":       ROOT / "results_cryodrgn/J1442/confidence_5class/confusion.png",
-    "j264_b":      ROOT / "results_cryodrgn/J264/fullset_D256_z10_ep50/landscape_k9/panel_B_cryosparc_class.png",
-    "j264_fe":     ROOT / "results_cryodrgn/J264/fullset_D256_z10_ep50/free_energy/free_energy_J264.png",
-    "j264_k9_a":   ROOT / "results_cryodrgn/J264/fullset_D256_z10_ep50/landscape_k9/panel_A_landscape.png",
+    "scatter":      ROOT / "results_cryosparc/diagnostics/pairwise_posterior_scatter_J1442.png",
+    "cs_confusion": ROOT / "results_cryosparc/J1442/confusion/confusion_soft_posterior.png",
+    "pca_j1442":    ROOT / "results_cryodrgn/J1442/fullset_D256_z10_ep100/analyze.50/z_pca_marginals.png",
+    "pca_j264":     ROOT / "results_cryodrgn/J264/fullset_D256_z10_ep50/analyze.50/z_pca_marginals.png",
+    "land_k3_a":    ROOT / "results_cryodrgn/J1442/fullset_D256_z10_ep100/landscape_k3/panel_A_landscape.png",
+    "latent_conf":  ROOT / "results_cryodrgn/J1442/fullset_D256_z10_ep100/latent_gmm_k3/latent_confusion_soft.png",
+    "land_z10_d":   ROOT / "results_cryodrgn/J1442/landscape_z10/panel_D_pc1_marginal.png",
+    "basin_j1442":  ROOT / "results_cryodrgn/J1442/basin_occupancy_j1442x5/basin_occupancy_J1442x5.png",
+    "conf5":        ROOT / "results_cryodrgn/J1442/confidence_5class/confusion.png",
+    "j264_k9_a":    ROOT / "results_cryodrgn/J264/fullset_D256_z10_ep50/landscape_k9/panel_A_landscape.png",
+    "j264_k6_a":    ROOT / "results_cryodrgn/J264/fullset_D256_z10_ep50/landscape_k6/panel_A_landscape.png",
 }
 
 
-# ── helper utilities ─────────────────────────────────────────────────────────
-def _px(val): return Inches(val)
+def _px(v): return Inches(v)
 
+def set_bg(slide, color=WHITE):
+    fill = slide.background.fill; fill.solid(); fill.fore_color.rgb = color
 
-def set_slide_bg(slide, color=WHITE):
-    fill = slide.background.fill
-    fill.solid()
-    fill.fore_color.rgb = color
+def add_rect(slide, l, t, w, h, fill, line=None):
+    sh = slide.shapes.add_shape(1, _px(l), _px(t), _px(w), _px(h))
+    sh.fill.solid(); sh.fill.fore_color.rgb = fill
+    if line: sh.line.color.rgb = line
+    else: sh.line.fill.background()
+    return sh
 
-
-def add_rect(slide, left, top, width, height, fill_color, line_color=None):
-    shape = slide.shapes.add_shape(1, _px(left), _px(top), _px(width), _px(height))
-    shape.fill.solid()
-    shape.fill.fore_color.rgb = fill_color
-    if line_color:
-        shape.line.color.rgb = line_color
-    else:
-        shape.line.fill.background()
-    return shape
-
-
-def add_text(slide, text, left, top, width, height,
-             size=20, bold=False, italic=False, color=DGRAY,
-             align=PP_ALIGN.LEFT, wrap=True):
-    tb = slide.shapes.add_textbox(_px(left), _px(top), _px(width), _px(height))
-    tf = tb.text_frame
-    tf.word_wrap = wrap
-    for i, line in enumerate(text.split("\n")):
+def add_text(slide, txt, l, t, w, h, sz=16, bold=False, italic=False,
+             color=DGRAY, align=PP_ALIGN.LEFT, wrap=True):
+    tb = slide.shapes.add_textbox(_px(l), _px(t), _px(w), _px(h))
+    tf = tb.text_frame; tf.word_wrap = wrap
+    for i, line in enumerate(txt.split("\n")):
         p = tf.paragraphs[0] if i == 0 else tf.add_paragraph()
-        run = p.add_run()
-        run.text = line
-        run.font.size = Pt(size)
-        run.font.bold = bold
-        run.font.italic = italic
-        run.font.color.rgb = color
-        p.alignment = align
+        r = p.add_run(); r.text = line
+        r.font.size = Pt(sz); r.font.bold = bold; r.font.italic = italic
+        r.font.color.rgb = color; p.alignment = align
     return tb
 
-
-def add_bullets(slide, items, left, top, width, height,
-                size=17, color=DGRAY, title_first=False):
-    tb = slide.shapes.add_textbox(_px(left), _px(top), _px(width), _px(height))
-    tf = tb.text_frame
-    tf.word_wrap = True
+def add_bullets(slide, items, l, t, w, h, sz=15, color=DGRAY):
+    tb = slide.shapes.add_textbox(_px(l), _px(t), _px(w), _px(h))
+    tf = tb.text_frame; tf.word_wrap = True
     for i, item in enumerate(items):
         p = tf.paragraphs[0] if i == 0 else tf.add_paragraph()
-        if isinstance(item, tuple):
-            indent, txt = item
-        else:
-            indent, txt = 0, item
-        run = p.add_run()
-        run.text = ("    " * indent) + ("• " if indent > 0 else "▸ ") + txt
-        run.font.size = Pt(size - 2 * indent)
-        run.font.color.rgb = color
-        run.font.bold = (i == 0 and title_first)
-    return tb
+        ind, txt = item if isinstance(item, tuple) else (0, item)
+        r = p.add_run(); r.text = ("    "*ind) + ("  • " if ind else "▸ ") + txt
+        r.font.size = Pt(sz - ind); r.font.color.rgb = color
 
-
-def add_image(slide, key, left, top, width=None, height=None):
+def add_image(slide, key, l, t, width=None, height=None):
     p = FIGS.get(key)
     if p and p.exists():
-        if width and height:
-            return slide.shapes.add_picture(str(p), _px(left), _px(top),
-                                            _px(width), _px(height))
-        elif width:
-            return slide.shapes.add_picture(str(p), _px(left), _px(top),
-                                            width=_px(width))
-        elif height:
-            return slide.shapes.add_picture(str(p), _px(left), _px(top),
-                                            height=_px(height))
-    else:
-        # Placeholder box
-        add_rect(slide, left, top, width or 5, height or 3, LGRAY, DGRAY)
-        name = key if not p else str(p.name)
-        add_text(slide, f"[Figure: {name}]", left + 0.1, top + 0.1,
-                 (width or 5) - 0.2, (height or 3) - 0.2,
-                 size=11, color=DGRAY, italic=True)
+        kw = {}
+        if width: kw['width'] = _px(width)
+        if height: kw['height'] = _px(height)
+        return slide.shapes.add_picture(str(p), _px(l), _px(t), **kw)
+    add_rect(slide, l, t, width or 5, height or 3, LGRAY, MGRAY)
+    add_text(slide, f"[{key}]", l+.1, t+.1, (width or 5)-.2, (height or 3)-.2,
+             sz=9, italic=True, color=MGRAY)
+
+def title_bar(slide, text, sub=None, col=NAVY):
+    add_rect(slide, 0, 0, 13.33, 1.05, col)
+    add_text(slide, text, 0.25, 0.08, 12.8, 0.68, sz=23, bold=True, color=WHITE)
+    if sub:
+        add_text(slide, sub, 0.25, 0.73, 12.8, 0.30, sz=12,
+                 color=RGBColor(0xCC,0xDD,0xFF))
+
+def caption(slide, txt, l, t, w, h):
+    add_rect(slide, l, t, w, h, RGBColor(0xF5,0xF8,0xFF), BLUE)
+    add_text(slide, txt, l+.08, t+.05, w-.16, h-.1, sz=10, italic=True, color=DGRAY)
+
+def set_notes(slide, txt):
+    slide.notes_slide.notes_text_frame.text = txt
+
+def stage(slide, l, t, w, h, header, body, fill_col):
+    add_rect(slide, l, t, w, .38, fill_col)
+    add_text(slide, header, l+.06, t+.04, w-.12, .3, sz=12, bold=True,
+             color=WHITE, align=PP_ALIGN.CENTER)
+    add_rect(slide, l, t+.38, w, h-.38, RGBColor(0xF2,0xF6,0xFF), fill_col)
+    add_text(slide, body, l+.06, t+.42, w-.12, h-.5, sz=9.5,
+             color=DGRAY, align=PP_ALIGN.CENTER)
 
 
-def title_bar(slide, text, subtitle=None):
-    add_rect(slide, 0, 0, 13.33, 1.05, NAVY)
-    add_text(slide, text, 0.25, 0.1, 12.8, 0.65, size=26, bold=True,
-             color=WHITE, align=PP_ALIGN.LEFT)
-    if subtitle:
-        add_text(slide, subtitle, 0.25, 0.72, 12.8, 0.3, size=14,
-                 color=RGBColor(0xCC, 0xDD, 0xFF), align=PP_ALIGN.LEFT)
-
-
-def set_notes(slide, text):
-    notes_slide = slide.notes_slide
-    tf = notes_slide.notes_text_frame
-    tf.text = text
-
-
-# ── presentation builder ──────────────────────────────────────────────────────
+# ════════════════════════════════════════════════════════════════════════════
 def build():
     prs = Presentation()
-    prs.slide_width  = Inches(13.33)
-    prs.slide_height = Inches(7.5)
-    blank_layout = prs.slide_layouts[6]  # completely blank
+    prs.slide_width = Inches(13.33); prs.slide_height = Inches(7.5)
+    BL = prs.slide_layouts[6]
 
-    # ── SLIDE 1 – Title ───────────────────────────────────────────────────────
-    sl = prs.slides.add_slide(blank_layout)
-    set_slide_bg(sl, NAVY)
-    add_rect(sl, 0.0, 0.0, 13.33, 7.5, NAVY)
-    add_rect(sl, 0.3, 0.28, 12.73, 4.4, RGBColor(0x0E, 0x25, 0x4D))
-    add_text(sl,
-        "Conformational Heterogeneity of CFTR\n"
-        "Under Drug Treatment",
-        0.55, 0.5, 12.2, 2.5,
-        size=34, bold=True, color=WHITE, align=PP_ALIGN.CENTER)
-    add_text(sl,
-        "A Hybrid CryoEM + Deep Learning Pipeline",
-        0.55, 2.75, 12.2, 0.7,
-        size=22, italic=True, color=RGBColor(0xAA, 0xCC, 0xFF),
-        align=PP_ALIGN.CENTER)
-    add_text(sl,
-        "Minou Emamian  |  Hunt Lab  |  2026",
-        0.55, 3.55, 12.2, 0.5,
-        size=16, color=RGBColor(0xCC, 0xCC, 0xFF), align=PP_ALIGN.CENTER)
-    add_rect(sl, 1.5, 4.6, 10.33, 0.06, RGBColor(0x2E, 0x75, 0xB6))
-    add_text(sl,
-        "Methods: CryoSPARC • Gaussian Mixture Models • cryoDRGN Neural Network",
-        0.55, 4.8, 12.2, 0.5,
-        size=14, color=RGBColor(0x99, 0xBB, 0xFF), align=PP_ALIGN.CENTER)
+    # ── S1 Title ─────────────────────────────────────────────────────────────
+    s = prs.slides.add_slide(BL); set_bg(s, NAVY)
+    add_rect(s, .3, .3, 12.73, 4.4, RGBColor(0x0E,0x25,0x4D))
+    add_text(s, "Conformational Heterogeneity of CFTR Under Drug Treatment",
+             .55, .5, 12.2, 2.1, sz=33, bold=True, color=WHITE, align=PP_ALIGN.CENTER)
+    add_text(s, "A Hybrid CryoEM + Deep Learning Pipeline",
+             .55, 2.7, 12.2, .65, sz=22, italic=True,
+             color=RGBColor(0xAA,0xCC,0xFF), align=PP_ALIGN.CENTER)
+    add_text(s, "Minou Emamian  |  Hunt Lab  |  2026",
+             .55, 3.45, 12.2, .5, sz=16, color=RGBColor(0xCC,0xCC,0xFF), align=PP_ALIGN.CENTER)
+    add_rect(s, 1.5, 4.55, 10.33, .06, BLUE)
+    add_text(s, "Methods: CryoSPARC · Gaussian Mixture Models · cryoDRGN Neural Network",
+             .55, 4.75, 12.2, .45, sz=13, color=RGBColor(0x99,0xBB,0xFF), align=PP_ALIGN.CENTER)
+    set_notes(s, """SPEAKING NOTES — Slide 1 (Title)
+Good [morning/afternoon]. Today I'll walk you through my work on CFTR — a protein that, when broken, causes cystic fibrosis — and how I've been using electron microscopy and machine learning to map the different shapes this protein adopts when treated with new drugs.
 
-    set_notes(sl, """
-SPEAKING NOTES — Slide 1 (Title)
+The talk is about 12 minutes. I'll start with the biology (no background required), explain the two methods, and end with what we found.""")
 
-Good [morning/afternoon] everyone. Today I'm going to walk you through my research on a protein called CFTR, 
-which is broken in people with cystic fibrosis — a serious lung disease. 
-
-The exciting part is that there are now drugs that can partially fix this protein, but we don't fully 
-understand exactly HOW they fix it — we don't know what shape the protein is being pushed into. 
-
-I've been using cryo-electron microscopy — a technique that photographs individual proteins frozen in ice — 
-combined with machine learning algorithms, to figure out what shapes this protein adopts when treated with 
-these drugs. This work combines traditional image analysis with a neural network approach, and I'll show 
-you both methods and how they complement each other.
-
-The talk will be about 12 minutes. I'll start with the biology (no experience needed), then walk through 
-the methods, and finish with what we found.
-""")
-
-    # ── SLIDE 2 – CFTR Biology ─────────────────────────────────────────────────
-    sl = prs.slides.add_slide(blank_layout)
-    set_slide_bg(sl)
-    title_bar(sl, "What is CFTR? Why Does It Matter?",
-              "The biology behind cystic fibrosis")
-    add_bullets(sl, [
+    # ── S2 CFTR Biology ───────────────────────────────────────────────────────
+    s = prs.slides.add_slide(BL); set_bg(s)
+    title_bar(s, "What is CFTR? Why Does It Matter?", "The biology behind cystic fibrosis")
+    add_bullets(s, [
         "CFTR = Cystic Fibrosis Transmembrane conductance Regulator",
-        (1, "A channel protein embedded in the surface of lung and gut cells"),
-        (1, "Its job: pump chloride ions (Cl⁻) OUT of the cell to attract water"),
-        (1, "Water on cell surfaces keeps mucus thin and fluid"),
-        "Cystic Fibrosis (CF): CFTR is broken or absent",
-        (1, "Thick, sticky mucus builds up in lungs, pancreas, liver"),
-        (1, "~40,000 people in the US; median survival now ~50 years"),
-        "Breakthrough drugs (Trikafta / elexacaftor+tezacaftor+ivacaftor)",
-        (1, "Correctors: help misfolded CFTR reach the cell surface"),
-        (1, "Potentiator: helps the gate of CFTR stay open once there"),
-        (1, "Transformed CF from fatal to manageable for ~90% of patients"),
-        "Open question: what EXACT shape does CFTR adopt with these drugs?",
-    ], 0.4, 1.15, 7.8, 5.8, size=17)
+        (1,"A channel protein embedded in the walls of lung and gut cells"),
+        (1,"Job: pump chloride ions (Cl⁻) OUT of the cell → water follows → mucus stays thin"),
+        "Cystic Fibrosis (CF): CFTR is broken or never reaches the cell surface",
+        (1,"Thick, sticky mucus in lungs/pancreas/liver → repeated infections"),
+        (1,"~40,000 people in the US; historically fatal in childhood"),
+        "Breakthrough drugs — Trikafta (elexacaftor + tezacaftor + ivacaftor):",
+        (1,"CORRECTORS: help misfolded CFTR fold correctly and reach the cell surface"),
+        (1,"POTENTIATOR (ivacaftor): keeps the channel gate open once it gets there"),
+        (1,"Transformed CF for ~90% of patients — life expectancy now 50+ years"),
+        "Open question: what exact SHAPE does CFTR adopt with these drugs?",
+        (1,"→ This work: use cryo-EM + machine learning to map those conformations"),
+    ], .4, 1.15, 12.5, 5.8, sz=16)
+    add_rect(s, .3, 7.0, 12.7, .38, RGBColor(0xE0,0xF0,0xFF), BLUE)
+    add_text(s, "Drugs work — but understanding HOW at atomic detail guides next-generation drug design",
+             .45, 7.05, 12.4, .3, sz=13, bold=True, color=NAVY)
+    set_notes(s, """SPEAKING NOTES — Slide 2 (CFTR Biology)
+Think of CFTR as a tiny sliding door in the wall of your lung cells. When it opens, chloride flows out and water follows, keeping mucus thin.
 
-    add_rect(sl, 8.4, 1.15, 4.6, 5.9, LGRAY, BLUE)
-    add_text(sl,
-        "[ CFTR channel schematic ]\n\n"
-        "Shows: cell membrane, CFTR channel pore,\n"
-        "chloride ions flowing out, water following.\n\n"
-        "Source: Mechanism of dual pharmacological\n"
-        "correction and potentiation of human CFTR\n"
-        "(Liu et al., 2024)",
-        8.55, 1.3, 4.3, 4.0, size=11, italic=True, color=DGRAY)
-    add_text(sl, "KEY INSIGHT: drugs work, but the structural 'HOW' is incomplete",
-             0.4, 6.7, 12.5, 0.5, size=14, bold=True, color=ORANGE)
+In CF, this door is either broken or gets misfolded (like crumpled origami) and destroyed before reaching the cell surface. The corrector drugs help it fold correctly; the potentiator keeps it open.
 
-    set_notes(sl, """
-SPEAKING NOTES — Slide 2 (What is CFTR?)
+These drugs have been transformative — but we still don't fully know the atomic-level shapes CFTR adopts with them, which is what this work aims to answer.""")
 
-Let me give you a quick biology refresher. 
+    # ── S3 CFTR Structure ─────────────────────────────────────────────────────
+    s = prs.slides.add_slide(BL); set_bg(s)
+    title_bar(s, "CFTR's Modular Architecture & Drug Binding Sites",
+              "From Flatiron Poster Figure 8 — domain coloring explained below")
+    add_bullets(s, [
+        "CFTR is built from several structural domains (like rooms in a machine):",
+        (1,"NBD1 / NBD2 — Nucleotide Binding Domains: the 'engines'; bind ATP to open/close"),
+        (1,"TMD1 / TMD2 — Transmembrane Domains: 12 helices forming the pore through the membrane"),
+        (1,"R-domain — Regulatory: must be phosphorylated (activated) before channel opens"),
+        (1,"Lasso motif / N-terminus — structural anchor at the top of the protein"),
+        (1,"ICL1–ICL4 — Intracellular loops connecting membrane helices to NBDs"),
+        "Most common mutation: ΔF508 — single amino acid deletion in NBD1",
+        (1,"NBD1 crumples → whole protein degraded before reaching the membrane"),
+        "Drug binding sites (confirmed by cryo-EM and biochemistry):",
+        (1,"Elexacaftor + tezacaftor: NBD1–TMD2 interface (stabilize the fold)"),
+        (1,"Ivacaftor: inside the pore (keeps the gate open)"),
+    ], .4, 1.15, 7.1, 5.6, sz=15)
 
-Think of CFTR as a tiny door — or channel — in the wall of your lung cells. Its job is to let 
-chloride ions (a type of salt) pass through the cell membrane to the outside. When chloride moves 
-out, water follows it, and that water is what keeps the mucus on your lung surfaces thin enough 
-to flow and be cleared by cilia.
+    add_rect(s, 7.7, 1.15, 5.4, 4.3, LGRAY, BLUE)
+    add_text(s, "[ CFTR 3D structure — Flatiron Poster Figure 8 ]",
+             7.8, 1.2, 5.2, .3, sz=10, bold=True, color=NAVY)
+    caption(s,
+        "Domain colour key (Flatiron Poster Fig. 8):\n"
+        "  BLUE = NBD1 (~residues 390–670, ΔF508 mutation site)\n"
+        "  GREEN = NBD2 (~residues 1210–1480, second motor)\n"
+        "  ORANGE = TMD1 (helices 1–6, first pore half)\n"
+        "  PURPLE = TMD2 (helices 7–12, second pore half)\n"
+        "  YELLOW = R-domain + ICL connectors (regulatory)\n"
+        "  GREY = Lasso motif / N-terminus (structural anchor)\n\n"
+        "Numbers in the key (e.g. 6–14) = conformational class\n"
+        "labels from CryoSPARC. Each number identifies which\n"
+        "class shows the depicted structural feature or\n"
+        "domain arrangement. P6=NBD1LessMix, P8=Vshaped, etc.",
+        7.7, 3.45, 5.4, 2.2)
 
-In cystic fibrosis, this door is either broken (it won't open) or it's never built correctly 
-(it gets stuck inside the cell and never reaches the surface). The result is thick, sticky mucus 
-that builds up and causes repeated lung infections.
+    add_text(s, "Class names: P6=NBD1LessMix-Ablated | P7=NBD1LessWide-Ablated | P8=VshapedMix | P9=NBD2Less-Ablated | P10=AltNBD1-ArdeconComposite-Ablated",
+             .4, 6.75, 12.5, .38, sz=11, italic=True, color=BLUE)
+    set_notes(s, """SPEAKING NOTES — Slide 3 (CFTR Structure)
+The domains are like rooms in a machine: NBD1 and NBD2 are the engines that hydrolyze ATP; TMD1 and TMD2 form the actual pore; the R-domain is a safety lock; the lasso motif anchors the top.
 
-The new drugs — sold under the brand name Trikafta — include two types:
-- CORRECTORS: these act like chaperones that help the misfolded protein fold into the right shape 
-  so it can actually reach the cell surface
-- POTENTIATORS: these act like a wedge that keeps the channel door open once it gets there
+The ΔF508 deletion (one amino acid missing from NBD1) causes the engine to crumple, and the quality-control machinery in the cell destroys it before it reaches the surface.
 
-These drugs have been transformative — they've changed CF from a disease that killed most patients 
-in childhood to one where people can live to 50 and beyond. 
+The color key numbers in Figure 8 of the Flatiron poster (P6–P14) tell you which CFTR conformational state is being shown. For example, "P8 (VshapedMix)" is a class where the NBD1 domain has reduced density and the protein adopts a characteristic V-shape; "P10" shows an alternative NBD1 arrangement called the Ardecon composite.""")
 
-BUT — we don't fully understand at the atomic level what shape the protein is being held in by these 
-drugs. That's what my research is trying to answer, using electron microscopy.
-
-[Point to the placeholder box] In the actual presentation you'd want to insert a figure showing CFTR 
-as a cartoon in a cell membrane with chloride ions flowing through.
-""")
-
-    # ── SLIDE 3 – CFTR Structure & Drug Binding ────────────────────────────────
-    sl = prs.slides.add_slide(blank_layout)
-    set_slide_bg(sl)
-    title_bar(sl, "CFTR's Modular Architecture & Drug Targets",
-              "Different drugs bind to different 'rooms' in the protein")
-    add_bullets(sl, [
-        "CFTR has distinct structural domains (like rooms in a building):",
-        (1, "NBD1 / NBD2 — Nucleotide Binding Domains: the 'engines'  (bind ATP to open/close)"),
-        (1, "TMD1 / TMD2 — Transmembrane Domains: the pore through the membrane"),
-        (1, "R-domain — Regulatory domain: a 'lock' that must be phosphorylated to allow opening"),
-        "Most common mutation: ΔF508 — deletes one amino acid (F508) from NBD1",
-        (1, "Causes NBD1 to misfold → whole protein degraded before reaching membrane"),
-        "Drug binding sites (from cryo-EM structures + biochemistry):",
-        (1, "Elexacaftor/Tezacaftor: bind at the NBD1–TMD2 interface (correction)"),
-        (1, "Ivacaftor: binds inside the pore region (potentiation)"),
-        "Result: multiple distinct STABLE SHAPES (conformations) of the drug-bound protein",
-        (1, "These are what we are imaging and classifying"),
-    ], 0.4, 1.15, 7.8, 5.8, size=16)
-
-    add_rect(sl, 8.4, 1.15, 4.6, 5.5, LGRAY, BLUE)
-    add_text(sl,
-        "[ CFTR 3D structure ]\n\n"
-        "Shows: NBD1, NBD2, TMD1, TMD2, R-domain\n"
-        "Drug binding pockets highlighted.\n\n"
-        "Source: Flatiron CFTR Hierarchical\n"
-        "Unfolding Poster (2025) and/or\n"
-        "Liu et al. 2024",
-        8.55, 1.3, 4.3, 4.0, size=11, italic=True, color=DGRAY)
-
-    add_text(sl,
-        "Biological class names used in this study:\n"
-        "P6=NBD1LessMix-Ablated  |  P7=NBD1LessWide-Ablated  |  P8=VshapedMix\n"
-        "P9=NBD2Less-Ablated  |  P10=AltNBD1-ArdeconComposite-Ablated",
-        0.4, 6.55, 12.5, 0.8, size=12, italic=True, color=BLUE)
-
-    set_notes(sl, """
-SPEAKING NOTES — Slide 3 (CFTR Structure & Drug Targets)
-
-Now let's look at CFTR's structure more carefully. The protein is made of several distinct sections 
-or domains — think of it like a building with different rooms that each have a specific function.
-
-The NBDs (Nucleotide Binding Domains) are the engines — they bind to ATP molecules (your cell's 
-energy currency) and use that energy to physically open and close the pore. NBD1 is where the 
-most common mutation occurs: ΔF508, which means amino acid number 508 (phenylalanine) is deleted. 
-This one missing amino acid causes the whole protein to fold incorrectly and get destroyed before 
-it even reaches the cell surface.
-
-The TMDs (Transmembrane Domains) form the actual pore — the channel through which chloride flows.
-
-The corrector drugs bind at the junction between these domains and stabilize the folded structure. 
-The potentiator drug fits inside the pore and keeps it wedged open.
-
-When we image CFTR with electron microscopy — and I'll explain that in a moment — we can actually 
-see the protein in different shapes. The class names you'll see throughout this talk (P6, P7, P8, etc.) 
-are shorthand for these different conformational states, and they describe what domain is missing or 
-altered compared to a reference structure. For example:
-- "NBD1LessMix-Ablated" means this class shows reduced NBD1 density, mixing with an ablated variant
-- "VshapedMix" means the protein adopts a characteristic V-shape
-
-These names tell us WHERE the structural differences are — which is exactly the biology we care about.
-""")
-
-    # ── SLIDE 4 – CryoEM Methodology ──────────────────────────────────────────
-    sl = prs.slides.add_slide(blank_layout)
-    set_slide_bg(sl)
-    title_bar(sl, "CryoEM: Photographing Individual Proteins",
-              "How we actually see CFTR at atomic resolution")
-
+    # ── S4 CryoEM Methodology ─────────────────────────────────────────────────
+    s = prs.slides.add_slide(BL); set_bg(s)
+    title_bar(s, "CryoEM: Photographing Individual Proteins at Near-Atomic Resolution",
+              "How we image CFTR — panels adapted from Liu et al. Figure 6 (mechanism paper)")
     steps = [
-        ("1", "Purify CFTR protein + add drug (Trikafta)", NAVY),
-        ("2", "Mix with lipid nanodiscs → stable membrane environment", BLUE),
-        ("3", "Plunge-freeze into liquid ethane → vitreous ice (~−170°C)", GREEN),
-        ("4", "Load into electron microscope; collect 10,000–100,000 images", ORANGE),
-        ("5", "Computational alignment: find which direction each particle is facing", NAVY),
-        ("6", "3D reconstruction from millions of aligned 2D projections", BLUE),
+        ("1","Purify CFTR protein; add Trikafta drug cocktail",NAVY),
+        ("2","Reconstitute in lipid nanodiscs (mimic cell membrane)",BLUE),
+        ("3","Plunge-freeze into liquid ethane at −170°C → vitreous ice",GREEN),
+        ("4","Load into electron microscope; collect 50,000–200,000 images",TEAL),
+        ("5","Pick particles; estimate 3D orientations (poses) computationally",ORANGE),
+        ("6","Reconstruct 3D density maps per conformational class",RGBColor(0x7B,0x35,0x8E)),
     ]
-    for i, (num, txt, col) in enumerate(steps):
-        y = 1.25 + i * 0.88
-        add_rect(sl, 0.3, y, 0.55, 0.65, col)
-        add_text(sl, num, 0.35, y + 0.08, 0.45, 0.5, size=20, bold=True,
-                 color=WHITE, align=PP_ALIGN.CENTER)
-        add_text(sl, txt, 1.0, y + 0.08, 7.0, 0.6, size=16, color=DGRAY)
+    for i,(num,txt,col) in enumerate(steps):
+        y = 1.22 + i*.84
+        add_rect(s, .3, y, .5, .62, col)
+        add_text(s, num, .33, y+.1, .44, .42, sz=18, bold=True, color=WHITE, align=PP_ALIGN.CENTER)
+        add_text(s, txt, .93, y+.1, 6.9, .52, sz=14, color=DGRAY)
 
-    add_rect(sl, 8.2, 1.15, 4.8, 5.6, LGRAY, BLUE)
-    add_text(sl,
-        "[ CryoEM workflow diagram ]\n\n"
-        "Shows the pipeline from:\n"
-        "protein + drug → frozen grid →\n"
-        "electron micrograph → particle\n"
-        "picking → 2D classes → 3D volume\n\n"
-        "Source: Punjani et al. 2017\n"
-        "Nature Methods (cryoSPARC paper)",
-        8.35, 1.3, 4.45, 4.0, size=11, italic=True, color=DGRAY)
-
-    add_text(sl,
-        "Key challenge: each image is EXTREMELY noisy (signal-to-noise ratio ~0.1)\n"
-        "AND each protein is in a random orientation — we don't control which way it's facing",
-        0.3, 6.65, 12.7, 0.7, size=13, italic=True, color=ORANGE)
-
-    set_notes(sl, """
-SPEAKING NOTES — Slide 4 (CryoEM Methodology)
-
-Now let me explain HOW we actually image these proteins. Cryo-EM stands for cryo-electron 
-microscopy, and the process goes like this:
-
-First, we purify the CFTR protein in the lab and mix it with the Trikafta drugs. Because CFTR 
-normally lives in cell membranes, we also mix it with special lipid particles called nanodiscs 
-that mimic the membrane environment and keep the protein stable.
-
-Then we take a tiny droplet of this protein solution and plunge it extremely rapidly into liquid 
-ethane at -170 degrees Celsius. This freezes the solution so fast that water doesn't form ice 
-crystals — instead it forms a glass-like amorphous solid called vitreous ice. The protein is now 
-frozen mid-motion, in whatever shape it happened to be in at that exact moment.
-
-We then load this frozen sample into an electron microscope — imagine it as a camera that uses 
-electrons instead of light, which gives much finer detail. We collect tens of thousands of images, 
-each showing individual protein particles embedded in the ice.
-
-The key challenge here is that: 
-1) Each image is incredibly noisy — the signal from one tiny protein barely stands out from background
-2) Each protein is oriented randomly — we're getting random 2D projections of a 3D object
-
-The computational step (step 5) is where you reconstruct the 3D structure — it's like using 
-thousands of shadow projections from different angles to reconstruct the 3D object that cast them.
-""")
-
-    # ── SLIDE 5 – The Classification Problem ──────────────────────────────────
-    sl = prs.slides.add_slide(blank_layout)
-    set_slide_bg(sl)
-    title_bar(sl, "The Challenge: One Protein, Many Shapes",
-              "Heterogeneous reconstruction — the core problem of this project")
-
-    add_bullets(sl, [
-        "PROBLEM: CryoEM collects images of ALL conformations mixed together",
-        (1, "If we average everything naively → blurry, meaningless map"),
-        (1, "Like averaging photographs of a running person — you'd get a blur"),
-        "GOAL: sort 100,000+ particle images into conformational classes",
-        (1, "Each class = one distinct shape of the protein"),
-        (1, "Then reconstruct a 3D map for each class separately"),
-        "For CFTR + Trikafta, CryoSPARC found:",
-        (1, "Dataset J1442: 3 classes (K=3) with 230,396 particles"),
-        (1, "Dataset J1497: 5 classes (K=5) — same particles, different model"),
-        (1, "Dataset J264: 9 classes (K=9) with 301,770 particles"),
-        "The challenge: are these really distinct conformations or artifacts?",
-        (1, "BOTH methods agree on the core 3 states — this is our strongest result"),
-    ], 0.4, 1.15, 12.5, 5.9, size=17)
-
-    add_rect(sl, 0.4, 6.5, 12.5, 0.75, RGBColor(0xE8, 0xF0, 0xFE), BLUE)
-    add_text(sl,
-        "This talk: compare TWO independent approaches — CryoSPARC (reference-based) vs "
-        "cryoDRGN (reference-free neural network) — to build confidence in the classifications",
-        0.55, 6.6, 12.2, 0.6, size=13, italic=True, color=NAVY)
-
-    set_notes(sl, """
-SPEAKING NOTES — Slide 5 (The Classification Problem)
-
-Here's the core challenge of this whole project. When we collect cryo-EM images, we're imaging 
-a mixture of proteins, and each protein particle might be in a slightly different shape. 
-
-If we just average all 100,000 images together, we'd get a blurry mess — like taking a 
-long-exposure photograph of a busy intersection. Each car is in a different position, so you'd 
-just see streaks, not individual cars.
-
-Instead, we want to SORT the particles into groups — each group containing particles that look 
-similar to each other, meaning they're likely in the same conformation. Then we reconstruct a 
-separate 3D map for each group.
-
-For CFTR treated with Trikafta drugs, the software found between 3 and 9 distinct groups 
-depending on how we set up the experiment:
-- J1442: 3 groups with 230,000 particles
-- J1497: same particles but sorted into 5 groups  
-- J264: a different, larger experiment with 9 groups and 300,000 particles
-
-The big scientific question is: are these really distinct conformations, or is the software 
-just hallucinating groups? This is where my two-method approach becomes important — if two 
-completely different methods, starting from different assumptions, both find the same 3 groups, 
-that's strong evidence those groups are real.
-""")
-
-    # ── SLIDE 6 – CryoSPARC Hetero-Refine & Bias ─────────────────────────────
-    sl = prs.slides.add_slide(blank_layout)
-    set_slide_bg(sl)
-    title_bar(sl, "CryoSPARC Heterogeneous Refinement: Power & Bias",
-              "The 'Einstein from noise' problem in iterative refinement")
-
-    add_text(sl, "How it works:", 0.4, 1.2, 12.5, 0.35, size=18, bold=True, color=NAVY)
-    add_bullets(sl, [
-        "Start with K reference 3D maps (from ab-initio reconstruction)",
-        "E-step: assign each particle to its most-likely class (based on correlation to reference)",
-        "M-step: rebuild each class map from its assigned particles",
-        "Iterate until convergence",
-    ], 0.4, 1.6, 7.8, 2.2, size=16)
-
-    add_text(sl, "The bias problem:", 0.4, 3.8, 12.5, 0.35, size=18, bold=True, color=ORANGE)
-    add_bullets(sl, [
-        "'Einstein from noise': show reference maps, the algorithm finds a match even in pure noise",
-        (1, "Convergence to LOCAL optimum near the starting references, not THE global truth"),
-        "Near one-hot posteriors: algorithm becomes OVERCONFIDENT in its class assignments",
-        (1, "For J1442: after biased refinement, mean max-posterior = 0.992 (≈100% confident)"),
-        (1, "After DEBIASED single E-step (J1442 honest): mean = 0.362 (≈ 1/3 each = flat)"),
-        "This means: most particles are genuinely ambiguous between the 3 classes",
-    ], 0.4, 4.2, 12.5, 2.9, size=16)
-
-    add_text(sl,
-        "E-step formula:  P(class k | particle n) ∝ P(image n | class k) × P(class k)\n"
-        "After many iterations: P → one-hot vector (0,0,...,1,...,0)  ← overconfidence",
-        0.4, 7.05, 12.5, 0.4, size=12, italic=True, color=DGRAY)
-
-    set_notes(sl, """
-SPEAKING NOTES — Slide 6 (CryoSPARC Bias)
-
-Let me explain how CryoSPARC's heterogeneous refinement works and why we have to be careful about it.
-
-The algorithm works in cycles. It starts with reference 3D maps — initial guesses at what each 
-conformation looks like. Then it does two steps over and over:
-- E-step (Expectation): for each particle image, calculate "which reference map does this look 
-  most like?" and assign a probability to each class
-- M-step (Maximization): rebuild each class's 3D map using the particles assigned to it
-
-This is very powerful, but there's a fundamental problem called "Einstein from noise." In 2009, 
-researchers showed that if you show CryoSPARC a reference image of Einstein's face and give it 
-pure random noise images, it will find Einstein's face in the noise. This is because the 
-correlation step can always find SOMETHING that matches a reference — the algorithm will 
-converge to whatever it was primed to look for.
-
-This leads to what I call "near one-hot posteriors" — after many iterations, the algorithm becomes 
-almost 100% confident about every particle's class assignment. For J1442, after biased refinement, 
-the average confidence is 99.2% — essentially saying "I'm sure this particle is exactly class 6." 
-
-But when we use a debiased approach — running just ONE E-step from an unbiased starting point — 
-the average confidence drops to 36.2%, which is almost exactly 1/3 for three classes. This means 
-most particles are genuinely ambiguous and the algorithm was manufacturing false confidence.
-
-My GMM pipeline was designed to characterize and quantify this uncertainty honestly.
-""")
-
-    # ── SLIDE 7 – GMM Uncertainty Pipeline ────────────────────────────────────
-    sl = prs.slides.add_slide(blank_layout)
-    set_slide_bg(sl)
-    title_bar(sl, "Our GMM Pipeline: Honest Uncertainty Quantification",
-              "Fitting a Gaussian Mixture Model to the posterior probability simplex")
-
-    add_bullets(sl, [
-        "Input: each particle has a vector (P6, P7, P8) summing to 1.0  (K×1 probability vector)",
-        "Problem: this lives on a 2D simplex — standard Gaussian doesn't apply",
-        "Solution: Additive Log-Ratio (ALR) transform to make it unconstrained:",
-    ], 0.4, 1.2, 12.5, 1.6, size=17)
-
-    add_rect(sl, 0.8, 2.7, 6.5, 0.7, RGBColor(0xE8, 0xF0, 0xFE), BLUE)
-    add_text(sl,
-        "  ALR:  yⱼ = log( pⱼ / pₖ )    (drop last component as reference)",
-        0.85, 2.75, 6.4, 0.6, size=16, bold=True, color=NAVY)
-
-    add_bullets(sl, [
-        "Then fit K-component GMM in ALR space:",
-    ], 0.4, 3.5, 12.5, 0.5, size=17)
-
-    add_rect(sl, 0.8, 3.95, 9.0, 0.75, RGBColor(0xFF, 0xF3, 0xE0), ORANGE)
-    add_text(sl,
-        "  p(x) = Σₖ πₖ · 𝒩(x ; μₖ , Σₖ)    (GMM likelihood)",
-        0.85, 4.0, 8.8, 0.65, size=16, bold=True, color=RGBColor(0x8B, 0x30, 0x00))
-
-    add_bullets(sl, [
-        "Outputs of the GMM pipeline:",
-        (1, "GMM responsibilities rₙₖ = soft class membership per particle"),
-        (1, "Soft confusion matrix: how often each class 'bleeds into' another"),
-        (1, "Bootstrap-corrected population estimates with confidence intervals"),
-        (1, "Exportable particle subsets above a confidence threshold"),
-        "Key finding: J1442 GMM components heavily overlap near (0.33, 0.33, 0.33)",
-        (1, "Classes are genuinely ambiguous — the 3 states are positions on a continuum"),
-    ], 0.4, 4.85, 12.5, 2.5, size=16)
-
-    set_notes(sl, """
-SPEAKING NOTES — Slide 7 (GMM Pipeline)
-
-OK so now I've told you the problem — CryoSPARC gives us overconfident assignments. What did I build 
-to quantify the uncertainty more honestly?
-
-Each particle in the CryoSPARC output gets assigned a probability vector. For 3 classes, it's 
-(P6, P7, P8) which sums to 1.0. This is like saying "this particle is 40% likely to be class 6, 
-35% class 7, 25% class 8."
-
-These probability vectors lie on what mathematicians call a simplex — a triangular surface in 
-3D space. You can't just put a regular Gaussian distribution on a simplex, because the probabilities 
-have to add up to 1. 
-
-To fix this, I use the Additive Log-Ratio transform, which converts the simplex into regular 
-unconstrained coordinates. The formula on the slide says: take the log of each probability divided 
-by the last one. This maps the triangle onto infinite 2D space.
-
-Then I fit a Gaussian Mixture Model — basically multiple overlapping "bells" in this transformed 
-space. The formula shows the standard GMM: it's a weighted sum of Gaussian bell curves, where 
-πₖ is the weight (how big that bell is), μₖ is the center (where that class lives in this space), 
-and Σₖ is the shape of the bell (how spread out it is).
-
-The outputs are really useful:
-- We get soft memberships (rₙₖ) — how much each particle belongs to each class
-- We can measure class overlap — which classes are most similar  
-- We can estimate the true population fractions with error bars
-- We can export just the high-confidence particles for better reconstructions
-
-The key result: when I plot these probability vectors, all three classes heavily overlap near 
-the center (0.33, 0.33, 0.33) — meaning most particles genuinely don't belong to any one class, 
-they're sort of in between. This shows the three "classes" are actually positions along a 
-continuous conformational spectrum.
-""")
-
-    # ── SLIDE 8 – GMM Results (clean pairwise scatter) ────────────────────────
-    sl = prs.slides.add_slide(blank_layout)
-    set_slide_bg(sl)
-    title_bar(sl, "Posterior Overlap: Three Classes Share the Same Probability Space",
-              "J1442 (K=3) — 230,396 CFTR particles, CryoSPARC debiased posteriors")
-
-    add_image(sl, "scatter", 0.25, 1.15, width=9.5)
-
-    add_text(sl,
-        "How to read this:\n"
-        "• Each dot = one particle  (subsampled to 50k for clarity)\n"
-        "• Color = which class CryoSPARC assigned it to (P6=red, P7=orange, P8=gray)\n"
-        "• X-axis / Y-axis = CryoSPARC's probability for each class  (e.g. x=P(P6))\n"
-        "• White dot = mean position of each class;  ellipses = 1σ / 2σ spread\n"
-        "• If classes were perfectly distinct: each cloud would be in a corner (0,0), (1,0), (0,1)\n"
-        "• Instead: ALL three clouds pile up near the CENTER (≈ 0.33, 0.33)\n"
-        "  → The algorithm is essentially guessing — it has no real confidence",
-        9.85, 1.2, 3.3, 5.8, size=13, color=DGRAY)
-
-    add_rect(sl, 0.25, 6.9, 13.0, 0.45, RGBColor(0xFF, 0xF0, 0xE0), ORANGE)
-    add_text(sl,
-        "Key message: all three class clouds overlap near probability = 1/3 for all classes — "
-        "indicating fundamental conformational ambiguity, NOT three discrete states",
-        0.4, 6.93, 12.7, 0.4, size=13, bold=True, color=ORANGE)
-
-    set_notes(sl, """
-SPEAKING NOTES — Slide 8 (Posterior Scatter)
-
-This is one of the most important figures in my analysis. Let me walk you through it carefully.
-
-Each of these three panels shows a different pairing of the three classes — P6 vs P7, P6 vs P8, 
-and P7 vs P8. Each dot represents one protein particle — but remember, we have 230,000 particles, 
-so I'm only showing a random sample of 50,000.
-
-The position of each dot tells you what CryoSPARC thought about that particle:
-- If a particle is assigned to Class P6 with 90% confidence, it would appear at the FAR RIGHT 
-  of the x-axis in the "P6 vs P7" panel
-- If it's totally uncertain, it would appear near the middle of the plot, around (0.33, 0.33)
-
-Now look at what actually happened: ALL THREE CLOUDS are piled up near the CENTER. This means 
-most particles have probabilities close to 0.33 for each of the three classes — essentially 
-uniform. The algorithm is saying "I don't really know which class this is."
-
-The white dots are the class means — where the average particle in each class sits. And you can 
-see they're actually pretty close to each other, right in the center of overlap.
-
-This is the HONEST picture after debiasing. Contrast this with what you'd get from a regular 
-CryoSPARC run: the dots would be scattered near the corners (0.99, 0.01) type values — 
-completely overconfident.
-
-The diagonal negative correlation you see — when P6 probability is high, P7 tends to be low — 
-that's mathematically forced because the three probabilities always sum to 1.
-
-Bottom line: these three classes don't correspond to three isolated, well-separated populations. 
-They're more like three preferred positions along a continuum of conformational states.
-""")
-
-    # ── SLIDE 9 – CryoDRGN Neural Network ────────────────────────────────────
-    sl = prs.slides.add_slide(blank_layout)
-    set_slide_bg(sl)
-    title_bar(sl, "CryoDRGN: An Unsupervised Neural Network Approach",
-              "Learning the conformational landscape without reference maps")
-
-    add_text(sl, "Architecture: Variational Autoencoder (VAE)", 0.4, 1.2, 12.5, 0.35,
-             size=18, bold=True, color=NAVY)
-
-    # VAE schematic using shapes
-    boxes = [
-        (0.4,  2.0, 2.5, 2.8, "ENCODER\n(conv neural net)\n\nInput:\nraw particle\nimage", BLUE, WHITE),
-        (3.3,  2.0, 2.5, 2.8, "LATENT\nSPACE z\n\n~10-dim vector\n(each particle's\n'fingerprint')", GREEN, WHITE),
-        (6.2,  2.0, 2.5, 2.8, "DECODER\n(fully-connected net)\n\nOutput:\nreconstructed\nimage", ORANGE, WHITE),
+    # Right column: three panel descriptions
+    add_rect(s, 8.1, 1.15, 5.0, 5.8, LGRAY, BLUE)
+    add_text(s, "[ Figure 6, Liu et al. — Mechanism paper ]",
+             8.2, 1.2, 4.8, .28, sz=10, bold=True, color=NAVY)
+    panels = [
+        ("Panel A — Correctors only",
+         "CFTR + elexacaftor + tezacaftor.\nChannel folded correctly but CLOSED.\nCryoEM 2D class averages (noisy ring-\nshaped images) → averaged & aligned →\n3D reconstruction at right shows the\nfull folded protein at ~3–4 Å."),
+        ("Panel B — Full Trikafta",
+         "CFTR + all three drugs.\nChannel in primed-open conformation.\nDrug densities visible as extra density\nin binding pockets. 3D model shows\nNBD1/NBD2 engagement and open\nchannel pore configuration."),
+        ("Panel C — Structural comparison",
+         "Overlay / difference of the two\nstates above. Coloured by domain\nto highlight WHICH regions shifted.\nShows concretely how ivacaftor\n(the potentiator) changes the\nprotein's conformation."),
     ]
-    for bx, by, bw, bh, btxt, bfill, btextcol in boxes:
-        add_rect(sl, bx, by, bw, bh, bfill)
-        add_text(sl, btxt, bx + 0.1, by + 0.15, bw - 0.2, bh - 0.3,
-                 size=13, bold=True, color=btextcol, align=PP_ALIGN.CENTER)
-    # Arrows between boxes (text approximation)
-    add_text(sl, "→", 2.95, 3.15, 0.4, 0.5, size=28, bold=True, color=NAVY)
-    add_text(sl, "→", 5.85, 3.15, 0.4, 0.5, size=28, bold=True, color=NAVY)
+    for j,(ptitle,pdesc) in enumerate(panels):
+        py = 1.55 + j*1.72
+        add_rect(s, 8.15, py, 4.85, 1.6, RGBColor(0xD8,0xEA,0xFF), BLUE)
+        add_text(s, ptitle, 8.2, py+.04, 4.75, .26, sz=10, bold=True, color=NAVY)
+        add_text(s, pdesc, 8.2, py+.3, 4.75, 1.25, sz=9, color=DGRAY)
+
+    add_text(s, "KEY: each image is very noisy (SNR ~0.1). Proteins are frozen in RANDOM orientations — computational steps figure out which direction each was facing.",
+             .3, 7.09, 12.7, .36, sz=12, bold=True, italic=True, color=ORANGE)
+    set_notes(s, """SPEAKING NOTES — Slide 4 (CryoEM Methodology)
+CryoEM works like this: we purify CFTR, add the drugs, then mix it with lipid nanodiscs (tiny artificial membrane patches that keep the protein stable). We then plunge-freeze a droplet at -170°C so fast that water doesn't form ice crystals — it forms a glass that traps each protein in whatever shape it was in at that instant.
+
+The electron microscope shoots a beam of electrons through this frozen grid and collects images. Each image shows one protein particle, but they're tiny and embedded in noise — the signal-to-noise ratio is about 0.1, meaning the background is 10× stronger than the protein signal.
+
+The three panels from the mechanism paper (Figure 6) show:
+- Panel A: CFTR with just the correctors (no potentiator). The protein folds correctly but the channel is closed. The 2D class averages (the noisy ring-shaped images) are averaged and aligned to give the 3D reconstruction shown to the right.
+- Panel B: CFTR with all three drugs. The channel is in the primed-open conformation. You can actually see density for the drug molecules in the binding pockets.
+- Panel C: A comparison between the two states — highlighting exactly which domains moved when the potentiator was added.
+
+This is what drives the biological question: if we can see how the drug changes the structure, we understand the mechanism.""")
+
+    # ── S5 Classification Challenge ───────────────────────────────────────────
+    s = prs.slides.add_slide(BL); set_bg(s)
+    title_bar(s, "The Challenge: One Sample, Many Shapes",
+              "Sorting 100,000+ particle images into distinct conformational classes")
+    add_bullets(s, [
+        "CryoEM images ALL conformations mixed together — simple averaging blurs everything",
+        "GOAL: sort particle images into conformational classes → reconstruct each separately",
+        "For CFTR + Trikafta:",
+        (1,"J1442: K=3 classes, 230,396 particles (debiased posteriors — our main dataset)"),
+        (1,"J1497: K=5 classes, same 230,396 particles (same data, more classes asked for)"),
+        (1,"J264: K=9 classes, 301,770 particles (separate, larger experiment)"),
+        "Central question: are these real conformations or algorithmic artifacts?",
+        (1,"If two COMPLETELY INDEPENDENT methods find the same classes → high confidence they're real"),
+        "Method 1 — CryoSPARC: starts from reference maps, iterative refinement",
+        "Method 2 — cryoDRGN: neural network, NO reference maps, learns from scratch",
+        (1,"If both agree → conclusion is protected against bias of either method"),
+    ], .4, 1.15, 12.5, 5.8, sz=16)
+    add_rect(s, .3, 7.05, 12.7, .38, RGBColor(0xE0,0xF8,0xE0), GREEN)
+    add_text(s, "Both methods agree on 3 core CFTR states — the central result of this work",
+             .45, 7.09, 12.4, .3, sz=13, bold=True, color=GREEN)
+    set_notes(s, """SPEAKING NOTES — Slide 5 (Classification Challenge)
+Here's the core problem. If we just average all 100,000 images together, we'd get a blurry mess — like photographing a running person with a long exposure.
+
+Instead we want to SORT the particles: group the images that show similar shapes, then reconstruct each group separately.
+
+For CFTR with Trikafta, CryoSPARC found 3 to 9 groups depending on the experiment. The scientific question is whether these are real structural states or artifacts of the algorithm.
+
+My approach: use cryoDRGN as an independent check. CryoSPARC needs reference maps and uses iterative refinement; cryoDRGN uses no references and learns purely from the images. If both find the same answer, that's strong cross-validation.""")
+
+    # ── S6 CryoSPARC Bias ─────────────────────────────────────────────────────
+    s = prs.slides.add_slide(BL); set_bg(s)
+    title_bar(s, "CryoSPARC Hetero-Refinement: Power & The Einstein-from-Noise Bias",
+              "Why standard refinement overestimates confidence — and how J1442 mitigated it")
+    add_text(s, "How it works:", .4, 1.2, 5.4, .3, sz=15, bold=True, color=NAVY)
+    add_bullets(s, [
+        "Start with K reference 3D maps",
+        "E-step: assign each particle to best-matching map",
+        "M-step: rebuild each map from assigned particles",
+        "Iterate ~50–100 cycles → convergence",
+    ], .4, 1.55, 5.4, 1.9, sz=14)
+    add_text(s, "The bias problem:", .4, 3.5, 5.4, .3, sz=15, bold=True, color=ORANGE)
+    add_bullets(s, [
+        "'Einstein from noise': iterative refinement finds references even in pure noise",
+        "Converges to LOCAL optimum near starting maps, not global truth",
+        "Drives posteriors toward one-hot (overconfident) values",
+        "Standard J1069 run: mean max-posterior = 0.992 (≈ 100% confident per particle)",
+    ], .4, 3.9, 5.4, 2.5, sz=14)
+
+    add_rect(s, 6.0, 1.15, 7.1, 3.1, RGBColor(0xE8,0xF0,0xFF), BLUE)
+    add_text(s, "J1442: a deliberately LESS BIASED classification",
+             6.15, 1.22, 6.85, .3, sz=13, bold=True, color=NAVY)
+    add_text(s,
+        "Starting from J1069's NU-refined volumes (fully converged)\n"
+        "Re-classified the same particles BUT:\n"
+        "  • O-EM learning rate = 0 (model does NOT update)\n"
+        "  • Only ITERATION 1 — a single E-step\n"
+        "  • No iterative bias accumulation\n\n"
+        "This gives the RAW probability: 'how likely is this particle\n"
+        "under each class model?' — before refinement amplifies separation.",
+        6.15, 1.57, 6.85, 2.65, sz=12, color=DGRAY)
+
+    add_rect(s, 6.0, 4.35, 7.1, 2.0, RGBColor(0xFF,0xF4,0xE0), ORANGE)
+    add_text(s, "Posterior comparison (same 230,396 particles):", 6.15, 4.42, 6.85, .28, sz=12, bold=True, color=ORANGE)
+    rows = [
+        ("Biased J1069 (fully converged heteroref):","0.992 mean max-p",ORANGE),
+        ("Debiased J1442 (single E-step, lr=0):","0.362 mean max-p",GREEN),
+        ("Expected if completely random (3 classes):","0.333 baseline",DGRAY),
+    ]
+    for k,(lbl,val,c) in enumerate(rows):
+        add_text(s, lbl, 6.15, 4.75+k*.39, 4.7, .34, sz=11, color=DGRAY)
+        add_rect(s, 10.9, 4.72+k*.39, 2.1, .34, c if c!=DGRAY else LGRAY)
+        add_text(s, val, 10.95, 4.75+k*.39, 2.0, .3, sz=11,
+                 color=WHITE if c!=DGRAY else DGRAY, bold=True)
+    set_notes(s, """SPEAKING NOTES — Slide 6 (CryoSPARC Bias)
+CryoSPARC's algorithm works in cycles: start with reference maps, assign particles to best-matching maps (E-step), rebuild the maps from those assignments (M-step), repeat. After 50-100 cycles, it converges.
+
+The problem: in 2009, researchers showed that even pure noise images will "find" a reference if you run this iterative process long enough. The algorithm amplifies any hint of signal, eventually driving every particle to 100% confidence in one class.
+
+For J1442, we used a specially designed approach to avoid this:
+- Take J1069's final converged volumes (the best maps we have)
+- Run just ONE E-step — just compute "how likely is each particle under each map?"
+- With learning rate = 0 — the maps don't update at all
+- This gives the honest, unbiased probability before iterative refinement amplifies it
+
+The result: the mean max-posterior drops from 99.2% (biased) to 36.2% (debiased) — almost exactly 1/3 for three classes. This tells us: in the honest picture, most particles are genuinely ambiguous between the three states.""")
+
+    # ── S7 GMM + Scatter + CS Confusion (combined) ────────────────────────────
+    s = prs.slides.add_slide(BL); set_bg(s)
+    title_bar(s, "GMM Pipeline: Quantifying Class Overlap — There IS Signal, But Also Genuine Ambiguity",
+              "J1442 debiased posteriors (O-EM lr=0, single iteration) — 230,396 CFTR particles")
+
+    add_image(s, "scatter", .2, 1.15, width=8.0)
+    caption(s,
+        "Three panels: each compares two class probabilities. Dot = 1 particle (50k shown).\n"
+        "Color = CryoSPARC assignment. Dots lean toward 'their corner' (diagonal has more\n"
+        "of each color) — confirming real class signal. But the overlap near center (0.33, 0.33)\n"
+        "confirms genuine conformational ambiguity. These are debiased (honest) posteriors.",
+        .2, 6.5, 8.0, .95)
+
+    add_image(s, "cs_confusion", 8.45, 1.15, width=4.65)
+    caption(s,
+        "Soft-posterior confusion (GMM pipeline).\n"
+        "P6 diagonal 0.40, P7 = 0.31, P8 = 0.38.\n"
+        "All > 0.33 baseline → REAL class signal.\n"
+        "Off-diagonal 0.29–0.36 → genuine overlap.\n"
+        "Note: axis label 'True' is a misnomer here\n"
+        "— both are observed, not ground truth.\n\n"
+        "GMM formula:  p(x) = Σₖ πₖ · 𝒩(x ; μₖ, Σₖ)\n"
+        "Fit to ALR-transformed probability vectors.",
+        8.45, 4.6, 4.65, 1.85)
+    set_notes(s, """SPEAKING NOTES — Slide 7 (GMM + Scatter + Confusion)
+These two panels together tell the full story of what CryoSPARC's honest posteriors look like.
+
+LEFT: Each of the three scatter plots compares two classes. Each dot is one CFTR particle. The x-axis is CryoSPARC's probability for one class, the y-axis for another.
+
+IMPORTANT — and I want to be clear about this: there IS real class signal here. You can see that P6 particles (one color) lean toward the right in the P6 vs P7 panel — they have higher P6 probability than average. The same is true for P8. This is NOT random — the diagonal of the confusion matrix confirms this (0.40, 0.31, 0.38 are all above the 0.33 random baseline).
+
+BUT — much of the data is still near the center (0.33, 0.33), meaning many individual particles are genuinely ambiguous. These aren't particles where the algorithm is wrong — they're particles that truly sit between conformational states.
+
+RIGHT: The confusion matrix quantifies this exactly. Diagonal 0.40/0.31/0.38 confirms signal; off-diagonal 0.29–0.36 confirms overlap.
+
+The GMM pipeline fits Gaussian bell curves to these distributions. This lets us:
+- Compute soft class memberships (how likely each particle is in each cluster)
+- Bootstrap the populations to get error bars
+- Export high-confidence particle subsets
+- Quantify class overlap precisely
+
+The key message: the three classes are REAL but not cleanly separated at the per-particle level — they're positions on a continuum. This motivates the neural network approach on the next slides.""")
+
+    # ── S8 CryoDRGN VAE (improved design) ─────────────────────────────────────
+    s = prs.slides.add_slide(BL); set_bg(s)
+    title_bar(s, "CryoDRGN: A Neural Network for Unsupervised Conformational Analysis",
+              "No reference maps required — the latent space emerges from the image data itself")
+
+    stage(s, .2,  1.2, 2.55, 2.85, "① INPUT\nParticle Image",
+          "Noisy 256×256 cryo-EM image\n+ estimated orientation\n+ contrast function (CTF)\n\n230,000 particles per run\n\nThis is ALL we give the\nneural network to work with",
+          NAVY)
+    add_text(s, "→", 2.8, 2.38, .5, .5, sz=28, bold=True, color=NAVY, align=PP_ALIGN.CENTER)
+    add_text(s, "encode", 2.78, 2.2, .55, .25, sz=9, italic=True, color=NAVY)
+
+    stage(s, 3.35, 1.2, 2.7, 2.85, "② ENCODER\n(ConvNet)",
+          "Stacked CNN layers\nCompress 256×256 image\n→ mean μ and variance σ²\nin 10 dimensions\n\n'Learns what makes\ndifferent CFTR shapes\nlook different'",
+          BLUE)
+    add_text(s, "→", 6.1, 2.38, .5, .5, sz=28, bold=True, color=BLUE, align=PP_ALIGN.CENTER)
+    add_text(s, "sample z~N(μ,σ)", 6.05, 2.18, .7, .3, sz=8, italic=True, color=BLUE)
+
+    stage(s, 6.65, 1.2, 2.55, 2.85, "③ LATENT z\n(10 numbers)",
+          "Each particle gets\n10 numbers (z)\n\n= 'Conformational\n  GPS coordinates'\n\nSimilar shapes → close z\nDifferent shapes → far z\n\nWE ANALYSE THIS",
+          GREEN)
+    add_text(s, "→", 9.25, 2.38, .5, .5, sz=28, bold=True, color=GREEN, align=PP_ALIGN.CENTER)
+    add_text(s, "decode", 9.22, 2.18, .6, .25, sz=9, italic=True, color=GREEN)
+
+    stage(s, 9.8, 1.2, 2.7, 2.85, "④ DECODER\n(FeedForward Net)",
+          "Takes z + orientation\nPredicts what the particle\nimage SHOULD look like\n\nTrained to match\nthe real input image\n\nValidates the encoding",
+          ORANGE)
 
     # Training objective
-    add_rect(sl, 0.4, 5.0, 8.6, 0.75, RGBColor(0xF0, 0xF8, 0xFF), BLUE)
-    add_text(sl,
-        "  Training objective (ELBO):  ℒ = 𝔼[log p(x|z)] − β · KL( q(z|x) ‖ p(z) )\n"
-        "  Reconstruction term → decoder learns to generate images  |  "
-        "KL term → latent stays compact",
-        0.5, 5.03, 8.5, 0.7, size=13, color=NAVY, bold=True)
-
-    add_bullets(sl, [
-        "Input: pose-corrected particle images (poses borrowed from CryoSPARC) + CTF",
-        "Output: per-particle 10-dim latent vector z — each particle's 'conformational address'",
-        "Key strength: NO reference maps needed — unsupervised by design",
-        "Caveat: uses CryoSPARC-derived poses (one indirect dependency; mitigated by agreement)",
-        "Then we apply PCA + KDE to z to find the conformational landscape",
-    ], 8.95, 1.2, 4.2, 5.9, size=15)
-
-    set_notes(sl, """
-SPEAKING NOTES — Slide 9 (CryoDRGN)
-
-Now let me introduce the second major method I used: CryoDRGN, which is a neural network 
-approach to this same problem.
-
-The architecture is called a Variational Autoencoder, or VAE. You can think of it as 
-two neural networks connected back-to-back:
-
-The ENCODER takes a raw particle image (which is very noisy and has complex variations 
-in contrast) and compresses it down to a small vector of about 10 numbers. This vector — 
-called z — is the particle's "fingerprint" or "conformational address." Similar shapes 
-should get similar z vectors.
-
-The DECODER takes that small z vector and tries to reconstruct the original particle image.
-
-The training objective shown — called the ELBO — has two parts:
-1. Reconstruction quality: how well does the decoder recreate the original image?
-2. KL divergence: keeps the latent space organized and prevents it from spreading out chaotically
-
-The critical difference from CryoSPARC is that cryoDRGN is UNSUPERVISED. It never looks at 
-any reference maps. It figures out the structure purely from the raw data. 
-
-There's one caveat: we do use CryoSPARC's pose estimates (which direction each particle was 
-facing) as input. This is an indirect dependency. However, the fact that BOTH methods end up 
-finding the same three classes — even with this indirect link — gives us confidence that the 
-classes are real, not artifacts.
-
-After training, we have a 10-dimensional latent space. We then use Principal Component Analysis 
-(PCA) and free-energy calculations to understand what it looks like.
-""")
-
-    # ── SLIDE 10 – Latent Space: 3 Clear Classes ─────────────────────────────
-    sl = prs.slides.add_slide(blank_layout)
-    set_slide_bg(sl)
-    title_bar(sl, "The Latent Space: CryoDRGN Independently Finds 3 States",
-              "J1442 fullset D=256, zdim=10, 100 epochs — CONVERGED (loss change <0.01%/epoch)")
-
-    add_image(sl, "pca_j1442", 0.2, 1.15, height=5.4)
-    add_image(sl, "land_k3_a", 5.4, 1.15, width=7.8)
-
-    add_text(sl,
-        "LEFT: Raw latent PCA (analyze output)\n"
-        "3 distinct density lobes visible;\n"
-        "PC1/PC2 explain 23.5%+15.9%=39.4%",
-        0.2, 6.5, 5.1, 0.75, size=12, color=DGRAY, italic=True)
-    add_text(sl,
-        "RIGHT: K=3 GMM fit in full 10-D latent (visualized on PC1-PC2 plane)\n"
-        "3 labelled components with biological names; min separation = 2.60 SD\n"
-        "(>2.0 SD = genuinely distinct classes in multidimensional sense)",
-        5.4, 6.5, 7.7, 0.75, size=12, color=DGRAY, italic=True)
-
-    add_rect(sl, 0.2, 7.25, 12.9, 0.2, NAVY)
-    add_text(sl,
-        "Same 3 classes as CryoSPARC heteroref — found INDEPENDENTLY without reference maps → "
-        "strong validation of the classification",
-        0.35, 7.28, 12.6, 0.17, size=12, bold=True, color=WHITE, align=PP_ALIGN.CENTER)
-
-    set_notes(sl, """
-SPEAKING NOTES — Slide 10 (Latent Space: 3 Clear Classes)
-
-This is our headline result. Look at the left figure — it shows the raw output of cryoDRGN 
-after training. Each dot is one of the 230,000 particles, plotted in the first two principal 
-components of the 10-dimensional latent space.
-
-You can clearly see THREE distinct blobs. No guidance was given to the algorithm about how 
-many classes to find, yet it spontaneously separated the data into three groups.
-
-On the right, I've fit a 3-component Gaussian Mixture Model to the FULL 10-dimensional latent 
-space (not just the 2D projection). The three colored ellipses correspond to the three classes, 
-labelled with their biological names. The key metric is the minimum separation between any two 
-components: 2.60 standard deviations. A separation greater than 2 SD means the classes are 
-genuinely distinguishable — they're not just overlapping blobs.
-
-These three latent components correspond exactly to the same three classes that CryoSPARC 
-identified — NBD1LessMix-Ablated (P6), NBD1LessWide-Ablated (P7), and VshapedMix (P8).
-
-This is the core result: TWO completely independent methods, starting from different 
-assumptions, both find the same three CFTR conformational states. This mutual validation gives 
-us much higher confidence that these three states are real structural features of the protein, 
-not just artifacts of one particular algorithm.
-
-The model was trained to convergence — the loss function barely changed in the last 5 epochs 
-(less than 0.01% change), so we know we're not seeing something that would change with more training.
-""")
-
-    # ── SLIDE 11 – PC1 Marginal Density: 3 Peaks ─────────────────────────────
-    sl = prs.slides.add_slide(blank_layout)
-    set_slide_bg(sl)
-    title_bar(sl, "The Conformational Axis: 3 Peaks Along PC1",
-              "Free-energy landscape reveals a continuous coordinate with 3 preferred positions")
-
-    add_image(sl, "land_z10_d", 0.2, 1.15, width=7.0)
-
-    add_bullets(sl, [
-        "PC1 = dominant conformational axis (explains 23% of latent variance)",
-        "F(PC1) = −log p(PC1): maps density to 'energy' (lower = more populated)",
-        "3 peaks along PC1 align with P6, P7, P8 class assignments",
-        "Peaks connected by populated valleys — a continuous coordinate,",
-        (1, "not 3 isolated species. Separation ~1.5–2 kT at D=128"),
-        "At D=256 (higher resolution): separation in higher dimensions",
-        (1, "GMM min separation 2.60 SD — cleanly resolved in full 10-D"),
-        (1, "PC1 alone shows 1 well — the resolution matters!"),
-        "KEY: the 3 preferred positions are REPRODUCIBLE",
-        (1, "J1442 3-class populations: P6≈37%, P7≈29%, P8≈34%"),
-        (1, "Stable across D=128/D=256 runs and multiple methods"),
-    ], 7.4, 1.15, 5.7, 5.5, size=15)
-
-    add_text(sl,
-        "Bell curves fitted in 1-D on PC1 — each bell = one class distribution along the dominant axis.\n"
-        "This is the corrected version: 1-D GMM fitted to PC1 scores (not full-latent projected).",
-        0.2, 6.75, 7.1, 0.6, size=11, italic=True, color=DGRAY)
-
-    set_notes(sl, """
-SPEAKING NOTES — Slide 11 (PC1 Marginal)
-
-This figure shows what I call the "conformational landscape" — it answers the question: 
-what shapes does the protein PREFER to be in?
-
-The x-axis is the first principal component (PC1) of the latent space — the most important 
-single axis of variation. The y-axis is density — how many particles are at each position.
-
-The histogram (gray bars) shows where the 230,000 particles actually are. You can clearly 
-see THREE peaks. The colored bell curves show the three Gaussian components fitted to these 
-peaks — red/green/blue for the three classes.
-
-The fact that all three peaks are separated but still connected by particles in between 
-tells us something important: CFTR is not snapping discretely between three totally different 
-shapes. Instead, it's moving along a continuous track, with three PREFERRED resting positions. 
-It's like a ball rolling in a landscape with three shallow valleys — it tends to rest in one 
-of the valleys, but it can move between them.
-
-An important technical note: this version uses a 1-D GMM fitted DIRECTLY on PC1 scores, 
-which is why each bell fits its peak well. An earlier version projected the full 10-D GMM 
-onto PC1, which made the middle bell (P7) too broad. The corrected version on the slide 
-properly fits the peaks.
-
-The populations (how many particles in each state) are: roughly 37% P6, 29% P7, 34% P8. 
-These numbers are very stable — they come out essentially the same whether we use D=128 or 
-D=256 models, and whether we use the CryoSPARC posteriors or cryoDRGN's latent GMM. 
-That reproducibility is itself a result worth noting.
-""")
-
-    # ── SLIDE 12 – The 5-Class Problem ────────────────────────────────────────
-    sl = prs.slides.add_slide(blank_layout)
-    set_slide_bg(sl)
-    title_bar(sl, "The 5-Class Challenge: Why P9 and P10 Elude cryoDRGN",
-              "CryoSPARC finds 5 classes; the neural network can only cleanly recover 3")
-
-    add_image(sl, "conf5", 0.2, 1.15, width=7.2)
-
-    add_bullets(sl, [
-        "CryoSPARC J1497 (same particles, K=5): finds P6, P7, P8, P9, P10",
-        (1, "P9 = NBD2Less-Ablated  |  P10 = AltNBD1-ArdeconComposite-Ablated"),
-        "cryoDRGN K=5 GMM fit: min separation = 0.79 SD  (<2 = overlapping)",
-        (1, "Compare: K=3 gets 2.60 SD — cleanly distinct"),
-        "Confusion matrix (LEFT) shows:",
-        (1, "49% of CryoSPARC P10 particles → cryoDRGN assigns them to P6"),
-        (1, "44% of CryoSPARC P9 particles → cryoDRGN assigns them to P8"),
-        "Interpretation: P10 ≈ P6 and P9 ≈ P8 in the neural network's view",
-        (1, "The two extra classes are SUBSTATES of the 3 core states"),
-        "Why are they hard? Both free-energy analyses (J1442 & J1497)",
-        (1, "confirm 1 continuous basin — no energetic barrier separates P9/P10"),
-        "NOT a failure: supports that P9/P10 are subtle structural variants",
-        (1, "Ongoing work: focused classification targeting specific domains may separate them"),
-    ], 7.5, 1.15, 5.6, 5.9, size=14)
-
-    set_notes(sl, """
-SPEAKING NOTES — Slide 12 (5-Class Problem)
-
-Now let me address an interesting challenge in this work. CryoSPARC found 5 classes when 
-configured to look for 5 (in dataset J1497). But when I run cryoDRGN and try to find 5 
-clusters in the latent space, it can't do it cleanly.
-
-The confusion matrix on the left tells the story. This matrix compares what CryoSPARC says 
-(rows = CryoSPARC classes) with what cryoDRGN says (columns = cryoDRGN classes).
-
-If the two methods agreed perfectly, you'd see all the numbers on the diagonal (top-left to 
-bottom-right) being high, like 0.9 or 1.0. But look at P9 — 44% of CryoSPARC's P9 particles 
-get assigned to cryoDRGN's P8 cluster. And P10 — 49% get assigned to cryoDRGN's P6.
-
-What this tells us is that from cryoDRGN's perspective, P9 and P10 are not separate clusters — 
-they're just part of the P8 and P6 clouds. The neural network can't tell them apart because 
-they're essentially in the same place in latent space.
-
-This isn't really a failure of the method — it's actually telling us something scientifically 
-interesting. P9 (NBD2Less-Ablated) is probably just a variant of P8 (VshapedMix) where one 
-domain is slightly more disordered. Similarly, P10 is a variant of P6. The structural 
-differences exist, but they're too subtle for the neural network to separate without additional 
-information — like a focused analysis targeting just those specific protein domains.
-
-Currently I'm exploring ways to extract these sub-states by looking at the free-energy landscape 
-in specific regions of latent space and applying targeted classification there.
-""")
-
-    # ── SLIDE 13 – J264: 9-Class Dataset ──────────────────────────────────────
-    sl = prs.slides.add_slide(blank_layout)
-    set_slide_bg(sl)
-    title_bar(sl, "J264: A Richer Dataset — 9 Conformational Classes",
-              "301,770 particles, D=256 training — emerging cluster structure")
-
-    add_image(sl, "pca_j264", 0.2, 1.15, height=5.3)
-    add_image(sl, "j264_b",   5.5, 1.15, width=7.6)
-
-    add_text(sl,
-        "LEFT: Raw latent PCA (cryodrgn analyze)\n"
-        "~4-6 distinguishable density lobes;\n"
-        "PC1=0.34, PC2=0.28 (more structured than J1442!)\n"
-        "Ablated classes (NBD-less) visible as side-lobes",
-        0.2, 6.5, 5.2, 0.85, size=12, italic=True, color=DGRAY)
-    add_text(sl,
-        "RIGHT: K=9 class-coloured scatter (cryodrgn landscape analysis)\n"
-        "SC/AC/AO core states (blue tones) in centre; portal & ablated spread outward\n"
-        "Free energy: F(PC1) = ONE well (continuous) → careful: clusters are POSITIONS,\n"
-        "not energetically isolated states",
-        5.5, 6.5, 7.7, 0.85, size=12, italic=True, color=DGRAY)
-
-    add_rect(sl, 0.2, 7.32, 12.9, 0.14, NAVY)
-    add_text(sl,
-        "More training (currently at 50 ep, paper standard = 50) + ablated-class-excluded "
-        "retraining may further resolve sub-clusters → ongoing",
-        0.35, 7.33, 12.6, 0.12, size=11, bold=True, color=WHITE, align=PP_ALIGN.CENTER)
-
-    set_notes(sl, """
-SPEAKING NOTES — Slide 13 (J264: 9 Classes)
-
-Now let me show you the more complex dataset we've been analyzing. J264 has 301,770 particles 
-and was classified into 9 different conformational groups by CryoSPARC.
-
-The left figure shows the raw cryoDRGN latent space — and you can already see it's more 
-structured than J1442. PC1 explains 34% of the variance, PC2 another 28% — so the first two 
-components already capture a lot of the interesting variation. You can count roughly 4-6 
-distinguishable dense regions.
-
-The right figure colors each particle by its CryoSPARC class. You can see the three main CFTR 
-conformations — Symmetric Closed (SC), Asymmetric Closed (AC), and Asymmetric Open (AO) — 
-all in the central dense region in different shades of blue. These are the three cleanest, most 
-robust states from John's group's structural biology work.
-
-The "ablated" classes — the ones where entire protein domains are detached or disordered — form 
-separate side-lobes that stick out from the main density. These are structurally more distinct.
-
-Important caveat: when I compute the free-energy landscape (probability → energy), J264 shows 
-ONE continuous basin — no barriers. This doesn't mean there are no distinct classes; it means 
-the 9 CryoSPARC classes are POSITIONS along a continuum of conformational changes, not 9 
-energetically isolated states.
-
-This is actually consistent with how CFTR biology is supposed to work — the protein is 
-constantly flexing and opening and closing, not snapping between rigid states.
-
-I'm currently working on retaining only the "meaningful" classes (excluding the ablated variants 
-which may be experimental artifacts) and applying targeted analysis to see if the remaining 
-core states can be further separated.
-""")
-
-    # ── SLIDE 14 – Synthesis & Key Findings ──────────────────────────────────
-    sl = prs.slides.add_slide(blank_layout)
-    set_slide_bg(sl)
-    title_bar(sl, "Synthesis: What We've Learned",
-              "Two independent methods converge on the same picture of CFTR's conformational landscape")
-
-    add_text(sl, "✓  Confirmed results", 0.4, 1.2, 12.5, 0.35, size=18, bold=True, color=GREEN)
-    add_bullets(sl, [
-        "CFTR + Trikafta exists in 3 core conformational states (P6/P7/P8)",
-        (1, "CryoSPARC reference-based: finds these with high map resolution"),
-        (1, "CryoDRGN reference-free: finds the SAME 3, independently (min sep 2.60 SD)"),
-        (1, "Population fractions reproducible: ~37% P6, ~29% P7, ~34% P8"),
-    ], 0.4, 1.6, 12.5, 2.1, size=16)
-
-    add_text(sl, "⚠  Honest caveats", 0.4, 3.7, 12.5, 0.35, size=18, bold=True, color=ORANGE)
-    add_bullets(sl, [
-        "States are POSITIONS on a continuous landscape, not fully discrete snapshots",
-        "CryoSPARC posteriors are near-uniform after debiasing — classes genuinely overlap",
-        "5th/extra states (P9/P10) not resolvable by the neural network alone",
-        "J264's 9-class structure is partly continuous — more work needed",
-    ], 0.4, 4.1, 12.5, 1.8, size=16)
-
-    add_text(sl, "→  What this means for CFTR biology", 0.4, 5.9, 12.5, 0.35, size=18,
-             bold=True, color=NAVY)
-    add_bullets(sl, [
-        "The drug-bound protein explores multiple conformations — dynamic, not static",
-        "The most distinct states differ in NBD positioning/disorder and exit portal structure",
-        "Structural differences are real and localized (density diagnostics confirm)  ",
-    ], 0.4, 6.3, 12.5, 1.05, size=16)
-
-    set_notes(sl, """
-SPEAKING NOTES — Slide 14 (Synthesis)
-
-Let me bring everything together. What have we actually learned?
-
-The confirmed results: we have strong evidence for three core CFTR conformational states in the 
-presence of Trikafta drugs. This evidence comes from two independent methods — CryoSPARC and 
-cryoDRGN — and they agree. The population fractions (how many particles are in each state) are 
-stable across different experiments and model sizes. This reproducibility is exactly what you 
-want to see in science.
-
-The honest caveats: these three states are not like three completely different protein sculptures. 
-They're more like three preferred positions on a flexible protein that's constantly moving. Most 
-particles have genuinely ambiguous assignments — they're sort of in-between states. This doesn't 
-invalidate the classification; it tells us about the thermodynamics of the protein.
-
-For the two additional states CryoSPARC finds (P9 and P10) — we can see in the neural network's 
-latent space that they're essentially sub-states of P8 and P6. Whether they're meaningfully 
-distinct from a biological standpoint is still an open question.
-
-For the biology: what this means is that CFTR with Trikafta is a dynamic protein. It doesn't 
-just sit in one shape — it wobbles between several preferred shapes. The most structurally 
-distinct states differ in the NBD (motor domain) positioning and in the exit portal at the bottom 
-of the channel. These are likely the functional differences that matter for drug efficacy.
-""")
-
-    # ── SLIDE 15 – Conclusions & Future Directions ────────────────────────────
-    sl = prs.slides.add_slide(blank_layout)
-    set_slide_bg(sl, NAVY)
-    add_rect(sl, 0, 0, 13.33, 7.5, NAVY)
-
-    add_text(sl, "Conclusions & Future Directions",
-             0.4, 0.25, 12.5, 0.75, size=28, bold=True, color=WHITE)
-    add_rect(sl, 0.4, 1.0, 12.5, 0.05, BLUE)
-
-    add_text(sl, "What was done:", 0.4, 1.2, 12.5, 0.35, size=18, bold=True,
-             color=RGBColor(0xAA, 0xCC, 0xFF))
-    conc = [
-        "Built a GMM pipeline to quantify true uncertainty in CryoSPARC class assignments",
-        "Trained and analyzed cryoDRGN on two CFTR datasets (J1442, J264) using D=256 models",
-        "Established a cross-method validation framework (CryoSPARC ↔ cryoDRGN)",
-        "Designed automated free-energy basin analysis and cluster export to .cs format",
+    add_rect(s, .2, 4.2, 12.9, .85, RGBColor(0xE8,0xEE,0xFF), NAVY)
+    add_text(s, "Training objective (ELBO loss function):", .35, 4.26, 5.5, .28, sz=13, bold=True, color=NAVY)
+    add_text(s, "ℒ = 𝔼[log p(image | z)] − β · KL( q(z | image) ‖ p(z) )",
+             .35, 4.56, 8.5, .42, sz=15, bold=True, color=NAVY)
+    add_text(s, "← reconstruction quality                 ← keeps z-space organized",
+             .35, 4.75, 8.5, .28, sz=10, italic=True, color=DGRAY)
+    add_rect(s, 9.15, 4.2, 3.95, .85, RGBColor(0xE0,0xFF,0xE8), GREEN)
+    add_text(s, "Result: each particle has a unique\nlatent coordinate z after training",
+             9.25, 4.26, 3.75, .75, sz=12, color=GREEN, bold=True)
+
+    # Analogy + caveat
+    add_rect(s, .2, 5.2, 12.9, .85, RGBColor(0xFF,0xF8,0xE0), GOLD)
+    add_text(s,
+        "GPS ANALOGY: think of z as a GPS coordinate for protein shape — 10 numbers specify WHERE on a conformational map each particle sits.\n"
+        "Nearby coordinates = similar shapes. PCA collapses 10-D to 2-D for visualization (like flattening a globe onto paper).",
+        .35, 5.25, 12.6, .75, sz=12, color=RGBColor(0x60,0x50,0x00))
+
+    add_rect(s, .2, 6.15, 12.9, .85, LGRAY, MGRAY)
+    add_text(s,
+        "CAVEAT: initial 3D orientations (poses) come from CryoSPARC — one indirect dependency.\n"
+        "MITIGATION: both methods (CryoSPARC + cryoDRGN) find the same 3 states independently → the result is not an artifact of the pose input.",
+        .35, 6.2, 12.6, .75, sz=11, italic=True, color=DGRAY)
+    set_notes(s, """SPEAKING NOTES — Slide 8 (CryoDRGN VAE)
+Now let me explain how cryoDRGN works. It's a type of neural network called a Variational Autoencoder.
+
+Think of it as four stages:
+
+STAGE 1 — INPUT: We feed it the raw particle images plus estimated orientations. This is everything we give it — no references, no class labels.
+
+STAGE 2 — ENCODER: A convolutional neural network (the same type that recognizes faces on your phone) compresses each 256×256 image into just 10 numbers: a mean (μ) and variance (σ²) in a 10-dimensional space.
+
+STAGE 3 — LATENT SPACE z: These 10 numbers are the "conformational GPS coordinate" of that particle. Similar-looking particles get similar coordinates; very different ones get very different coordinates. This is what we analyze.
+
+STAGE 4 — DECODER: A second network takes those 10 numbers and tries to reconstruct what the original image should look like. If reconstruction is good, the encoding captured the right information.
+
+The training objective balances two goals: reconstruct the image well (so the encoder captures the right information) and keep the latent space organized (so nearby points in z-space correspond to similar conformations).
+
+The GPS analogy is the key: after training, every CFTR particle has a unique address in 10-dimensional space. We use PCA to look at this space in 2 dimensions — like flattening a 10-dimensional globe onto a flat paper map.
+
+One caveat: the orientations we feed in come from CryoSPARC, so there's an indirect link. But since both methods find the same 3 states, this dependency doesn't explain our results.""")
+
+    # ── S9 D=256: 3 Clear States ──────────────────────────────────────────────
+    s = prs.slides.add_slide(BL); set_bg(s)
+    title_bar(s, "cryoDRGN D=256: 3 States Cleanly Separated in the Latent Space",
+              "J1442 fullset, D=256, zdim=10, 100 epochs — converged (loss change <0.01%/epoch)")
+
+    add_image(s, "pca_j1442", .2, 1.15, height=5.35)
+    add_image(s, "land_k3_a", 5.25, 1.15, width=5.55)
+    add_image(s, "latent_conf", 10.85, 1.15, width=2.28)
+
+    caption(s,
+        "LEFT: Raw PCA of the 10-D latent (cryoDRGN analyze output).\n"
+        "Each dot = 1 particle. 3 blobs visible. No supervision given.\n"
+        "PC1 = 23.5%, PC2 = 15.9% of latent variance.",
+        .2, 6.57, 5.0, .88)
+    caption(s,
+        "CENTRE: K=3 GMM fit in full 10-D latent, visualized on PC1-PC2 plane.\n"
+        "Ellipses = 1σ/2σ per class; ⭐ = class mean in 2D projection.\n"
+        "Min GMM separation = 2.60 SD  (>2 SD = genuinely distinct classes!)\n"
+        "Labels = biological names (NBD1LessMix-Ablated, VshapedMix, etc.)",
+        5.25, 6.57, 5.55, .88)
+    caption(s,
+        "RIGHT: Latent GMM confusion.\n"
+        "Diagonal 0.97 / 0.96 / 0.99 !\n"
+        "vs CryoSPARC: 0.40 / 0.31 / 0.38\n"
+        "→ Dramatic improvement.",
+        10.85, 5.55, 2.28, 1.9)
+
+    add_rect(s, .2, 7.38, 12.9, .1, NAVY)
+    add_text(s, "Same 3 classes as CryoSPARC — found WITHOUT reference maps. Latent-GMM confusion (0.97–0.99) vs CryoSPARC (0.40–0.38) = cryoDRGN cleanly resolves what CryoSPARC genuinely struggles with.",
+             .35, 7.4, 12.6, .1, sz=11, bold=True, color=WHITE, align=PP_ALIGN.CENTER)
+    set_notes(s, """SPEAKING NOTES — Slide 9 (D=256: 3 Clear States)
+Remember the GPS analogy from the last slide. Here we're plotting where all 230,000 CFTR particles end up in that GPS map.
+
+LEFT: Three distinct blobs, with no guidance about how many to look for. The neural network discovered this structure by itself.
+
+CENTRE: When I fit a 3-component GMM (three Gaussian bells) to the full 10-dimensional space, the minimum separation is 2.60 standard deviations. Two SD is the threshold for genuine discreteness — these are clearly distinguishable in the full 10-D space.
+
+RIGHT: The confusion matrix of the latent GMM. Look at the diagonal: 0.97, 0.96, 0.99. Compare this to CryoSPARC's debiased confusion from slide 7: 0.40, 0.31, 0.38. 
+
+CryoSPARC sees substantial particle-level confusion between the three classes. cryoDRGN's latent space has essentially zero confusion. The neural network is finding a representation where the three states are cleanly separated — far more so than in the CryoSPARC posterior space.
+
+This doesn't mean CryoSPARC is wrong — it means cryoDRGN's latent geometry is better suited to discriminating these particular structural differences. And crucially, both find the SAME three classes. That cross-validation is our strongest result.""")
+
+    # ── S10 D=128: PC1 3-peaks + Basin ────────────────────────────────────────
+    s = prs.slides.add_slide(BL); set_bg(s)
+    title_bar(s, "Lower-Resolution Model (D=128): 3 Peaks in PC1 + Free-Energy Basins",
+              "Complementary view from D=128 z10 100ep fullset — lower-parameter model than slide 9")
+
+    add_image(s, "land_z10_d", .2, 1.15, width=5.8)
+    add_image(s, "basin_j1442", 6.1, 1.15, width=7.0)
+
+    caption(s,
+        "LEFT: PC1 marginal density (D=128 model).\n"
+        "Three clear peaks along PC1 → P6, P7, P8.\n"
+        "Each bell = 1-D GMM fitted directly to PC1 scores.\n"
+        "At D=128, the dominant 3-state variation\n"
+        "is concentrated into PC1 (lower-res = more compression).",
+        .2, 6.57, 5.8, .88)
+    caption(s,
+        "RIGHT: 2D free-energy basin analysis F(PC1,PC2) = -log[probability density].\n"
+        "A: 3 energy wells (⭐=minima; bright yellow=stable, dark=unstable/unpopulated).\n"
+        "B: Watershed boundaries — 3 coloured basins, each capturing one CryoSPARC class.\n"
+        "C: Occupancy matrix — P6→Basin1 (91%), P7→Basin2 (69%), P8→Basin3 (85%).\n"
+        "D: Basin count = 3 is stable across 0.5–1.3 kT barrier thresholds (robust!).",
+        6.1, 6.57, 7.0, .88)
+
+    add_rect(s, .2, 7.4, 12.9, .08, RGBColor(0x10,0x50,0x30))
+    add_text(s, "Why does D=128 show clearer PC1 separation while D=256 shows better multi-dimensional GMM? → see notes for explanation.",
+             .35, 7.42, 12.6, .08, sz=10, bold=True, color=WHITE, align=PP_ALIGN.CENTER)
+    set_notes(s, """SPEAKING NOTES — Slide 10 (D=128: PC1 peaks + Basin)
+This slide shows complementary evidence from a lower-resolution version of the neural network — D=128 instead of D=256. The comparison reveals something scientifically interesting.
+
+LEFT: The PC1 density plot shows three clear, clean peaks — one per class. This is actually MORE visually obvious in the D=128 model than in D=256.
+
+RIGHT: The free-energy basin analysis. Think of this like a topographic map where altitude represents how UNLIKELY a conformation is. We compute the probability density of particles in the latent space, then take -log(probability) to convert to "free energy" in units of kT.
+
+Panel A shows the actual 2D surface with three clear valleys (low points = stable states = many particles).
+Panel B shows the "watershed" — drawing boundaries between basins by flood-filling from each valley.
+Panel C shows the occupancy: which CryoSPARC classes fall into which basin. It's block-diagonal — P6→Basin1, P7→Basin2, P8→Basin3 — meaning the free-energy basins match the CryoSPARC classes.
+Panel D shows that the 3-basin result is stable across a range of barrier thresholds — it's not an artifact of one specific threshold choice.
+
+Now, the interesting comparison: why does D=128 show clearer 3-peak separation in PC1, while D=256 (from the previous slide) shows better separation in the full 10-D GMM?
+
+The explanation: D=128 processes lower-resolution images, so it must compress everything into 10 numbers from less detailed input. The DOMINANT variation it can capture is the large-scale conformational differences — the major NBD rearrangements between states. This gets concentrated into PC1, giving clean visible peaks.
+
+D=256 processes higher-resolution images, capturing both the large-scale state differences AND fine structural details within each state. This distributes the variance across MORE dimensions — so no single PC captures all the 3-state signal. But the total 10-D GMM separation is BETTER (2.60 SD vs 1.82 SD for D=128), because the model has more information to work with.
+
+Analogy: a blurry photo vs a sharp photo. In the blurry one, the 3 major shapes (states) stand out clearly against each other. In the sharp one, you see all the details too — more information, but spread across more dimensions to use it.""")
+
+    # ── S11 5-Class Challenge ─────────────────────────────────────────────────
+    s = prs.slides.add_slide(BL); set_bg(s)
+    title_bar(s, "The 5-Class Challenge: P9 & P10 Are Substates, Not Independent States",
+              "Most updated D=256 analysis — CryoSPARC finds 5; cryoDRGN cleanly separates only 3")
+
+    add_image(s, "conf5", .2, 1.15, width=7.55)
+    add_bullets(s, [
+        "CryoSPARC J1497 (K=5, same 230k particles): adds P9 & P10",
+        (1,"P9 = NBD2Less-Ablated  |  P10 = AltNBD1-ArdeconComposite-Ablated"),
+        "cryoDRGN K=5 GMM in D=256 latent: min sep = 0.79 SD",
+        (1,"Compare K=3 result: 2.60 SD — the 5th class is clearly NOT independent"),
+        "Confusion matrix (LEFT, most recent D=256 run):",
+        (1,"49% of CryoSPARC P10 → cryoDRGN assigns to P6 (NBD1LessMix)"),
+        (1,"44% of CryoSPARC P9 → cryoDRGN assigns to P8 (VshapedMix)"),
+        "Conclusion: P10 ≈ P6 and P9 ≈ P8 in the neural network's view",
+        (1,"P9/P10 are STRUCTURAL SUBSTATES — real but not energetically isolated"),
+        (1,"Likely differ only in one peripheral loop being ordered vs disordered"),
+        "Path forward: focused classification targeting NBD1/ICL4 regions",
+        (1,"Standard: domain-masked heteroref K=2 within P6+P10 and P8+P9 subsets"),
+    ], 7.9, 1.15, 5.2, 5.9, sz=14)
+    set_notes(s, """SPEAKING NOTES — Slide 11 (5-Class Challenge)
+CryoSPARC, when configured to find 5 classes, identifies P9 and P10 as additional states. The confusion matrix compares what CryoSPARC says (rows) versus what cryoDRGN says (columns).
+
+Key off-diagonal entries:
+- P9: 44% get sent to cryoDRGN's P8 cluster → in the neural network's view, P9 IS P8
+- P10: 49% get sent to cryoDRGN's P6 cluster → P10 IS P6
+
+When we try to fit 5 Gaussian components to the D=256 latent space, the minimum separation drops to 0.79 SD — well below the 2.0 threshold. There aren't 5 distinct regions in the latent space for 5 components.
+
+This is biologically interpretable: P9 and P10 are likely structural substates of P8 and P6. They probably differ only in whether one specific flexible loop (like the Lasso-Nter motif or ICL4) is ordered or disordered — a subtle peripheral change that doesn't alter the overall conformation enough for cryoDRGN's global latent space to separate.
+
+This is NOT a failure of the method — it tells us something real: P9 and P10 don't have their own energetic wells in the landscape. They're at the extremes of P8 and P6's distributions.
+
+The path to separating them: focused or masked classification — instead of classifying globally, focus just on the region of the protein where P9 differs from P8 (the NBD2 region), and run a K=2 classification there. This targeted approach may reveal the structural substate.""")
+
+    # ── S12 J264 9+6 landscape ────────────────────────────────────────────────
+    s = prs.slides.add_slide(BL); set_bg(s)
+    title_bar(s, "J264: A 9-Class Dataset — Emerging Cluster Structure in D=256",
+              "D=256, zdim=10, 50 epochs, 301,770 particles — converged (loss plateau <0.003%/epoch)")
+
+    add_image(s, "pca_j264", .2, 1.15, height=5.45)
+    add_image(s, "j264_k9_a", 4.75, 1.15, width=4.6)
+    add_image(s, "j264_k6_a", 9.4,  1.15, width=3.8)
+
+    caption(s,
+        "LEFT: Raw PCA output (cryoDRGN analyze).\n"
+        "4-6 distinguishable lobes; PC1=34%, PC2=28%.\n"
+        "Ablated classes (domain-detached) form side-lobes.\n"
+        "Much larger dataset → richer structure than J1442.",
+        .2, 6.64, 4.5, .82)
+    caption(s,
+        "CENTRE: K=9 GMM (matches CryoSPARC's 9 classes).\n"
+        "Core states (SC/AC/AO) in blue tones — the clean NBD trajectory.\n"
+        "Portal-opening states (SEPD/AEPD) in green.\n"
+        "Ablated classes (NBD-less, V-shaped) in red/grey.\n"
+        "Min sep 0.83 SD → continuous landscape overall.",
+        4.75, 6.64, 4.6, .82)
+    caption(s,
+        "RIGHT: K=6 GMM — ongoing.\n"
+        "6 components match the 6\nvisible density lobes more\nhonestly (min sep 1.30 SD).\n"
+        "Expected to improve further\nwith additional training or\nexcluding ablated classes.",
+        9.4, 6.64, 3.8, .82)
+
+    add_rect(s, .2, 7.4, 12.9, .08, NAVY)
+    add_text(s, "Free energy F(PC1) = 1 continuous well — no energetic barriers between classes. Classes are POSITIONS along a trajectory, not isolated states.",
+             .35, 7.42, 12.6, .08, sz=10, bold=True, color=WHITE, align=PP_ALIGN.CENTER)
+    set_notes(s, """SPEAKING NOTES — Slide 12 (J264: 9 Classes + K=6)
+Now the more complex dataset, J264, with 9 conformational groups and 301,000 particles.
+
+LEFT: The raw latent space is already more structured than J1442. PC1 explains 34% of variance, PC2 explains 28%. You can see 4-6 distinguishable density regions. The overall shape is elongated along PC1.
+
+CENTRE K=9: The nine classes correspond to the full range of CFTR conformations:
+- Blue: Symmetric Closed (SC), Asymmetric Closed (AC), Asymmetric Open (AO) — the core NBD trajectory from closed to open
+- Green: SEPD (Separated Exit Portal Domain), AEPD (Alternative Exit Portal) — portal-opening states
+- Red/grey: the ablated classes where domains are detached (NBD1-less, NBD2-less, etc.)
+
+The ablated classes form distinct side-lobes — those particles look very different from the intact protein, which is why they separate. The core SC/AC/AO states all overlap in the central region.
+
+RIGHT K=6: This is ongoing work. Instead of forcing all 9 classes, fitting 6 components better matches the 6 visible density lobes. This gives a more honest representation of what the model currently resolves. As training continues and we retrain excluding the ablated classes (which may be purification artifacts), the picture should sharpen.
+
+Important note: the free-energy analysis of J264 shows one continuous basin — no barriers between classes. The 9 CryoSPARC classes are positions along a continuous conformational trajectory, not 9 isolated structures. This is consistent with CFTR's biology — the protein is constantly flexing.""")
+
+    # ── S13 Synthesis ─────────────────────────────────────────────────────────
+    s = prs.slides.add_slide(BL); set_bg(s)
+    title_bar(s, "Synthesis: What We've Learned About CFTR + Trikafta",
+              "Two independent methods converge on the same conformational landscape")
+    add_text(s, "✓  Confirmed results", .4, 1.2, 12.5, .32, sz=17, bold=True, color=GREEN)
+    add_bullets(s, [
+        "CFTR + Trikafta exists in 3 core conformational states (P6 / P7 / P8)",
+        (1,"CryoSPARC (reference-based, debiased): finds these; honest posteriors confirm genuine overlap"),
+        (1,"cryoDRGN (reference-free): independently recovers the SAME 3 — min GMM separation 2.60 SD"),
+        (1,"Populations reproducible: P6≈36%, P7≈29%, P8≈34% — stable across models and methods"),
+    ], .4, 1.57, 12.5, 1.95, sz=15)
+    add_text(s, "⚠  Honest caveats", .4, 3.6, 12.5, .32, sz=17, bold=True, color=ORANGE)
+    add_bullets(s, [
+        "States are POSITIONS on a continuous landscape, not fully isolated snapshots",
+        "Most particles genuinely ambiguous at particle level — classes share conformational space",
+        "P9 / P10 (5-class): structural substates of P8 / P6 — subtle peripheral loop differences",
+    ], .4, 3.97, 12.5, 1.7, sz=15)
+    add_text(s, "→  What this means for CFTR biology", .4, 5.75, 12.5, .32, sz=17, bold=True, color=NAVY)
+    add_bullets(s, [
+        "Drug-bound CFTR is dynamic — it explores multiple conformations in thermal equilibrium",
+        "Three preferred 'resting positions' along a continuous conformational track",
+        "Structural differences between states are real and localized (P8 has extra ordered domain density)",
+        "Two-method validation provides armour: result is harder to dismiss as algorithmic artifact",
+    ], .4, 6.12, 12.5, 1.1, sz=15)
+    set_notes(s, """SPEAKING NOTES — Slide 13 (Synthesis)
+Let me bring everything together.
+
+CONFIRMED: Three core CFTR conformational states, independently found by two methods. The populations are stable across experiments (about 37%/29%/34%). This reproducibility is the strongest evidence that these are real states.
+
+CAVEATS: These aren't three discrete protein sculptures in separate boxes. They're three preferred positions on a continuous conformational track — the protein moves between them in thermal motion. The free-energy barriers between states are shallow (1-2 kT in the D=128 model).
+
+The additional states P9 and P10 are real structural variants but not energetically distinct from P8 and P6.
+
+BIOLOGY: Drug-bound CFTR is a dynamic machine. The three states correspond to different NBD configurations: symmetric closed (SC), asymmetric closed (AC), and asymmetric open (AO) — mapping onto the functional states of the channel. Understanding which state is most populated and how populations shift with different conditions is directly relevant to drug efficacy.
+
+The two-method approach is important for scientific credibility. CryoSPARC uses reference maps, which introduces reference bias. CryoDRGN uses no references, but uses CryoSPARC pose estimates, which introduces an indirect dependency. By showing both find the same result, we cover both bases — the conclusion is robust to the specific bias of either method.""")
+
+    # ── S14 Conclusions ───────────────────────────────────────────────────────
+    s = prs.slides.add_slide(BL); set_bg(s, NAVY)
+    add_rect(s, 0, 0, 13.33, 7.5, NAVY)
+    add_text(s, "Conclusions & Future Directions", .4, .22, 12.5, .7, sz=25, bold=True, color=WHITE)
+    add_rect(s, .4, .92, 12.5, .04, BLUE)
+    add_text(s, "What was accomplished:", .4, 1.07, 6.2, .3, sz=15, bold=True, color=RGBColor(0xAA,0xCC,0xFF))
+    done = [
+        "GMM pipeline: honest uncertainty quantification from debiased CryoSPARC posteriors",
+        "cryoDRGN: D=256 models trained + analyzed on 4 CFTR datasets — all converged",
+        "Cross-method validation: both methods independently recover the same 3 states",
+        "Basin occupancy + free-energy landscape analysis for J1442 and J264",
+        "Cluster export: .cs files per cryoDRGN GMM component → ready for CryoSPARC NU-refine",
     ]
-    for i, c in enumerate(conc):
-        add_text(sl, "• " + c, 0.5, 1.6 + i * 0.45, 12.2, 0.42, size=15, color=WHITE)
-
-    add_text(sl, "Next steps:", 0.4, 3.6, 12.5, 0.35, size=18, bold=True,
-             color=RGBColor(0xAA, 0xCC, 0xFF))
-    next_steps = [
-        "Run cryoDRGN analyze on all D=256 models (GPU on Hudson) → UMAP + volume traversals",
-        "Focused/masked 3D classification targeting NBD1/NBD2 regions to separate P9/P10",
-        "Export cryoDRGN cluster particle sets → NU-refinement in CryoSPARC → new maps",
-        "J264: exclude ablated particles, retrain, test if 3 core CFTR states emerge cleanly",
-        "3DFlex / 3DVA: model continuous motion along the CFTR conformational coordinate",
+    for i,d in enumerate(done):
+        add_text(s, "✓ "+d, .5, 1.42+i*.38, 6.0, .34, sz=12, color=WHITE)
+    add_text(s, "Next steps:", 7.05, 1.07, 6.1, .3, sz=15, bold=True, color=RGBColor(0xAA,0xCC,0xFF))
+    nexts = [
+        "GPU analyze on Hudson → UMAP + volume traversals along the latent PC1/PC2 axes",
+        "Focused classification at NBD1/ICL4 → attempt to separate P9/P10 substates",
+        "J264: retrain excluding ablated classes → test if 3 SC/AC/AO states emerge cleanly",
+        "Import cryoDRGN cluster .cs sets → NU-refinement in CryoSPARC → new maps",
+        "3DFlex / 3DVA: model continuous conformational motion along the landscape",
     ]
-    for i, s in enumerate(next_steps):
-        add_text(sl, "▸ " + s, 0.5, 4.05 + i * 0.45, 12.2, 0.42, size=14,
-                 color=RGBColor(0xCC, 0xDD, 0xFF))
+    for i,n in enumerate(nexts):
+        add_text(s, "▸ "+n, 7.15, 1.42+i*.38, 6.0, .34, sz=12, color=RGBColor(0xCC,0xDD,0xFF))
+    add_rect(s, .4, 3.55, 12.5, .04, RGBColor(0x3A,0x5A,0xA0))
+    add_text(s, "Key open question:", .4, 3.68, 12.5, .28, sz=14, bold=True, color=GOLD)
+    add_text(s, "Do the conformational state POPULATIONS change with different drug doses, patient mutations, or ATP? If so — connecting structure to function quantitatively.",
+             .4, 3.98, 12.5, .55, sz=13, color=WHITE, italic=True)
+    add_rect(s, .4, 4.7, 12.5, .04, RGBColor(0x3A,0x5A,0xA0))
+    add_text(s, "Take-home message:", .4, 4.83, 12.5, .28, sz=14, bold=True, color=GOLD)
+    add_text(s,
+        "CFTR + Trikafta adopts 3 distinct but interconverting conformations.\n"
+        "cryoDRGN independently validates CryoSPARC's classes — without reference maps.\n"
+        "Populations reproducible (~37%/29%/34%) and consistent across model sizes and methods.",
+        .4, 5.15, 12.5, .7, sz=13, color=WHITE)
+    add_rect(s, .4, 6.08, 12.5, .7, RGBColor(0x0E,0x25,0x4D))
+    add_text(s, "Code: github.com/minouemmad/cryoem-classification  |  Methods: CryoSPARC · cryoDRGN · Custom GMM Pipeline  |  Thank you — Questions?",
+             .55, 6.13, 12.2, .6, sz=12, italic=True,
+             color=RGBColor(0x99,0xBB,0xFF), align=PP_ALIGN.CENTER)
+    set_notes(s, """SPEAKING NOTES — Slide 14 (Conclusions)
+Let me close with what we've accomplished and where I'm going.
 
-    add_rect(sl, 0.4, 6.6, 12.5, 0.7, RGBColor(0x0E, 0x25, 0x4D))
-    add_text(sl,
-        "Code: github.com/minouemmad/cryoem-classification  |  Methods: CryoSPARC + cryoDRGN + "
-        "custom GMM pipeline  |  Questions?",
-        0.55, 6.65, 12.2, 0.6, size=12, italic=True, color=RGBColor(0x99, 0xBB, 0xFF),
-        align=PP_ALIGN.CENTER)
+The central result: CFTR with Trikafta adopts three distinct but interconverting conformational states. Two completely different algorithms — CryoSPARC with reference maps and iterative refinement, and cryoDRGN with no references and a neural network — both find the same answer. This cross-validation makes the result robust to the specific biases of either method.
 
-    set_notes(sl, """
-SPEAKING NOTES — Slide 15 (Conclusions & Next Steps)
+The population fractions (~37%/29%/34%) are reproducible across D=128 and D=256 models, and across CryoSPARC's posteriors and cryoDRGN's latent GMM. Stable populations are a strong signal of a real biological result.
 
-To wrap up — here's a summary of what I've done and where I'm going.
+For next steps: the most immediate is running cryodrgn analyze on the GPU cluster, which generates actual volume reconstructions at different positions in the latent space — letting us see WHAT conformation lives at each location.
 
-The work I've completed: 
-I built a GMM (Gaussian Mixture Model) pipeline that honestly quantifies the uncertainty in 
-CryoSPARC's particle classifications. I trained cryoDRGN neural networks on two CFTR datasets 
-at high resolution (D=256), both of which converged completely. I established a framework for 
-comparing the two methods against each other, and I've built automated analysis tools for 
-finding free-energy basins and exporting particle subsets.
+The focused classification experiment is the most scientifically interesting next step: can we separate P9 from P8 and P10 from P6 by running a targeted second-round classification focused on just the domain regions where they're expected to differ?
 
-For next steps:
-The most immediate is running cryodrgn analyze on the GPU cluster to generate volume 
-reconstructions from different positions in the latent space — this will tell us what each 
-part of the landscape actually looks like structurally.
+The key open question: do the conformational populations change with different conditions? If P8 (VshapedMix) becomes more populated at higher drug concentrations, that directly tells you which conformation the drug stabilizes. That's where the landscape approach — quantifying populations, not just finding states — becomes directly clinically relevant.
 
-Then I want to do focused classification — rather than trying to separate all 9 classes globally, 
-focus on just the NBD regions where the differences between P9/P10 and P8/P6 are expected to 
-live. This should improve our ability to separate those subtle substates.
+Thank you — happy to take questions.""")
 
-I'll also export the cryoDRGN cluster particle sets as .cs files that can be used for 
-non-uniform refinement in CryoSPARC — this is how we get the highest-quality structural 
-maps from our classification.
-
-For J264, the plan is to rerun after excluding the ablated particles (which are probably 
-experimental artifacts of partial purification), and see if the 3 core conformational states 
-emerge more clearly.
-
-Ultimately, I'd like to apply 3DFlex — which is a more sophisticated tool for modeling 
-continuous protein motion rather than discrete states. Given that our analysis shows a 
-continuous landscape, this may be the most honest way to describe CFTR's conformational 
-dynamics under drug treatment.
-
-Thank you — happy to take questions.
-""")
-
-    # ── SAVE ──────────────────────────────────────────────────────────────────
     out = ROOT / "docs" / "CFTR_cryoDRGN_presentation.pptx"
     out.parent.mkdir(exist_ok=True)
     prs.save(str(out))
     print(f"[saved] {out}")
-    return out
-
+    print(f"[slides] {len(prs.slides)}")
 
 if __name__ == "__main__":
     build()
