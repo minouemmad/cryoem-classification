@@ -35,7 +35,7 @@ FIGS = {
     "land_k3_a":    ROOT / "results_cryodrgn/J1442/fullset_D256_z10_ep100/landscape_k3/panel_A_landscape.png",
     "latent_conf":  ROOT / "results_cryodrgn/J1442/confidence_3class/confusion.png",
     "land_z10_d":   ROOT / "results_cryodrgn/J1442/landscape_z10/panel_D_pc1_marginal.png",
-    "basin_j1442":  ROOT / "results_cryodrgn/J1442/basin_occupancy_j1442x5/basin_occupancy_J1442x5.png",
+    "basin_j1442":  ROOT / "results_cryodrgn/J1442/basin_occupancy_j1442x5/panel_C_occupancy.png",
     "conf5":        ROOT / "results_cryodrgn/J1442/confidence_5class/confusion.png",
     "j264_k9_a":    ROOT / "results_cryodrgn/J264/fullset_D256_z10_ep50/landscape_k9/panel_A_landscape.png",
     "j264_k6_a":    ROOT / "results_cryodrgn/J264/fullset_D256_z10_ep50/landscape_k6/panel_A_landscape.png",
@@ -501,8 +501,8 @@ IMPORTANT: I'm NOT showing the latent GMM self-confusion (which was 0.97/0.96/0.
     title_bar(s, "Lower-Resolution Model (D=128): 3 Peaks in PC1 + Free-Energy Basins",
               "Complementary view from D=128 z10 100ep fullset — lower-parameter model than slide 9")
 
-    add_image(s, "land_z10_d", .2, 1.15, width=5.8)
-    add_image(s, "basin_j1442", 6.1, 1.15, width=7.0)
+    add_image(s, "land_z10_d", .2, 1.15, width=6.2)
+    add_image(s, "basin_j1442", 6.6, 1.15, width=6.5)
 
     caption(s,
         "LEFT: PC1 marginal density (D=128 model).\n"
@@ -510,14 +510,15 @@ IMPORTANT: I'm NOT showing the latent GMM self-confusion (which was 0.97/0.96/0.
         "Each bell = 1-D GMM fitted directly to PC1 scores.\n"
         "At D=128, the dominant 3-state variation\n"
         "is concentrated into PC1 (lower-res = more compression).",
-        .2, 6.57, 5.8, .88)
+        .2, 6.57, 6.2, .88)
     caption(s,
-        "RIGHT: 2D free-energy basin analysis F(PC1,PC2) = -log[probability density].\n"
-        "A: 3 energy wells (⭐=minima; bright yellow=stable, dark=unstable/unpopulated).\n"
-        "B: Watershed boundaries — 3 coloured basins, each capturing one CryoSPARC class.\n"
-        "C: Occupancy matrix — P6→Basin1 (91%), P7→Basin2 (69%), P8→Basin3 (85%).\n"
-        "D: Basin count = 3 is stable across 0.5–1.3 kT barrier thresholds (robust!).",
-        6.1, 6.57, 7.0, .88)
+        "RIGHT: Occupancy matrix P(basin | CryoSPARC class).\n"
+        "Rows = CryoSPARC class; columns = free-energy basin.\n"
+        "Block-diagonal structure: P6\u2192B1 (91%), P7\u2192B2 (69%),\n"
+        "P8\u2192B3 (85%). P9 and P10 also segregate to B3 and B1\n"
+        "respectively, matching their substate relationship\n"
+        "with P8 and P6.",
+        6.6, 6.57, 6.5, .88)
 
     add_rect(s, .2, 7.4, 12.9, .08, RGBColor(0x10,0x50,0x30))
     add_text(s, "Why does D=128 show clearer PC1 separation while D=256 shows better multi-dimensional GMM? → see notes for explanation.",
