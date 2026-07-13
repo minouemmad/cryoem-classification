@@ -32,3 +32,4 @@ results_cryodrgn/
 
 # oversized regenerable cryoDRGN intermediates (exceed GitHub 100MB)
 **/_passthrough_kept.npy
+*.npy
