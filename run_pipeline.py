@@ -18,7 +18,10 @@ import numpy as np
 import pandas as pd
 from sklearn.mixture import GaussianMixture
 
-from gmm_pipeline import (
+import sys
+sys.path.insert(0, str(Path(__file__).resolve().parent / "scripts"))  # gmm_pipeline lives here now
+
+from scripts.gmm_pipeline import (
     alr_transform,
     bhattacharyya_pairwise,
     bootstrap_population_ci_analytical,
@@ -36,7 +39,7 @@ from gmm_pipeline import (
     monte_carlo_confusion,
     observed_populations,
 )
-from gmm_pipeline.plots import (
+from scripts.gmm_pipeline.plots import (
     plot_class_table,
     plot_confusion,
     plot_gmm_landscape,
@@ -150,7 +153,7 @@ def main():
     if args.transform == "alr":
         X = alr_transform(prot.posterior)
     else:
-        from gmm_pipeline.preprocess import simplex_drop_last
+        from scripts.gmm_pipeline.preprocess import simplex_drop_last
         X = simplex_drop_last(prot.posterior)
     print(f"      X shape = {X.shape}")
 
