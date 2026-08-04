@@ -31,7 +31,11 @@ cryodrgn-py310/
 # OS / editor
 .DS_Store
 Thumbs.db
-results_cryodrgn/
+
+# results_cryodrgn: keep the folder skeleton (.gitkeep) but not the large/regenerable contents
+results_cryodrgn/**
+!results_cryodrgn/**/
+!results_cryodrgn/**/.gitkeep
 *.pkl
 
 # oversized regenerable cryoDRGN intermediates (exceed GitHub 100MB)
