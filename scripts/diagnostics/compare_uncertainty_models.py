@@ -1,8 +1,8 @@
 """Compare uncertainty models on the SAME 230,396 J1442 particles.
 
 Models scored (all row-aligned by construction):
-  M1  CryoSPARC hetero posteriors        (results_J1442/gmm/posterior_protein.npy)
-  M2  GMM on hetero posteriors           (results_J1442/gmm/responsibilities.npy)
+  M1  CryoSPARC hetero posteriors        (results_cryosparc/J1442/gmm/posterior_protein.npy)
+  M2  GMM on hetero posteriors           (results_cryosparc/J1442/gmm/responsibilities.npy)
   M3  GMM on 3DVA latent coordinates     (refit here, K=3)
   M4  responsibility-weighted populations -> for EACH soft model above,
           population_i = (1/N) * sum_n r_ni     (vs hard argmax)
@@ -43,13 +43,13 @@ for _p in (REPO, REPO / "scripts"):  # repo root + scripts/ (holds gmm_pipeline)
     if str(_p) not in sys.path:
         sys.path.insert(0, str(_p))
 
-HETERO_POST = REPO / "results_J1442" / "gmm" / "posterior_protein.npy"
-HETERO_RESP = REPO / "results_J1442" / "gmm" / "responsibilities.npy"
+HETERO_POST = REPO / "results_cryosparc/J1442" / "gmm" / "posterior_protein.npy"
+HETERO_RESP = REPO / "results_cryosparc/J1442" / "gmm" / "responsibilities.npy"
 LATENT_CS = (
     REPO / "data" / "J1442_3DVA" / "all_particles"
     / "components_mode_0" / "cryosparc_P25_J3428_particles.cs"
 )
-OUTDIR = REPO / "results_J1442" / "uncertainty_models"
+OUTDIR = REPO / "results_cryosparc/J1442" / "uncertainty_models"
 K = 3
 LABELS = ["P6", "P7", "P8"]
 RNG = 0

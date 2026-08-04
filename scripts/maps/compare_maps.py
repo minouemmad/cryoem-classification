@@ -22,7 +22,7 @@ Usage
                data/maps/cryosparc_P25_J1077_010_volume_map.mrc \
                data/maps/cryosparc_P25_J1078_011_volume_map.mrc \
         --labels P6 P7 P8 \
-        --outdir results_J1069/map_comparison
+        --outdir results_cryosparc/J1069/map_comparison
 """
 from __future__ import annotations
 

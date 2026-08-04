@@ -24,8 +24,8 @@ printed ONLY for interpretation if --cs is given; it never enters the ranking.
 Run with the cryodrgn-py310 env from repo root::
 
     python scripts/cryodrgn/cryodrgn_sweep_score.py \\
-      --runs results_cryodrgn/J1442_real/train_sweep_* \\
-      -o results_cryodrgn/J1442_real/sweep_leaderboard
+      --runs results_cryodrgn/J1442_gP25_WT_POSE_BIAS/train_sweep_* \\
+      -o results_cryodrgn/J1442_gP25_WT_POSE_BIAS/sweep_leaderboard
 """
 from __future__ import annotations
 

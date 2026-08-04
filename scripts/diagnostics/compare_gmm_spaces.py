@@ -42,8 +42,8 @@ LATENT_CS = (
     REPO / "data" / "J1442_3DVA" / "all_particles"
     / "components_mode_0" / "cryosparc_P25_J3428_particles.cs"
 )
-HETERO_POST = REPO / "results_J1442" / "gmm" / "posterior_protein.npy"
-OUTDIR = REPO / "results_J1442" / "threedva"
+HETERO_POST = REPO / "results_cryosparc/J1442" / "gmm" / "posterior_protein.npy"
+OUTDIR = REPO / "results_cryosparc/J1442" / "threedva"
 K = 3
 RNG = 0
 SIL_SAMPLE = 20_000

@@ -30,7 +30,7 @@ Workflow per dataset
 Run with the cryoDRGN env from the repo root::
 
     python scripts/cryodrgn/cryodrgn_decode_states.py \
-      --dataset "J1442:results_cryodrgn/J1442_real/train_z10/z.100.pkl:data/cryosparc_P25_J1442_passthrough_particles_all_classes.cs:data/cryosparc_P25_J1442_00000_particles.cs:6,7,8:results_cryodrgn/J1442_real/train_z10/weights.100.pkl:results_cryodrgn/J1442_real/train_z10/config.yaml:data/J1442_classes" \
+      --dataset "J1442:results_cryodrgn/J1442_gP25_WT_POSE_BIAS/train_z10/z.100.pkl:data/cryosparc_P25_J1442_passthrough_particles_all_classes.cs:data/cryosparc_P25_J1442_00000_particles.cs:6,7,8:results_cryodrgn/J1442_gP25_WT_POSE_BIAS/train_z10/weights.100.pkl:results_cryodrgn/J1442_gP25_WT_POSE_BIAS/train_z10/config.yaml:data/J1442_classes" \
       --dataset "J1497:results_cryodrgn/J1497_real/train/z.100.pkl:data/gP25W6J1497_passthrough_particles_all_classes.cs:data/cryosparc_P25_J1497_00000_particles.cs:6,7,8,9,10:results_cryodrgn/J1497_real/train/weights.100.pkl:results_cryodrgn/J1497_real/train/config.yaml:data/J1497_classes" \
       --n-dummies 6 --rep medoid --traj 8 -d 64 --run \
       -o results_cryodrgn/decode_states

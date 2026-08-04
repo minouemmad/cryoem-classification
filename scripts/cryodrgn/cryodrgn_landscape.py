@@ -25,11 +25,11 @@ What you get (results dir):
 Run with the cryoDRGN env from repo root::
 
     python scripts/cryodrgn/cryodrgn_landscape.py \
-      --z results_cryodrgn/J1442/train_z10/z.100.pkl \
+      --z results_cryodrgn/J1442_gP25_WT_POSE_BIAS/train_z10/z.100.pkl \
       --passthrough-cs data/cryosparc_P25_J1442_passthrough_particles_all_classes.cs \
       --cs data/cryosparc_P25_J1442_00000_particles.cs \
       --n-dummies 6 --protein-idx 6 7 8 -k 3 --k-fine 8 \
-      -o results_cryodrgn/J1442/landscape_z10
+      -o results_cryodrgn/J1442_gP25_WT_POSE_BIAS/landscape_z10
 """
 from __future__ import annotations
 

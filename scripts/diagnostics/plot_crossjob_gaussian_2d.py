@@ -21,7 +21,7 @@ Usage
     python scripts/plot_crossjob_gaussian_2d.py \
         --cs data/cryosparc_P25_J1069_00042_particles.cs \
         --weights-cs data/cryosparc_P25_J1442_00000_particles.cs \
-        --n-dummies 6 --outdir results_J1069
+        --n-dummies 6 --outdir results_cryosparc/J1069
 """
 from __future__ import annotations
 

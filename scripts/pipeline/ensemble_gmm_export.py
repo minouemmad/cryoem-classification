@@ -94,7 +94,7 @@ def parse_args():
     p.add_argument("--scale-field", default="alignments3D/alpha")
     p.add_argument("--name-prefix", default="ensembleGMM")
     p.add_argument("--covariance", default="full")
-    p.add_argument("--outdir", default="results_J1069")
+    p.add_argument("--outdir", default="results_cryosparc/J1069")
     p.add_argument("--seed", type=int, default=0)
     return p.parse_args()
 

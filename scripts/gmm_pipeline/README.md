@@ -49,7 +49,7 @@ python run_pipeline.py `
   --mc-samples 50000 `
   --n-boot 30 `
   --reps 0 1 2 3 `
-  --outdir results_J1442
+  --outdir results_cryosparc/J1442
 ```
 
 Source `.cs` files live in `data/`; standalone utilities (diagnostics,

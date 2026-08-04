@@ -41,7 +41,7 @@ hard basin label for every particle, from which the occupancy matrix follows.
 Run with the cryoDRGN env from repo root::
 
     python scripts/cryodrgn/cryodrgn_basin_occupancy.py \
-      --dataset "J1442:results_cryodrgn/J1442_real/train_z10/z.100.pkl:data/cryosparc_P25_J1442_passthrough_particles_all_classes.cs:data/cryosparc_P25_J1442_00000_particles.cs:6,7,8" \
+      --dataset "J1442:results_cryodrgn/J1442_gP25_WT_POSE_BIAS/train_z10/z.100.pkl:data/cryosparc_P25_J1442_passthrough_particles_all_classes.cs:data/cryosparc_P25_J1442_00000_particles.cs:6,7,8" \
       --dataset "J1497:results_cryodrgn/J1497_real/train/z.100.pkl:data/gP25W6J1497_passthrough_particles_all_classes.cs:data/cryosparc_P25_J1497_00000_particles.cs:6,7,8,9,10" \
       --n-dummies 6 --barrier-kt 0.5 -o results_cryodrgn/basin_occupancy
 """

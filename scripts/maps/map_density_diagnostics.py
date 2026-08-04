@@ -41,7 +41,7 @@ Usage
     python scripts/map_density_diagnostics.py \
         --maps data/maps/J1069_homog_aligned/J1076_P6.mrc ... \
         --labels P6 P7 P8 \
-        --outdir results_J1069/density_diagnostics
+        --outdir results_cryosparc/J1069/density_diagnostics
 """
 from __future__ import annotations
 

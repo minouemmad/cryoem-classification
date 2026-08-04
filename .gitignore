@@ -9,24 +9,28 @@ __pycache__/
 .venv/
 venv/
 env/
+cryodrgn-env/
 cryodrgn-py310/
 
-# Large cryo-EM binaries — kept locally, not versioned (too large for GitHub)
+# Large cryo-EM binaries — kept locally, not versioned (too large for GitHub; LFS unavailable)
 *.mrc
 *.mrcs
 *.cs
 *.star
+*.pkl
+*.npy
+*.npz
+*.map
+*.tbz
+*.h5
+*.hdf5
 
-# cryoDRGN-required CryoSPARC metadata (tracked via Git LFS)
-!data/cryosparc_P25_J1442_00000_particles.cs
-!data/cryosparc_P25_J1442_passthrough_particles_all_classes.cs
-!data/J995_particles/
-!data/J995_particles/**/*.cs
+# Oversized office docs (> GitHub/LFS-friendly size; keep locally only)
+*.pptm
 
 # OS / editor
 .DS_Store
 Thumbs.db
-results_cryodrgn/*/inputs/*.mrcs
 results_cryodrgn/
 *.pkl
 

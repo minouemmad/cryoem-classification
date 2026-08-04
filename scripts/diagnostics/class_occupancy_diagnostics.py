@@ -23,7 +23,7 @@ This deliberately does NOT recompute things already produced by
 Run:
     python scripts/local_followups.py \
         --cs data/cryosparc_P25_J1442_00000_particles.cs \
-        --n-dummies 6 --outdir results_J1442/local_followups
+        --n-dummies 6 --outdir results_cryosparc/J1442/local_followups
 """
 from __future__ import annotations
 

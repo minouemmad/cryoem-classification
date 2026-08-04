@@ -90,7 +90,7 @@ def parse_args():
     p.add_argument("--n-dummies", type=int, default=6)
     p.add_argument("--protein-idx", type=int, nargs="*", default=None)
     p.add_argument("--covariance", default="full")
-    p.add_argument("--outdir", default="results_J1069/gmm_referee")
+    p.add_argument("--outdir", default="results_cryosparc/J1069/gmm_referee")
     p.add_argument("--seed", type=int, default=0)
     p.add_argument("--max-points", type=int, default=40000,
                    help="Subsample for scatter plots only (metrics use all points)")

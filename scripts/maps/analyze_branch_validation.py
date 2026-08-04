@@ -34,9 +34,9 @@ plus within-class GMM confidence (cluster cleanliness) and ALR-space silhouette.
 Run
 ---
     python scripts/analyze_branch_validation.py \
-        --branch-dir results_J1069/cryosparc_outputs/with_1442_weights \
-        --input-index results_J1069/exports_combined/combined_J1069_w1442_class_index.csv \
-        --outdir results_J1069/branch_validation_w1442
+        --branch-dir results_cryosparc/J1069/cryosparc_outputs/with_1442_weights \
+        --input-index results_cryosparc/J1069/exports_combined/combined_J1069_w1442_class_index.csv \
+        --outdir results_cryosparc/J1069/branch_validation_w1442
 """
 from __future__ import annotations
 
@@ -164,7 +164,7 @@ def main():
                     help="class_index.csv (uid,class,weight) = branch input assignment")
     ap.add_argument("--j1442-cs", default="data/cryosparc_P25_J1442_00000_particles.cs")
     ap.add_argument("--n-dummies", type=int, default=6)
-    ap.add_argument("--outdir", default="results_J1069/branch_validation_w1442")
+    ap.add_argument("--outdir", default="results_cryosparc/J1069/branch_validation_w1442")
     ap.add_argument("--seed", type=int, default=0)
     ap.add_argument("--max-points", type=int, default=40000)
     args = ap.parse_args()

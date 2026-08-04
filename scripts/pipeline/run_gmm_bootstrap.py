@@ -14,8 +14,8 @@ from scripts.gmm_pipeline.preprocess import alr_transform
 from scripts.gmm_pipeline.plots import plot_confusion
 
 configs = [
-    ("results_J1442", 3, [6, 7, 8]),
-    ("results_J1497", 5, [6, 7, 8, 9, 10]),
+    ("results_cryosparc/J1442", 3, [6, 7, 8]),
+    ("results_cryosparc/J1497", 5, [6, 7, 8, 9, 10]),
 ]
 
 for outdir, K, protein_idx in configs:

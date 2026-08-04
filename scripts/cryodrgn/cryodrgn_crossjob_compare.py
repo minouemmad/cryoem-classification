@@ -33,7 +33,7 @@ latent_reproducibility.png.  Plus compare_summary.md and compare_metrics.json.
 Run with the cryoDRGN env from repo root::
 
     python scripts/cryodrgn/cryodrgn_crossjob_compare.py \
-      --z-ref results_cryodrgn/J1442_real/train_z10/z.100.pkl \
+      --z-ref results_cryodrgn/J1442_gP25_WT_POSE_BIAS/train_z10/z.100.pkl \
       --passthrough-ref data/cryosparc_P25_J1442_passthrough_particles_all_classes.cs \
       --cs-ref data/cryosparc_P25_J1442_00000_particles.cs \
       --protein-idx-ref 6 7 8 \

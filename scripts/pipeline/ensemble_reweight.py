@@ -102,7 +102,7 @@ def parse_args():
     p.add_argument("--protein-idx", type=int, nargs="*", default=None)
     p.add_argument("--n-lambda", type=int, default=21, help="Grid points in [0,1]")
     p.add_argument("--covariance", default="full")
-    p.add_argument("--outdir", default="results_J1069/ensemble_reweight")
+    p.add_argument("--outdir", default="results_cryosparc/J1069/ensemble_reweight")
     p.add_argument("--seed", type=int, default=0)
     return p.parse_args()
 

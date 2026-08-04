@@ -17,11 +17,11 @@ Then run ab-initio reconstruction + NU-refinement on each subset.
 Run from repo root with the cryodrgn-py310 env::
 
     python scripts/cryodrgn/export_cryodrgn_subsets.py \\
-      --npz  results_cryodrgn/J1442_real/latent_gmm_z10/per_particle.npz \\
+      --npz  results_cryodrgn/J1442_gP25_WT_POSE_BIAS/latent_gmm_z10/per_particle.npz \\
       --passthrough-cs  data/cryosparc_P25_J1442_passthrough_particles_all_classes.cs \\
       --protein-idx 6 7 8 \\
       --js-pct 33 \\
-      -o  results_cryodrgn/J1442_real/cryodrgn_subsets
+      -o  results_cryodrgn/J1442_gP25_WT_POSE_BIAS/cryodrgn_subsets
 """
 from __future__ import annotations
 

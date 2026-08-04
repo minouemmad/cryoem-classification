@@ -46,14 +46,14 @@ Usage
     python scripts/export_weighted_by_class.py \
         --cs data/cryosparc_P25_J1442_00000_particles.cs \
         --passthrough-cs data/cryosparc_P25_J1442_passthrough_particles_all_classes.cs \
-        --n-dummies 6 --beta 1 2 4 --outdir results_J1442
+        --n-dummies 6 --beta 1 2 4 --outdir results_cryosparc/J1442
 
     # cross-job: J1069 particles weighted by J1442 posteriors (J1442 poses)
     python scripts/export_weighted_by_class.py \
         --cs data/cryosparc_P25_J1069_00042_particles.cs \
         --weights-cs data/cryosparc_P25_J1442_00000_particles.cs \
         --passthrough-cs data/cryosparc_P25_J1442_passthrough_particles_all_classes.cs \
-        --n-dummies 6 --beta 1 2 4 --outdir results_J1069
+        --n-dummies 6 --beta 1 2 4 --outdir results_cryosparc/J1069
 """
 from __future__ import annotations
 

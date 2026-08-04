@@ -22,10 +22,10 @@ Both assignments are *observed* (from different methods); neither is "true".
 Run with the cryoDRGN env from repo root::
 
     python scripts/cryodrgn/plot_state_confusion.py \
-      --soft-csv results_cryodrgn/J1442/confidence_5class/J1497_5class_soft_probabilities.csv \
+      --soft-csv results_cryodrgn/J1442_gP25_WT_POSE_BIAS/confidence_5class/J1497_5class_soft_probabilities.csv \
       --cs data/cryosparc_P25_J1497_00000_particles.cs \
       --protein-idx 6 7 8 9 10 --n-dummies 6 \
-      -o results_cryodrgn/J1442/confidence_5class
+      -o results_cryodrgn/J1442_gP25_WT_POSE_BIAS/confidence_5class
 """
 from __future__ import annotations
 

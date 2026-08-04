@@ -24,8 +24,8 @@ maps and full maps in the branch output tree:
 Run
 ---
     python scripts/analyze_branch_maps.py \
-        --branch-dir results_J1069/cryosparc_outputs/with_1442_weights \
-        --outdir results_J1069/branch_validation_w1442/maps
+        --branch-dir results_cryosparc/J1069/cryosparc_outputs/with_1442_weights \
+        --outdir results_cryosparc/J1069/branch_validation_w1442/maps
 """
 from __future__ import annotations
 

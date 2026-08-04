@@ -35,7 +35,7 @@
 #   ZDIM=20 BETA=0.02 D=128 EPOCHS=50 KCLUST=12 bash scripts/cryodrgn/j1442_recover_states.sh
 #
 # Paths below follow the hudson layout: cryoDRGN artifacts for J1442 live under
-# results_cryodrgn/J1442_real/ (alongside inputs/, pilot_z10/, train_fullset/).
+# results_cryodrgn/J1442_gP25_WT_POSE_BIAS/ (alongside inputs/, pilot_z10/, train_fullset/).
 ###############################################################################
 set -euo pipefail
 
@@ -47,7 +47,7 @@ PYCLUSTER="${PYCLUSTER:-python}"            # cryodrgn-py310 python for the expo
 CRYODRGN="${CRYODRGN:-cryodrgn}"           # cryodrgn executable
 
 # Base dir for J1442 cryoDRGN artifacts (hudson convention: J1442_real)
-J1442_DIR="${J1442_DIR:-$REPO/results_cryodrgn/J1442_real}"
+J1442_DIR="${J1442_DIR:-$REPO/results_cryodrgn/J1442_gP25_WT_POSE_BIAS}"
 
 # Inputs (already produced on hudson; poses/ctf are convention-correct)
 PASS="${PASS:-$REPO/data/cryosparc_P25_J1442_passthrough_particles_all_classes.cs}"

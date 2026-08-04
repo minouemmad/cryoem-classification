@@ -10,7 +10,7 @@ CryoSPARC max posterior.
 Usage
 -----
     python export_by_cryosparc_class.py --cs cryosparc_P25_J1069_00042_particles.cs \
-        --n-dummies 6 --resp-threshold 0.9 --outdir results_J1069
+        --n-dummies 6 --resp-threshold 0.9 --outdir results_cryosparc/J1069
 """
 from __future__ import annotations
 

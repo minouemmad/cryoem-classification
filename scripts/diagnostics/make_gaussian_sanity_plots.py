@@ -11,7 +11,7 @@ Reproduces the pipeline GMM fit for a CryoSPARC dataset and renders:
 Usage
 -----
     python make_gaussian_sanity_plots.py --cs cryosparc_P25_J1442_00000_particles.cs \
-        --n-dummies 6 --outdir results_J1442
+        --n-dummies 6 --outdir results_cryosparc/J1442
 """
 from __future__ import annotations
 

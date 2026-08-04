@@ -39,11 +39,11 @@ passthrough and the particles .cs.
 Run with the cryoDRGN env (has numpy/sklearn/scipy/matplotlib) from repo root::
 
     python scripts/cryodrgn/cryodrgn_latent_gmm.py \
-      --z results_cryodrgn/J1442_real/train/z.49.pkl \
+      --z results_cryodrgn/J1442_gP25_WT_POSE_BIAS/train/z.49.pkl \
       --passthrough-cs data/cryosparc_P25_J1442_passthrough_particles_all_classes.cs \
       --cs data/cryosparc_P25_J1442_00000_particles.cs \
       --n-dummies 6 -k 3 \
-      --outdir results_cryodrgn/J1442_real/latent_gmm
+      --outdir results_cryodrgn/J1442_gP25_WT_POSE_BIAS/latent_gmm
 """
 from __future__ import annotations
 

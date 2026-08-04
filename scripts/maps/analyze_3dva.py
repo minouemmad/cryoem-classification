@@ -41,12 +41,12 @@ LATENT_CS = (
     / "cryosparc_P25_J3428_particles.cs"
 )
 # hetero-space GMM artifacts (fit on CryoSPARC class posteriors, K=3)
-HETERO_RESP = REPO / "results_J1442" / "gmm" / "responsibilities.npy"
+HETERO_RESP = REPO / "results_cryosparc/J1442" / "gmm" / "responsibilities.npy"
 J1442_CS = REPO / "data" / "cryosparc_P25_J1442_00000_particles.cs"
 HETERO_PROTEIN_IDX = [6, 7, 8]          # P6, P7, P8 (dummy occupancy is 0%)
 HETERO_LABELS = ["P6", "P7", "P8"]
 
-OUTDIR = REPO / "results_J1442" / "threedva"
+OUTDIR = REPO / "results_cryosparc/J1442" / "threedva"
 MODES = [0, 1, 2]
 PAIRS = [(0, 1), (0, 2), (1, 2)]
 RNG = 0

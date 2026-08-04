@@ -12,7 +12,7 @@ Example
 python scripts/export_threshold_sweep.py \
   --cs data/cryosparc_P25_J1442_00000_particles.cs \
   --passthrough-cs data/cryosparc_P25_J1442_passthrough_particles_all_classes.cs \
-  --outdir results_J1442 \
+  --outdir results_cryosparc/J1442 \
   --thresholds 0.6 0.7 0.8 0.9
 """
 

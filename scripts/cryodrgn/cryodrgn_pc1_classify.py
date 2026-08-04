@@ -19,12 +19,12 @@ for every PC1 class so each can be fed into Ab-initio -> NU-Refinement.
 Run with the cryoDRGN env (numpy/sklearn/scipy/matplotlib) from repo root::
 
     python scripts/cryodrgn/cryodrgn_pc1_classify.py \
-      --z results_cryodrgn/J1442_real/train_z10/z.100.pkl \
+      --z results_cryodrgn/J1442_gP25_WT_POSE_BIAS/train_z10/z.100.pkl \
       --passthrough-cs data/cryosparc_P25_J1442_passthrough_particles_all_classes.cs \
       --cs data/cryosparc_P25_J1442_00000_particles.cs \
       --n-dummies 6 --protein-idx 6 7 8 \
       --gmm-conf 0.8 \
-      -o results_cryodrgn/J1442_real/pc1_classify
+      -o results_cryodrgn/J1442_gP25_WT_POSE_BIAS/pc1_classify
 """
 from __future__ import annotations
 

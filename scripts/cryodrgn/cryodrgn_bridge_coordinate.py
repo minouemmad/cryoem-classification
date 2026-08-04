@@ -42,9 +42,9 @@ Run with the cryoDRGN env (has torch/scipy/sklearn) from the repo root, e.g.::
 
     python scripts/cryodrgn/cryodrgn_bridge_coordinate.py \
       --label J1442 \
-      --z results_cryodrgn/J1442/fullset_D256_z10_ep100/z.100.pkl \
-      --weights results_cryodrgn/J1442_real/train_fullset/weights.100.pkl \
-      --config  results_cryodrgn/J1442_real/train_fullset/config.yaml \
+      --z results_cryodrgn/J1442_gP25_WT_POSE_BIAS/fullset_D256_z10_ep100/z.100.pkl \
+      --weights results_cryodrgn/J1442_gP25_WT_POSE_BIAS/train_fullset/weights.100.pkl \
+      --config  results_cryodrgn/J1442_gP25_WT_POSE_BIAS/train_fullset/config.yaml \
       --passthrough data/cryosparc_P25_J1442_passthrough_particles_all_classes.cs \
       --cs data/cryosparc_P25_J1442_00000_particles.cs \
       --protein-idx 6,7,8 --n-dummies 6 --class-dir data/J1442_classes \

@@ -21,11 +21,11 @@ post-hoc confusion / ARI analysis after the new job re-derives a partition.
 Usage
 -----
     python scripts/combine_class_stacks.py \
-        --inputs results_J1069/exports_weighted/hardJ1069_w1442_b1_P6.cs \
-                 results_J1069/exports_weighted/hardJ1069_w1442_b1_P7.cs \
-                 results_J1069/exports_weighted/hardJ1069_w1442_b1_P8.cs \
+        --inputs results_cryosparc/J1069/exports_weighted/hardJ1069_w1442_b1_P6.cs \
+                 results_cryosparc/J1069/exports_weighted/hardJ1069_w1442_b1_P7.cs \
+                 results_cryosparc/J1069/exports_weighted/hardJ1069_w1442_b1_P8.cs \
         --out-prefix combined_J1069_w1442 \
-        --outdir results_J1069/exports_combined
+        --outdir results_cryosparc/J1069/exports_combined
 
 Each ``--inputs`` entry is a particle ``.cs``; its passthrough is assumed to be
 the sibling ``<name>_passthrough.cs``. Class labels are parsed from the trailing
