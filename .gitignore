@@ -1,0 +1,27 @@
+# data and results live on disk only (too large for git)
+/data/*
+!/data/README.md
+/results_cryodrgn/
+/results_recovar/
+/benchmarks/
+# symlinks to cryoSPARC job folders
+/J*
+
+# cryo-EM binaries anywhere
+*.mrc
+*.mrcs
+*.cs
+*.star
+*.pkl
+*.pt
+*.npy
+*.npz
+
+# Python / editors
+__pycache__/
+*.py[cod]
+.ipynb_checkpoints/
+.venv/
+*.swp
+*.swo
+.DS_Store
