@@ -1,47 +1,38 @@
 # cryoem-classification
 
-Label-free conformational classification of hCFTR cryo-EM particles with cryoDRGN: train a VAE (or a prior / autoencoder
-variant) on consensus poses, decode representative latent points, and split particles with a reconstruction-guided tree
-whose splits must hold up on held-out images.
+Label-free discovery of conformational states in hCFTR cryo-EM particle sets. A cryoDRGN-style autoencoder is trained on
+consensus poses, its latent space is reduced to a main axis (PC1), and candidate particle groups are chosen along that axis
+without assuming the number or size of states. Each group is refined in cryoSPARC (ab initio + non-uniform refinement) and
+the resulting maps are scored for reproducibility and for how distinct they are from the end states and from a random mixture.
+Heterogeneous-refinement classes are used only to evaluate results, never to pick groups.
 
-## Layout
+## Pipeline
 
-```
-data/                cryoSPARC exports per dataset (not versioned; see data/README.md)
-results_cryodrgn/    one folder per dataset: inputs, training runs, decoded centres, trees (not versioned)
-scripts/cryodrgn/    all code (below)
-```
+| Stage | Folder | What it does |
+|---|---|---|
+| 0 | `scripts/00_dataset_setup/` | Import a cryoSPARC job as a dataset: NU poses, CTF, 128 px stack, mask |
+| 1 | `scripts/01_train/` | Train the autoencoder (RAE with gradient penalty; VAE and variants for comparison) |
+| 2 | `scripts/02_decode_and_pc/` | Decode ~2,000 volumes; per-particle volume-PC scores (`volume_pc_scores.py`) or latent PC1 (`latent_pc1.py`) |
+| 3 | `scripts/03_find_volumes/` | Choose particle groups (see below) |
+| 4 | `scripts/04_refine_cryosparc/` | Export groups as STAR files, create/queue cryoSPARC chains (ab initio -> NU) |
+| 5 | `scripts/05_score_maps/` | Align and score maps, off-line rule, own-state score, state mixture fit, size plateau, reports |
+| - | `scripts/lanes/` | GPU lane scripts chaining train -> decode -> scores -> residual split -> refinement |
+| - | `scripts/lib/` | Shared modules (`cryo_utils`, `fastbp`, `mapdiff`, `recon_tree`) |
+| - | `scripts/tools/`, `scripts/trajectory/` | Map comparison, focused cryoDRGN, latent clustering, PC1 trajectories |
 
-Datasets (named `<heteroref job>_<project>_<construct>`): `J4001_gP25_WT`, `J399_hP7_E1371Q_ATP`, `J207_hP12_IDOR4`,
-`J2708_eP30_F508del_E1371W`, `J4624_eP37_WT_T2a`.
+### Stage 3 - ways to find volumes
+- `pc1_windows/` - sliding windows along PC1: hard, Gaussian soft, fixed PC value width, equal arc length, kNN neighbourhoods, replicate draws.
+- `pc1_ends/` - nested windows from each end of PC1 (end ladder); the end map is the largest window still within seed noise of its core.
+- `residual_axis/` - fit residual axes (`residual_fit.py`) on the middle of PC1 after removing the PC1 average map, then split the middle window along them (`residual_split.py`, `build_axis_cut.py`).
+- `lib/recon_tree.py` - reconstruction-guided latent tree (earlier approach).
 
-## Scripts (`scripts/cryodrgn/`)
+## Findings so far
+- The two PC1 end states are reproducible across seeds, window sizes and models.
+- PC1 windows give a reproducible but mixed intermediate map; the residual-axis split enriches it further (not pure).
+- No latent axis isolated the small alternative-NBD1 state.
+- Whether a dataset's latent captures heterogeneity must be checked first (J207's RAE/VAE latent does not separate its two heteroref classes).
 
-| Step | Script |
-|---|---|
-| Dataset setup (cryoSPARC poses, inputs, VAE, decode, trees) | `dataset/run_pipeline.sh` (+ `prepare.py`, `write_star.py`, `cs_pose_jobs.py`, `reorder_poses.py`, `make_mask.py`, `registry.py`) |
-| Extra tree on a finished dataset | `dataset/run_tree.sh` |
-| Leaf maps: per-leaf STAR, cryoSPARC ab initio + NU | `dataset/write_star.py NAME TREE TAG`, `dataset/cs_leaf_jobs.py`, `dataset/leaf_chain.sh` |
-| Training variants of `cryodrgn train_vae` | `train_vae_gmmprior.py`, `train_vae_diffprior.py`, `train_rae.py`, `train_rae_fprior.py`, `train_rae_deform.py`, `train_ae.py` |
-| Decode representative latent points | `decode.py` |
-| Reconstruction-guided tree | `recon_tree.py` (uses `fastbp.py`) |
-| Trajectories along latent / volume PC1 | `trajectory/` (`prepare.py`, `run.sh`, `fig.py`) |
-| Map comparison | `mapdiff.py`, `cx_pairfit.py`, `cx_render_mapdiff.py`, `group_resolution.py` |
-| Focused cryoDRGN | `focus_mask.py`, `focus_subtract.py` |
-| Latent-space diagnostics | `latent_clustering.py`, `latent_compare.py`, `latent_curvature.py`, `latent_diffusion.py` |
-| Decoder diagnostics | `pe_tests.py`, `pe_eval_data.py`, `vae_perturb_vs_data.py` |
-| Utilities | `cryo_utils.py` (shared helpers), `cs2star.py`, `topaz_denoise.py` |
-
-Run everything with the `cryodrgn` conda env (`~/miniconda3/envs/cryodrgn/bin/python`); `topaz_denoise.py` needs the
-`topaz` env and `cx_*.py` run inside ChimeraX (`chimerax --nogui --offscreen --exit --script ...`).
-
-## New dataset
-
-```bash
-# 1. add it to scripts/cryodrgn/dataset/registry.py, then
-python scripts/cryodrgn/dataset/prepare.py NAME
-python scripts/cryodrgn/dataset/write_star.py NAME
-cryosparcm cli "(lambda g: (exec(open('scripts/cryodrgn/dataset/cs_pose_jobs.py').read(), g), g['RESULT'])[1])({'api': api, 'NAME': 'NAME', 'PROJECT': 'P?'})"
-# 2. everything else (cryoSPARC chain, cryoDRGN inputs, VAE, decode, trees)
-nohup scripts/cryodrgn/dataset/run_pipeline.sh NAME CRYOSPARC_GPU &
-```
+## Running
+Use the `cryodrgn` conda env. Scripts carry cluster paths (`/data/hCFTR/...`, cryoSPARC project/job ids) at the top; adjust them
+for another machine. Data and results are not versioned (see `data/README.md`). Datasets: `J4001_gP25_WT`, `J4624_eP37_WT_T2a`,
+`J399_hP7_E1371Q_ATP`, `J2708_eP30_F508del_E1371W`, `J207_hP12_IDOR4`.
