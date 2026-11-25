@@ -1,0 +1,46 @@
+{
+ "J2708_hetero_K4_C06": {
+  "project": "P17",
+  "workspace": "W1",
+  "import_job": "J1204",
+  "abinit": "J1205",
+  "nu": "J1206",
+  "gpu": 2,
+  "name": "J2708_hetero_K4_C06",
+  "star": "/data/hCFTR/mae2183/cryoem-classification/results_cryodrgn/model_pipeline/od/J2708/hetero_K4/cryosparc/J2708_hetero_K4_C06.star",
+  "dataset": "J2708"
+ },
+ "J2708_hetero_K4_C07": {
+  "project": "P17",
+  "workspace": "W1",
+  "import_job": "J1207",
+  "abinit": "J1208",
+  "nu": "J1209",
+  "gpu": 2,
+  "name": "J2708_hetero_K4_C07",
+  "star": "/data/hCFTR/mae2183/cryoem-classification/results_cryodrgn/model_pipeline/od/J2708/hetero_K4/cryosparc/J2708_hetero_K4_C07.star",
+  "dataset": "J2708"
+ },
+ "J2708_hetero_K4_C08": {
+  "project": "P17",
+  "workspace": "W1",
+  "import_job": "J1210",
+  "abinit": "J1211",
+  "nu": "J1212",
+  "gpu": 2,
+  "name": "J2708_hetero_K4_C08",
+  "star": "/data/hCFTR/mae2183/cryoem-classification/results_cryodrgn/model_pipeline/od/J2708/hetero_K4/cryosparc/J2708_hetero_K4_C08.star",
+  "dataset": "J2708"
+ },
+ "J2708_hetero_K4_C09": {
+  "project": "P17",
+  "workspace": "W1",
+  "import_job": "J1213",
+  "abinit": "J1214",
+  "nu": "J1215",
+  "gpu": 2,
+  "name": "J2708_hetero_K4_C09",
+  "star": "/data/hCFTR/mae2183/cryoem-classification/results_cryodrgn/model_pipeline/od/J2708/hetero_K4/cryosparc/J2708_hetero_K4_C09.star",
+  "dataset": "J2708"
+ }
+}

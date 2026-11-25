@@ -25,3 +25,6 @@ __pycache__/
 *.swp
 *.swo
 .DS_Store
+
+# small reference files (envelopes, masks, PDB models, cryoSPARC job ids, selection results) are versioned
+!/reference/**

@@ -1,0 +1,14 @@
+# TYPE DS NAME SEED ZDIM BETA LAMBDA [WIDTH] [EPOCHS] [STACK]      (train_worker.sh; '#' = comment)
+# base RAE: seed 30112, z 10, rae-beta 0.1, rae-lambda 0.00243 | base VAE: seed 44688, beta 0.1 (= 1/zdim)
+rae J4001 rae_base 30112 10 0.1 0.00243
+rae J4001 rae_s7   7     10 0.1 0.00243
+rae J4001 rae_s101 101   10 0.1 0.00243
+vae J4001 vae_base 44688 10 0.1 0
+ae  J4001 ae_base  30112 10 0   0
+# architecture / prior tests
+rae J4001 rae_z4   30112 4  0.1  0.00243
+rae J4001 rae_z16  30112 16 0.1  0.00243
+rae J4001 rae_b001 30112 10 0.01 0.00243
+rae J4001 rae_l0   30112 10 0.1  0
+rae J4001 rae_w256 30112 10 0.1  0.00243 256
+rae J4001 rae_px256 30112 10 0.1 0.00243 1024 50 particles.256.mrcs

@@ -1,0 +1,7 @@
+{
+ "nu": "J1314",
+ "particles_from": "J399",
+ "volume_from": "J399",
+ "gpu": 2,
+ "params_from": "J766"
+}

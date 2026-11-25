@@ -1,0 +1,26 @@
+{
+ "name": "J4624_eP37_WT_T2a",
+ "n_heteroref": 304853,
+ "n_protein": 297913,
+ "class_counts": {
+  "C06": 56331,
+  "C07": 35549,
+  "C08": 128079,
+  "C09": 48954,
+  "C10": 29000
+ },
+ "class_files": [
+  "/data/hCFTR/mae2183/cryoem-classification/results_cryodrgn/J4624_eP37_WT_T2a/nu_consensus/classes/J4624_class_06.cs",
+  "/data/hCFTR/mae2183/cryoem-classification/results_cryodrgn/J4624_eP37_WT_T2a/nu_consensus/classes/J4624_class_07.cs",
+  "/data/hCFTR/mae2183/cryoem-classification/results_cryodrgn/J4624_eP37_WT_T2a/nu_consensus/classes/J4624_class_08.cs",
+  "/data/hCFTR/mae2183/cryoem-classification/results_cryodrgn/J4624_eP37_WT_T2a/nu_consensus/classes/J4624_class_09.cs",
+  "/data/hCFTR/mae2183/cryoem-classification/results_cryodrgn/J4624_eP37_WT_T2a/nu_consensus/classes/J4624_class_10.cs"
+ ],
+ "box": 320,
+ "apix": 0.8299999833106995,
+ "apix_128": 2.0749999582767487,
+ "n_stacks": 10943,
+ "init_volume_src": "/data/hCFTR/mae2183/cryoem-classification/data/eP37W32_J4624/heteroref_volumes/cryosparc_P37_J4624_class_08_00062_volume_sharp.mrc",
+ "init_volume_src_box": 224,
+ "init_volume_src_apix": 1.1857141256332397
+}

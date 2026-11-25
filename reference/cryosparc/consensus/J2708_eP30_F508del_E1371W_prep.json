@@ -1,0 +1,24 @@
+{
+ "name": "J2708_eP30_F508del_E1371W",
+ "n_heteroref": 231930,
+ "n_protein": 229410,
+ "class_counts": {
+  "C06": 53461,
+  "C07": 117761,
+  "C08": 26889,
+  "C09": 31299
+ },
+ "class_files": [
+  "/data/hCFTR/mae2183/cryoem-classification/results_cryodrgn/J2708_eP30_F508del_E1371W/nu_consensus/classes/J2708_class_06.cs",
+  "/data/hCFTR/mae2183/cryoem-classification/results_cryodrgn/J2708_eP30_F508del_E1371W/nu_consensus/classes/J2708_class_07.cs",
+  "/data/hCFTR/mae2183/cryoem-classification/results_cryodrgn/J2708_eP30_F508del_E1371W/nu_consensus/classes/J2708_class_08.cs",
+  "/data/hCFTR/mae2183/cryoem-classification/results_cryodrgn/J2708_eP30_F508del_E1371W/nu_consensus/classes/J2708_class_09.cs"
+ ],
+ "box": 250,
+ "apix": 1.0750000476837158,
+ "apix_128": 2.0996094681322575,
+ "n_stacks": 8250,
+ "init_volume_src": "/data/hCFTR/mae2183/cryoem-classification/data/eP30W12_J2708/3DVA_full_protein_mask_4.5\u00c5_J2019_NU/cryosparc_P30_J2025_map.mrc",
+ "init_volume_src_box": 250,
+ "init_volume_src_apix": 1.0750000476837158
+}

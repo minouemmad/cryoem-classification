@@ -1,0 +1,46 @@
+{
+ "eP37_rsVmc4k4d128_leaf0": {
+  "project": "P17",
+  "workspace": "W1",
+  "import_job": "J1042",
+  "abinit": "J1043",
+  "nu": "J1044",
+  "gpu": 2,
+  "name": "eP37_rsVmc4k4d128_leaf0",
+  "star": "/data/hCFTR/mae2183/cryoem-classification/results_cryodrgn/J4624_eP37_WT_T2a/recon_tree/rs_setVmc4k4/cryosparc/eP37_rsVmc4k4d128_leaf0.star",
+  "dataset": "J4624"
+ },
+ "eP37_rsVmc4k4d128_leaf1": {
+  "project": "P17",
+  "workspace": "W1",
+  "import_job": "J1045",
+  "abinit": "J1046",
+  "nu": "J1047",
+  "gpu": 2,
+  "name": "eP37_rsVmc4k4d128_leaf1",
+  "star": "/data/hCFTR/mae2183/cryoem-classification/results_cryodrgn/J4624_eP37_WT_T2a/recon_tree/rs_setVmc4k4/cryosparc/eP37_rsVmc4k4d128_leaf1.star",
+  "dataset": "J4624"
+ },
+ "eP37_rsVmc4k4d128_leaf2": {
+  "project": "P17",
+  "workspace": "W1",
+  "import_job": "J1048",
+  "abinit": "J1049",
+  "nu": "J1050",
+  "gpu": 2,
+  "name": "eP37_rsVmc4k4d128_leaf2",
+  "star": "/data/hCFTR/mae2183/cryoem-classification/results_cryodrgn/J4624_eP37_WT_T2a/recon_tree/rs_setVmc4k4/cryosparc/eP37_rsVmc4k4d128_leaf2.star",
+  "dataset": "J4624"
+ },
+ "eP37_rsVmc4k4d128_leaf3": {
+  "project": "P17",
+  "workspace": "W1",
+  "import_job": "J1051",
+  "abinit": "J1052",
+  "nu": "J1053",
+  "gpu": 2,
+  "name": "eP37_rsVmc4k4d128_leaf3",
+  "star": "/data/hCFTR/mae2183/cryoem-classification/results_cryodrgn/J4624_eP37_WT_T2a/recon_tree/rs_setVmc4k4/cryosparc/eP37_rsVmc4k4d128_leaf3.star",
+  "dataset": "J4624"
+ }
+}

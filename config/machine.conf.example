@@ -1,0 +1,9 @@
+# Machine config for pipeline/2_train/train_worker.sh (one file per machine).
+BASE=/data/hCFTR/mae2183/cryoem-classification/results_cryodrgn/model_pipeline      # queue.txt, taken.txt, worker.log, models/<DS>/<NAME>
+DATA=$BASE/data                                                                     # <DS>/particles.128.mrcs(.ok), poses.pkl, ctf.pkl
+PY=$HOME/miniconda3/envs/cryodrgn/bin/python
+CRYODRGN=$HOME/miniconda3/envs/cryodrgn/bin/cryodrgn
+SCD=/path/to/cryoem-classification/pipeline/2_train                                 # train_rae.py, train_ae.py (+ lib/ one level up)
+TAG=hudson
+# GPUs in Exclusive_Process mode (ganges): keep the dataset on the CPU
+# export CRYODRGN_DATA_DEVICE=cpu

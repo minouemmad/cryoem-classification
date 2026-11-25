@@ -1,0 +1,46 @@
+{
+ "J2708_rae_base_K4_g0": {
+  "project": "P17",
+  "workspace": "W1",
+  "import_job": "J1141",
+  "abinit": "J1142",
+  "nu": "J1143",
+  "gpu": 2,
+  "name": "J2708_rae_base_K4_g0",
+  "star": "/data/hCFTR/mae2183/cryoem-classification/results_cryodrgn/model_pipeline/od/J2708/rae_base_K4/cryosparc/J2708_rae_base_K4_g0.star",
+  "dataset": "J2708"
+ },
+ "J2708_rae_base_K4_g1": {
+  "project": "P17",
+  "workspace": "W1",
+  "import_job": "J1144",
+  "abinit": "J1145",
+  "nu": "J1146",
+  "gpu": 2,
+  "name": "J2708_rae_base_K4_g1",
+  "star": "/data/hCFTR/mae2183/cryoem-classification/results_cryodrgn/model_pipeline/od/J2708/rae_base_K4/cryosparc/J2708_rae_base_K4_g1.star",
+  "dataset": "J2708"
+ },
+ "J2708_rae_base_K4_g2": {
+  "project": "P17",
+  "workspace": "W1",
+  "import_job": "J1147",
+  "abinit": "J1148",
+  "nu": "J1149",
+  "gpu": 2,
+  "name": "J2708_rae_base_K4_g2",
+  "star": "/data/hCFTR/mae2183/cryoem-classification/results_cryodrgn/model_pipeline/od/J2708/rae_base_K4/cryosparc/J2708_rae_base_K4_g2.star",
+  "dataset": "J2708"
+ },
+ "J2708_rae_base_K4_g3": {
+  "project": "P17",
+  "workspace": "W1",
+  "import_job": "J1150",
+  "abinit": "J1151",
+  "nu": "J1152",
+  "gpu": 2,
+  "name": "J2708_rae_base_K4_g3",
+  "star": "/data/hCFTR/mae2183/cryoem-classification/results_cryodrgn/model_pipeline/od/J2708/rae_base_K4/cryosparc/J2708_rae_base_K4_g3.star",
+  "dataset": "J2708"
+ }
+}

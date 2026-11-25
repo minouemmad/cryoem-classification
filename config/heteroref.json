@@ -1,0 +1,8 @@
+{
+ "_doc": "per dataset: results folder under $RES, the NU-pose particle .cs (stack order) and the heterorefinement class .cs files (evaluation only, never used for fitting or selection)",
+ "J207":  {"dir": "J207_hP12_IDOR4", "poses_cs": "nu_consensus/J207_hP12_IDOR4_particles_NUposes.cs", "classes": "nu_consensus/classes/J207_class_*.cs"},
+ "J2708": {"dir": "J2708_eP30_F508del_E1371W", "poses_cs": "nu_consensus/J2708_eP30_F508del_E1371W_particles_NUposes.cs", "classes": "nu_consensus/classes/J2708_class_*.cs"},
+ "J399":  {"dir": "J399_hP7_E1371Q_ATP", "poses_cs": "nu_consensus/J399_particles_NUposes.cs", "classes": "recon_tree/classes_J399/*.cs"},
+ "J4001": {"dir": "J4001_gP25_WT"},
+ "J4624": {"dir": "J4624_eP37_WT_T2a"}
+}

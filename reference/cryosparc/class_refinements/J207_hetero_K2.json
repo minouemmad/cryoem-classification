@@ -1,0 +1,24 @@
+{
+ "J207_hetero_K2_C06": {
+  "project": "P17",
+  "workspace": "W1",
+  "import_job": "J1198",
+  "abinit": "J1199",
+  "nu": "J1200",
+  "gpu": 2,
+  "name": "J207_hetero_K2_C06",
+  "star": "/data/hCFTR/mae2183/cryoem-classification/results_cryodrgn/model_pipeline/od/J207/hetero_K2/cryosparc/J207_hetero_K2_C06.star",
+  "dataset": "J207"
+ },
+ "J207_hetero_K2_C07": {
+  "project": "P17",
+  "workspace": "W1",
+  "import_job": "J1201",
+  "abinit": "J1202",
+  "nu": "J1203",
+  "gpu": 2,
+  "name": "J207_hetero_K2_C07",
+  "star": "/data/hCFTR/mae2183/cryoem-classification/results_cryodrgn/model_pipeline/od/J207/hetero_K2/cryosparc/J207_hetero_K2_C07.star",
+  "dataset": "J207"
+ }
+}

@@ -1,0 +1,38 @@
+{
+ "STD_J4001gmc4leavesK3_g0": {
+  "project": "P17",
+  "workspace": "W1",
+  "import_job": "J1024",
+  "abinit": "J1025",
+  "nu": "J1026",
+  "gpu": 2,
+  "name": "STD_J4001gmc4leavesK3_g0",
+  "group": "set_mc4/leaves_K3_g0",
+  "n": 87026,
+  "poses": "J4001"
+ },
+ "STD_J4001gmc4leavesK3_g1": {
+  "project": "P17",
+  "workspace": "W1",
+  "import_job": "J1027",
+  "abinit": "J1028",
+  "nu": "J1029",
+  "gpu": 2,
+  "name": "STD_J4001gmc4leavesK3_g1",
+  "group": "set_mc4/leaves_K3_g1",
+  "n": 71851,
+  "poses": "J4001"
+ },
+ "STD_J4001gmc4leavesK3_g2": {
+  "project": "P17",
+  "workspace": "W1",
+  "import_job": "J1030",
+  "abinit": "J1031",
+  "nu": "J1032",
+  "gpu": 2,
+  "name": "STD_J4001gmc4leavesK3_g2",
+  "group": "set_mc4/leaves_K3_g2",
+  "n": 71519,
+  "poses": "J4001"
+ }
+}

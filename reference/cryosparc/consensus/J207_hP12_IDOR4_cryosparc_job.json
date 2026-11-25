@@ -1,0 +1,14 @@
+{
+ "project": "P12",
+ "workspace": "W7",
+ "import_particles": "J374",
+ "import_volume": "J375",
+ "homo": "J376",
+ "backproject": "J377",
+ "nu": "J378",
+ "params_from": {
+  "homo": "P7 J399",
+  "backproject": "P7 J825",
+  "nu": "P7 J647"
+ }
+}

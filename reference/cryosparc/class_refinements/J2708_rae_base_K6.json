@@ -1,0 +1,68 @@
+{
+ "J2708_rae_base_K6_g0": {
+  "project": "P17",
+  "workspace": "W1",
+  "import_job": "J1180",
+  "abinit": "J1181",
+  "nu": "J1182",
+  "gpu": 2,
+  "name": "J2708_rae_base_K6_g0",
+  "star": "/data/hCFTR/mae2183/cryoem-classification/results_cryodrgn/model_pipeline/od/J2708/rae_base_K6/cryosparc/J2708_rae_base_K6_g0.star",
+  "dataset": "J2708"
+ },
+ "J2708_rae_base_K6_g1": {
+  "project": "P17",
+  "workspace": "W1",
+  "import_job": "J1183",
+  "abinit": "J1184",
+  "nu": "J1185",
+  "gpu": 2,
+  "name": "J2708_rae_base_K6_g1",
+  "star": "/data/hCFTR/mae2183/cryoem-classification/results_cryodrgn/model_pipeline/od/J2708/rae_base_K6/cryosparc/J2708_rae_base_K6_g1.star",
+  "dataset": "J2708"
+ },
+ "J2708_rae_base_K6_g2": {
+  "project": "P17",
+  "workspace": "W1",
+  "import_job": "J1186",
+  "abinit": "J1187",
+  "nu": "J1188",
+  "gpu": 2,
+  "name": "J2708_rae_base_K6_g2",
+  "star": "/data/hCFTR/mae2183/cryoem-classification/results_cryodrgn/model_pipeline/od/J2708/rae_base_K6/cryosparc/J2708_rae_base_K6_g2.star",
+  "dataset": "J2708"
+ },
+ "J2708_rae_base_K6_g3": {
+  "project": "P17",
+  "workspace": "W1",
+  "import_job": "J1189",
+  "abinit": "J1190",
+  "nu": "J1191",
+  "gpu": 2,
+  "name": "J2708_rae_base_K6_g3",
+  "star": "/data/hCFTR/mae2183/cryoem-classification/results_cryodrgn/model_pipeline/od/J2708/rae_base_K6/cryosparc/J2708_rae_base_K6_g3.star",
+  "dataset": "J2708"
+ },
+ "J2708_rae_base_K6_g4": {
+  "project": "P17",
+  "workspace": "W1",
+  "import_job": "J1192",
+  "abinit": "J1193",
+  "nu": "J1194",
+  "gpu": 2,
+  "name": "J2708_rae_base_K6_g4",
+  "star": "/data/hCFTR/mae2183/cryoem-classification/results_cryodrgn/model_pipeline/od/J2708/rae_base_K6/cryosparc/J2708_rae_base_K6_g4.star",
+  "dataset": "J2708"
+ },
+ "J2708_rae_base_K6_g5": {
+  "project": "P17",
+  "workspace": "W1",
+  "import_job": "J1195",
+  "abinit": "J1196",
+  "nu": "J1197",
+  "gpu": 2,
+  "name": "J2708_rae_base_K6_g5",
+  "star": "/data/hCFTR/mae2183/cryoem-classification/results_cryodrgn/model_pipeline/od/J2708/rae_base_K6/cryosparc/J2708_rae_base_K6_g5.star",
+  "dataset": "J2708"
+ }
+}

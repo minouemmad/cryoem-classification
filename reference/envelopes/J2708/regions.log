@@ -1,0 +1,7 @@
+best 6msm hand 0 corr 0.935 | all [('vshape', 0, 0.894), ('vshape', 1, 0.884), ('6msm', 0, 0.935), ('6msm', 1, 0.878)]
+model-vs-consensus corr (check) 0.534
+TMD1 voxels 1855
+NBD1 voxels 1109
+TMD2 voxels 1309
+NBD2 voxels 1206
+ENVPDB 8743 | consensus envelope 18908 | overlap 8385 | consensus voxels outside PDB env 10523 | best 6msm hand 0 corr 0.935 | all [('vshape', 0, 0.894), ('vshape', 1, 0.884), ('6msm', 0, 0.935), ('6msm', 1, 0.878)]

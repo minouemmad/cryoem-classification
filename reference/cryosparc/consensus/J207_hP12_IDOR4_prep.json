@@ -1,0 +1,20 @@
+{
+ "name": "J207_hP12_IDOR4",
+ "n_heteroref": 78509,
+ "n_protein": 61040,
+ "class_counts": {
+  "C06": 35067,
+  "C07": 25973
+ },
+ "class_files": [
+  "/data/hCFTR/mae2183/cryoem-classification/results_cryodrgn/J207_hP12_IDOR4/nu_consensus/classes/J207_class_06.cs",
+  "/data/hCFTR/mae2183/cryoem-classification/results_cryodrgn/J207_hP12_IDOR4/nu_consensus/classes/J207_class_07.cs"
+ ],
+ "box": 320,
+ "apix": 0.8289999961853027,
+ "apix_128": 2.072499990463257,
+ "n_stacks": 9377,
+ "init_volume_src": "/mnt/nfs_HuntLabSynologyDS3622CryoEM_V2/hCFTR/cS/CS-hcftr-m26may26f-idor4/J106/J106_008_volume_map.mrc",
+ "init_volume_src_box": 320,
+ "init_volume_src_apix": 0.8289999961853027
+}

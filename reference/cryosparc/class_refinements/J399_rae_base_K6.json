@@ -1,0 +1,68 @@
+{
+ "J399_rae_base_K6_g0": {
+  "project": "P17",
+  "workspace": "W1",
+  "import_job": "J1312",
+  "abinit": "J1313",
+  "nu": "J1314",
+  "gpu": 2,
+  "name": "J399_rae_base_K6_g0",
+  "star": "/data/hCFTR/mae2183/cryoem-classification/results_cryodrgn/model_pipeline/od/J399/rae_base_K6/cryosparc/J399_rae_base_K6_g0.star",
+  "dataset": "J399"
+ },
+ "J399_rae_base_K6_g1": {
+  "project": "P17",
+  "workspace": "W1",
+  "import_job": "J1315",
+  "abinit": "J1316",
+  "nu": "J1317",
+  "gpu": 2,
+  "name": "J399_rae_base_K6_g1",
+  "star": "/data/hCFTR/mae2183/cryoem-classification/results_cryodrgn/model_pipeline/od/J399/rae_base_K6/cryosparc/J399_rae_base_K6_g1.star",
+  "dataset": "J399"
+ },
+ "J399_rae_base_K6_g2": {
+  "project": "P17",
+  "workspace": "W1",
+  "import_job": "J1318",
+  "abinit": "J1319",
+  "nu": "J1320",
+  "gpu": 2,
+  "name": "J399_rae_base_K6_g2",
+  "star": "/data/hCFTR/mae2183/cryoem-classification/results_cryodrgn/model_pipeline/od/J399/rae_base_K6/cryosparc/J399_rae_base_K6_g2.star",
+  "dataset": "J399"
+ },
+ "J399_rae_base_K6_g3": {
+  "project": "P17",
+  "workspace": "W1",
+  "import_job": "J1321",
+  "abinit": "J1322",
+  "nu": "J1323",
+  "gpu": 2,
+  "name": "J399_rae_base_K6_g3",
+  "star": "/data/hCFTR/mae2183/cryoem-classification/results_cryodrgn/model_pipeline/od/J399/rae_base_K6/cryosparc/J399_rae_base_K6_g3.star",
+  "dataset": "J399"
+ },
+ "J399_rae_base_K6_g4": {
+  "project": "P17",
+  "workspace": "W1",
+  "import_job": "J1324",
+  "abinit": "J1325",
+  "nu": "J1326",
+  "gpu": 2,
+  "name": "J399_rae_base_K6_g4",
+  "star": "/data/hCFTR/mae2183/cryoem-classification/results_cryodrgn/model_pipeline/od/J399/rae_base_K6/cryosparc/J399_rae_base_K6_g4.star",
+  "dataset": "J399"
+ },
+ "J399_rae_base_K6_g5": {
+  "project": "P17",
+  "workspace": "W1",
+  "import_job": "J1327",
+  "abinit": "J1328",
+  "nu": "J1329",
+  "gpu": 2,
+  "name": "J399_rae_base_K6_g5",
+  "star": "/data/hCFTR/mae2183/cryoem-classification/results_cryodrgn/model_pipeline/od/J399/rae_base_K6/cryosparc/J399_rae_base_K6_g5.star",
+  "dataset": "J399"
+ }
+}
