@@ -57,7 +57,7 @@ Replica models use the same settings with other seeds (7, 101, 202, 303). VAE ($
 Weight medoid \(m\) by
 
 $$
-w_m \propto 1 + \left|\{\, i : \operatorname{nearest}(z_i) = m \,\}\right|,
+w_m \propto 1 + \left|\{i : \mathrm{nearest}(z_i)=m\}\right|,
 $$
 
 and run a weighted PCA on the medoid maps, giving projections \(P_{mj}\).
@@ -65,10 +65,8 @@ and run a weighted PCA on the medoid maps, giving projections \(P_{mj}\).
 A particle's score is the mean projection of its \(k\) nearest medoids in latent space (\(k\) chosen by leave-one-out cross-validation):
 
 $$
-s_{ij} = \frac{1}{k}\sum_{m \in kNN(z_i)} P_{mj}.
+s_{ij}=\frac{1}{k}\sum_{m\in kNN(z_i)} P_{mj}.
 $$
-
-<br>
 **4 · Residual model + sharpening.** The images are split into equal-count cells $c(i)$ along the current coordinate. A $K$-direction probabilistic PCA is then fitted to the whitened image residuals:
 
 $$y_i = a_i c_i P_i\Big(m_{c(i)}+\sum_{k=1}^{K} z_{ik}u_k\Big)+\varepsilon,\qquad
