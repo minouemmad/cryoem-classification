@@ -62,11 +62,8 @@ $$
 
 and run a weighted PCA on the medoid maps, giving projections \(P_{mj}\).
 
-A particle's score is the mean projection of its \(k\) nearest medoids in latent space (\(k\) chosen by leave-one-out cross-validation):
+A particle's score is the mean projection of its \(k\) nearest medoids in latent space (\(k\) chosen by leave-one-out cross-validation)
 
-$$
-s_{ij}=\frac{1}{k}\sum_{m\in kNN(z_i)} P_{mj}.
-$$
 **4 · Residual model + sharpening.** The images are split into equal-count cells $c(i)$ along the current coordinate. A $K$-direction probabilistic PCA is then fitted to the whitened image residuals:
 
 $$y_i = a_i c_i P_i\Big(m_{c(i)}+\sum_{k=1}^{K} z_{ik}u_k\Big)+\varepsilon,\qquad
