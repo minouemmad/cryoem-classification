@@ -52,10 +52,23 @@ $$\mathcal L=\sum_i \lVert y_i - c_i P_i D(z_i)\rVert^2 + \frac{1}{N_\text{pix}}
 Default settings: $z\in\mathbb R^{10}$; encoder and decoder 1024×3; $\beta=0.1$; $\lambda=0.00243$; 128 px; 50 epochs; batch 64; seed 30112.
 Replica models use the same settings with other seeds (7, 101, 202, 303). VAE ($\beta_{KL}=0.1$) and plain-AE variants use the same trainer.
 
-**3 · Volume-PC scores.** Decode $M=2000$ k-means medoids of $z$ at 64³ and smooth each map (8 Å FWHM).
-Weight medoid $m$ by $w_m\propto 1+\\{i:\text{nearest}(z_i)=m\}$ and run a weighted PCA on the medoid maps, giving projections $P_{mj}$.
-A particle's score is the mean projection of its $k$ nearest medoids in latent space ($k$ chosen by leave-one-out): $s_{ij}=\frac1k\sum_{m\in kNN(z_i)}P_{mj}$.
+**3 · Volume-PC scores.** Decode \(M = 2000\) k-means medoids of \(z\) at \(64^3\) resolution and smooth each map (8 Å FWHM).
 
+Weight medoid \(m\) by
+
+$$
+w_m \propto 1 + \left|\{\, i : \operatorname{nearest}(z_i) = m \,\}\right|,
+$$
+
+and run a weighted PCA on the medoid maps, giving projections \(P_{mj}\).
+
+A particle's score is the mean projection of its \(k\) nearest medoids in latent space (\(k\) chosen by leave-one-out cross-validation):
+
+$$
+s_{ij} = \frac{1}{k}\sum_{m \in kNN(z_i)} P_{mj}.
+$$
+
+<br>
 **4 · Residual model + sharpening.** The images are split into equal-count cells $c(i)$ along the current coordinate. A $K$-direction probabilistic PCA is then fitted to the whitened image residuals:
 
 $$y_i = a_i c_i P_i\Big(m_{c(i)}+\sum_{k=1}^{K} z_{ik}u_k\Big)+\varepsilon,\qquad
