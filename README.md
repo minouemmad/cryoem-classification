@@ -1,183 +1,192 @@
 # cryoem-classification
 
-Label-free conformational classification of hCFTR cryo-EM particles. A cryoDRGN model (RAE by default) is trained on consensus NU poses.
-Its latent space is used only to order particles. Every later decision is made on **back-projected half maps of the real images with fixed poses**:
-a main coordinate, residual directions found conditionally on everything already explained, classes in that multi-coordinate space, and
-a class count chosen by split-half and seed reproducibility. Classes are then refined in cryoSPARC (ab initio + NU). Heterorefinement classes
-are used **only for evaluation**: they are refined by the same route and compared at the end.
+Label-free conformational classification of hCFTR cryo-EM particles.
+
+The core is a **residual model fitted directly to the images**: a probabilistic PCA of the whitened residuals between each image and the projection of a reference map, at fixed consensus NU poses. A starting axis orders the particles. A conditioned search then adds coordinates one at a time, each fitted on what the earlier ones leave unexplained. Classes are cut in that coordinate space and refined in cryoSPARC (ab initio + NU).
+
+- **Measured on maps, not particles.** Every decision is made on back-projected half maps of the real images, so the quantities used are reproducible between independent halves.
+- **Several starting axes.** The start can come from the residual model alone (`free`) or from three nonlinear summaries of it: a codebook (`vq`), a diffusion map (`diffmap`) or an MLP bottleneck (`mlp`). A trained cryoDRGN model (`latent`, or the original volume-PC route) is optional.
+- **Reference classes for evaluation only.** cryoSPARC heterorefinement classes are refined by the same route and compared at the end; they never feed a fit, a mask or a choice.
 
 ## Layout
 
 ```
 config/      env.sh (site paths), datasets.tsv (stack, poses, CTF, envelope, mask, voxel size, max rounds), heteroref.json, examples
-lib/         fastbp.py (GPU back-projection / half maps / simulation), maps.py (envelope crop, class-map algebra), cryo_utils.py, mapdiff.py
-pipeline/    0_consensus  1_envelope  2_train  3_scores  4_residual  5_search  6_classes  7_refine  8_compare
-             run_model.sh (steps 3-6 for one model), pipe_worker.sh (queue), auto_select.sh (K scan -> refinement, hands-off)
-             3_scores/start.py         network-free starting axes (MP_START=free|vq|diffmap|mlp|latent)
-             4_residual/domains/       per-domain residual fits (whole dataset, or inside a particle subset via MCR_SUBSET)
-             6_classes/windows/        two-stage variable-size soft windows along any pipeline axis
-             7_refine/remote/          multi-machine refinement dispatcher (hudson / ganges / east cryoSPARC v4-v5 via cli)
-diagnostics/ evaluation-only checks: reproducibility stats, start-vs-start agreement, envelope / micelle tests, P7 and domain-density checks
-tools/deck/  pptx deck of every refined map with its nearest heterorefinement class (rebuilt as maps arrive)
-reference/   PDB models, per-dataset envelopes, cryoSPARC job ids, K-scan / reproducibility results (see reference/README.md)
-legacy/      earlier approaches (latent trees, diagnostics); not used
+lib/         fastbp.py (GPU back-projection, half maps, simulation), maps.py, mapdiff.py, cryo_utils.py
+pipeline/
+  0_consensus/   consensus NU poses -> 128 px stack, ctf.pkl, poses.pkl, STAR
+  1_envelope/    protein envelope from a fitted PDB (6MSM / 5UAK) + domain regions
+  2_train/       cryoDRGN RAE / VAE / AE / conditional RAE trainers (optional start only)
+  3_scores/      start.py: starting axes (rand, free, vq, diffmap, mlp, latent); decode.py + scores.py: cryoDRGN volume-PC start
+  4_residual/    residual_ppca.py (image-domain PPCA), sharpen.py;  domains/: per-domain and per-subset residual fits
+  5_search/      search.py: fully conditioned search for further coordinates
+  6_classes/     classes.py, kselect.py, repro.py, reassign.py;  windows/: variable-size soft windows along any axis
+  7_refine/      STAR export, cryoSPARC chains (import -> ab initio -> NU);  remote/: multi-machine dispatcher (cryoSPARC v4 / v5 via cli)
+  8_compare/     alignment to a common frame, cc and distance to the heterorefinement maps (evaluation only)
+  run_model.sh   steps 3-6 for one run;  pipe_worker.sh (queue);  auto_select.sh (K scan -> refinement)
+diagnostics/   evaluation-only checks: reproducibility, start-vs-start agreement, envelope / micelle, P7, domain density
+tools/deck/    pptx of every refined map with its nearest heterorefinement class (rebuilt as maps arrive)
+reference/     PDB models, envelopes, cryoSPARC job ids, K-scan results (reference/README.md)
+legacy/        earlier approaches; not used
 ```
 
-Datasets: `J4001_gP25_WT`, `J4624_eP37_WT_T2a`, `J207_hP12_IDOR4`, `J2708_eP30_F508del_E1371W`, `J399_hP7_E1371Q_ATP`.
-Large data stays on disk (`$RES`, `$WORK` in `config/env.sh`). Run with the `cryodrgn` conda env (cryoDRGN 4.3). The `cx_*` / `fit_pdb.py` scripts run in headless ChimeraX.
+Datasets: `J4001_gP25_WT`, `J4624_eP37_WT_T2a`, `J207_hP12_IDOR4`, `J2708_eP30_F508del_E1371W` and `J399_hP7_E1371Q_ATP`.
+
+Large data stays on disk (`$RES`, `$WORK` in `config/env.sh`). Python runs in the `cryodrgn` conda env. `cx_*` / `fit_pdb.py` / `fit_union.py` run in headless ChimeraX.
 
 ## Running
 
 ```bash
 source config/env.sh
-# 0  consensus poses + cryoDRGN inputs (128 px stack, ctf.pkl, poses.pkl)
-python pipeline/0_consensus/prepare.py NAME && python pipeline/0_consensus/write_star.py NAME   # + cs_pose_jobs.py in cryosparcm cli
-pipeline/0_consensus/consensus.sh NAME GPU
-# 1  envelopes (consensus + fitted PDB);  add a row to config/datasets.tsv
+# 0-1  consensus inputs and envelope (once per dataset; add a row to config/datasets.tsv)
+python pipeline/0_consensus/prepare.py NAME && pipeline/0_consensus/consensus.sh NAME GPU
 pipeline/1_envelope/envelope.sh GPU DS STACK POSES CTF
-# 2  training: one worker per GPU on any machine, jobs from queue.txt (config/train_queue.example)
-pipeline/2_train/train_worker.sh machine.conf GPU
-# 3-6  per trained model (or: lines "DS NAME MODELDIR 50 [OPTS]" in $WORK/pipe_queue.txt + pipe_worker.sh GPU)
-pipeline/run_model.sh GPU DS rae_base $WORK/models/DS/rae_base 50
-# 6-7  K scan, seed reproducibility, refinement of the candidate K set (+ heterorefinement classes for the comparison)
-pipeline/auto_select.sh "DS/rae_base:auto DS/rae_s7: DS/rae_s101:";  pipeline/7_refine/submit.sh DS hetero
-# 8  comparison with the heterorefinement maps (evaluation only)
-python pipeline/8_compare/compare.py DS
+# 3-6  one run per start (no training needed for free / vq / diffmap / mlp)
+pipeline/run_model.sh GPU DS start_free  - - MP_START=free
+pipeline/run_model.sh GPU DS start_vq    - - MP_START=vq,MP_REUSE_START=DS/start_free      # reuses the free-stage residual fit
+pipeline/run_model.sh GPU DS start_mlp   - - MP_START=mlp,MP_REUSE_START=DS/start_free,MP_SEED=1
+pipeline/run_model.sh GPU DS start_latent $WORK/models/DS/rae_base 50 MP_START=latent       # optional cryoDRGN start
+# 6-7  K scan and refinement (one machine: 7_refine/submit.sh; several: 7_refine/remote/dispatch.py)
+pipeline/auto_select.sh "DS/start_free:auto";  pipeline/7_refine/submit.sh DS hetero
+# windows / domain fits (optional, J4001 defaults)
+python pipeline/6_classes/windows/win_build.py DS RUN j stage1;  python pipeline/6_classes/windows/win_score.py
+pipeline/4_residual/domains/dom_fit.sh GPU;  pipeline/4_residual/domains/dom_sub.sh GPU
+# 8    evaluation
+python pipeline/8_compare/compare.py DS;  python tools/deck/build_deck.py data OUT.pptx
 ```
 
 ## Method
 
-**Notation.** Particle $i$ has image $y_i$, fixed pose $R_i$, CTF $c_i$ and scale $a_i$. $P_i$ is the projection at $R_i$.
-For a particle set $g$, back-projection gives half maps $A_g$ and $B_g$ (random halves). Each map is low-passed to 10 Å and restricted to the envelope (64³ grid).
-All "reproducible" quantities are cross-products of independent halves, $\langle A-\bar A,\,B-\bar B\rangle$, so noise averages out.
+**Notation.**
+- Particle $i$ has image $y_i$, fixed pose $R_i$, CTF $c_i$ and scale $a_i$; $P_i$ is the projection at $R_i$.
+- A particle set $g$ gives half maps $A_g$ and $B_g$ (random halves). Each is low-passed to 10 Å and restricted to the envelope (64³).
+- A "reproducible" quantity is a cross-product of independent halves, $\langle A-\bar A,\,B-\bar B\rangle$, so noise averages out.
 
-**2 · Training (RAE, Ghosh et al. 2020).** Deterministic encoder $z_i = E(y_i)$ with decoder $D$, trained on fixed NU poses:
+### 1 · Envelope
 
-$$\mathcal L=\sum_i \lVert y_i - c_i P_i D(z_i)\rVert^2 + \frac{1}{N_\text{pix}}\Big(\tfrac{\beta}{2}\lVert z_i\rVert^2+\lambda\,\lVert \partial D/\partial z\rVert_F^2\Big)$$
+The fitted 6MSM model (global fit, then a local TMD refit) defines a protein-only envelope, dilated 2 voxels.
+- 5UAK can be superposed on the fitted TMDs to form a union envelope (`diagnostics/fit_union.py`, `union_env.py`).
+- Domain regions from the same model: TMD1 1–380, NBD1 381–645, TMD2 840–1172, NBD2 1173–1480.
 
-Default settings: $z\in\mathbb R^{10}$; encoder and decoder 1024×3; $\beta=0.1$; $\lambda=0.00243$; 128 px; 50 epochs; batch 64; seed 30112.
-Replica models use the same settings with other seeds (7, 101, 202, 303). VAE ($\beta_{KL}=0.1$) and plain-AE variants use the same trainer.
+The consensus envelope is not used, because much of its extra density is micelle.
 
-**3 · Volume-PC scores.** Decode \(M = 2000\) k-means medoids of \(z\) at \(64^3\) resolution and smooth each map (8 Å FWHM).
+### 2 · Residual model (`4_residual/residual_ppca.py`)
 
-Weight medoid \(m\) by
-
-$$
-w_m \propto 1 + \left|\{i : \mathrm{nearest}(z_i)=m\}\right|,
-$$
-
-and run a weighted PCA on the medoid maps, giving projections \(P_{mj}\).
-
-A particle's score is the mean projection of its \(k\) nearest medoids in latent space (\(k\) chosen by leave-one-out cross-validation)
-
-**4 · Residual model + sharpening.** The images are split into equal-count cells $c(i)$ along the current coordinate. A $K$-direction probabilistic PCA is then fitted to the whitened image residuals:
+The images are split into equal-count cells $c(i)$ along the current coordinate, and $m_c$ is the back-projected map of cell $c$. A $K$-direction PPCA is fitted to the whitened residuals in the 50–7 Å band:
 
 $$y_i = a_i c_i P_i\Big(m_{c(i)}+\sum_{k=1}^{K} z_{ik}u_k\Big)+\varepsilon,\qquad
 z_i\mid r_i\sim\mathcal N\big((W_iW_i^\top+I)^{-1}W_i r_i,\ (W_iW_i^\top+I)^{-1}\big),\quad W_i=[\tau_k a_i c_i P_i q_k]$$
 
-- **M-step:** one $K\times K$ normal equation per Fourier voxel. The eigen-volumes are kept inside the envelope.
-- **Defaults:** $K=8$, band 50–7 Å, 30 EM iterations.
-- **Two folds:** directions learned on one half of the particles score the other half. The fold subspaces are compared (principal-angle cosines) and aligned by Procrustes.
+- **EM.** The M-step is one $K\times K$ normal equation per Fourier voxel. The eigen-volumes are multiplied by the soft envelope (or a domain mask) and re-orthonormalised. Defaults: $K=8$, 30 iterations.
+- **Two folds.** Directions learned on one half of the particles score the other half. Reproducibility is the principal-angle cosines between the folds' subspaces, and the folds are aligned by Procrustes.
+- **Random cells** (`start.py rand`): every cell map is the consensus, so the fit is unconditioned. This is the first step of every network-free start.
+- **`MCR_SUBSET=idx.npy`**: fits only those particles against their own mean map. This looks for variation *within* a window or class.
 
-The first coordinate is then **sharpened**:
-1. Take 24 equal-count bins along PC1. Let $e_{lo}$ and $e_{hi}$ be the mean maps of the two end bins on each side, and $u = e_{hi}-e_{lo}$.
-2. Place 200 cells in $(\text{PC1}, z)$ and project each cell map onto the end-to-end line: $t_c=\langle X_c-e_{lo},u\rangle/\lVert u\rVert^2$.
-3. Fit $t_c\approx\beta_0+\beta^\top \bar f_c$ by weighted least squares, on half A scored on half B and vice versa.
-4. The sharpened coordinate is $s_i=\beta^\top f_i$.
+### 3 · Starting axis (`3_scores/start.py`, `MP_START`)
 
-**5 · Fully conditioned search.** Rounds $r=1,\dots,R_{max}$. Coordinates $S$ (columns) have weights $w$, with $w_1=1$.
+All network-free starts work on the unconditioned coordinates $z^{(0)}\in\mathbb R^{8}$ from step 2, standardised. Only column 0 of `pc.scores.npy` is used downstream. `MP_SEED` replicates the random parts.
 
-1. Make 64 equal-count cells conditioned on all of $S$ (recursive bisection along the leading direction of $S\,\mathrm{diag}(w)$). Refit the residual model, giving $z$ conditional on $S$.
-2. Back-project 400 k-means cells in $(S\,\mathrm{diag}(w),\ 0.5z)$ as half maps $A_c$ and $B_c$.
-3. Remove what $S$ already predicts. Each cell subtracts the $n$-weighted mean of its 8 nearest cells in $S$: $\tilde X_c = X_c-\sum_{c'\in N_8(c)}\omega_{cc'}X_{c'}$, and likewise $\tilde z_c$. The most reproducible direction in $z$ then solves
+| Start | Construction |
+|---|---|
+| `free` | linear PCA of $z^{(0)}$ (3DVA-like); PC1 is the axis |
+| `vq` (codebook) | 1. k-means of $z^{(0)}$ into 300 cells.<br>2. Back-project each cell's half maps (10 Å, envelope) and run a weighted PCA over the 300 cell maps.<br>3. A particle's score is the mean map-PC projection of its 8 nearest cell centres.<br>The axis is defined by *map* variance, not coordinate variance. |
+| `diffmap` | spectral embedding (k-NN graph, $k=30$) of a 30 k subsample, extended to all particles by distance-weighted 15-NN regression; a nonlinear manifold coordinate |
+| `mlp` | denoising autoencoder 8→128→128→**1**→128→128→8 (SiLU, input noise 0.1, 40 epochs); the bottleneck is a principal curve through $z^{(0)}$ |
+| `latent` (optional) | PCA of a trained cryoDRGN encoder latent (free part only for the conditional RAE) |
+| unset (optional) | cryoDRGN volume-PC route: decode 2000 latent medoids, weighted PCA of the decoded maps, particle score = mean over $k$ nearest medoids |
+
+### 4 · Sharpening (`4_residual/sharpen.py`)
+
+The start is refined against the images:
+1. Fit the residual model conditioned on the start. Take 24 bins along it, with end maps $e_{lo}$ and $e_{hi}$ and $u=e_{hi}-e_{lo}$.
+2. Place 200 cells in (start, $z$) and project each cell map onto the end-to-end line: $t_c=\langle X_c-e_{lo},u\rangle/\lVert u\rVert^2$.
+3. Fit $t_c\approx\beta_0+\beta^\top \bar f_c$ cross-fitted between halves A and B. The sharpened coordinate is $s_i=\beta^\top f_i$.
+
+### 5 · Fully conditioned search (`5_search/search.py`)
+
+Rounds $r=1,\dots,R_{max}$, with coordinates $S$ and weights $w$ ($w_1=1$).
+
+1. Make 64 equal-count cells conditioned on all of $S$, and refit the residual model to get $z\mid S$.
+2. Back-project 400 k-means cells in $(S\,\mathrm{diag}(w),\ 0.5z)$. Each cell subtracts the $n$-weighted mean of its 8 nearest cells in $S$, giving $\tilde X_c$ and $\tilde z_c$.
+3. The most reproducible direction solves
 
 $$\Big(\sum_c n_c\tilde z_c\tilde A_c^\top\Big)\Big(\sum_c n_c\tilde z_c\tilde B_c^\top\Big)^{\!\top} w=\lambda\,\Big(\sum_c n_c\tilde z_c\tilde z_c^\top\Big)\,w .$$
 
-   The null distribution comes from 200 permutations of $\tilde z$ among cells with similar $S$. Stop if $p=P(\lambda_{null}\ge\lambda)>0.05$.
-4. Split the map effect $v$ of $x=w^\top z$ into its projection on the tangents $T$ of the existing coordinates and a remainder $v_\perp$.
-   - The tangent part **sharpens** them: $S\leftarrow S+x\,\beta^\top$.
-   - If the remainder is reproducible beyond its null ($\langle v_{A\perp},v_{B\perp}\rangle$, $p_{off}\le 0.05$), $x$ becomes a **new coordinate** with weight $w_{new}=\sqrt{\lambda/T_{main}}$. Here $T_{main}$ is the reproducible between-cell variance of round 1.
-   - No orthogonality is imposed.
+   The null is 200 permutations of $\tilde z$ among cells with similar $S$. Stop at $p>0.05$.
+4. Split the map effect of $x=w^\top z$ into a tangent part and a remainder.
+   - The tangent part sharpens the existing coordinates.
+   - A reproducible remainder ($p_{off}\le0.05$) makes $x$ a new coordinate with weight $\sqrt{\lambda/T_{main}}$.
 
-The rounds kept are decided by seed replicas: keep round $r$ while the median best $\lvert cc\rvert$ of its mode map with the seed models' mode maps is ≥ 0.75.
+### 6 · Classes and K (`6_classes`)
 
-**6 · Classes and K.** Back-project 300 cells in $S\,\mathrm{diag}(w)$. Group the cells with n-weighted k-means **on the cell maps**, $\min\sum_c n_c\lVert X_c-\mu_{k(c)}\rVert^2$ (20 restarts), for K = 1..10. The class maps are $M_k=\sum_{c\in k}n_cX_c/\sum_{c\in k}n_c$.
+300 cells in $S\,\mathrm{diag}(w)$ are grouped by $n$-weighted k-means **on the cell maps**, for K = 1..10. A K passes when:
+- every class reproduces between halves ($sh_k \ge 0.9$);
+- every class's own off-blend component reproduces ($own\_sh_k \ge 0.5$);
+- the smallest class is ≥ 4 % of the particles.
 
-| Quantity | Definition |
-|---|---|
-| within-class reproducible variance | $W_K=\sum_k\sum_{c\in k}n_c\langle A_c-\bar A_k,B_c-\bar B_k\rangle$ → elbow, gain $(W_{K-1}-W_K)/W_{K-1}$ |
-| own (off-blend) component | $o_k = M_k-\Pi_{\mathrm{aff}\{M_j\}_{j\ne k}}M_k$: what class $k$ has that is not a blend of the others |
-| split-half | $sh_k=\mathrm{cc}(M^A_k-\bar M^A,\ M^B_k-\bar M^B)$; $own\_sh_k=\mathrm{cc}(o^A_k,o^B_k)$ |
-| seed reproducible / distinct | Hungarian-matched class-map cc ≥ 0.8 in most seeds / own-component cross-seed cc ≥ 0.5 |
+The refined set is every passing K, plus the elbow, plus one boundary K.
 
-A value of K **passes** when $\min_k sh_k\ge0.9$, $\min_k own\_sh_k\ge0.5$ and the smallest class is ≥ 4 % of the particles. When seed models exist, every class must also be distinct across seeds.
-Refined candidates = every passing K, plus the elbow, plus (largest passing K + 1) as a boundary check (`kselect.py`).
+**Soft windows (`6_classes/windows`).** These are an alternative to hard classes for a state that sits between others along an axis. The axis can be any pipeline coordinate $S_j$ (or a domain coordinate). Particle $i$ is kept with probability $\exp(-(r_i-c)^2/2\sigma^2)$, where $r_i$ is its rank.
+1. **Position:** $\sigma=0.10$ at $c=0.1,\dots,0.9$. Pick the interior window farthest from the line between the two end maps.
+2. **Size:** at that $c$, $\sigma=0.04$–$0.22$. Pick the size whose map changes least relative to its neighbouring sizes (stability), so the size is not fixed in advance.
 
-**7 · Refinement.** One STAR per class is rewritten to the 128 px stack and imported **without poses**. Each is refined by ab initio (1 class) → NU, with parameters from P17 J451 / J452.
-The heterorefinement classes go through the identical route.
+Both picks are label-free.
 
-**Starting axis without a network (`MP_START`).** `free`: fit the residual model once with random cells (reference = consensus) and use
-PC1 of its coordinates $z^{(0)}$. `vq` (k-means codebook of $z^{(0)}$ → cell maps → map PCA), `diffmap` (diffusion-map embedding) and `mlp`
-(autoencoder bottleneck) are alternatives built on the same $z^{(0)}$; `latent` uses the cryoDRGN encoder PC1. `MP_SEED` replicates a start.
+**Per-domain fits (`4_residual/domains`).** The residual model with the eigen-volumes confined to one domain (dilated about 8 Å, inside the envelope), run either on the whole dataset or inside a window (`MCR_SUBSET`). A reproducible domain component can be used as a window axis or split along (`sub_split.py`).
 
-**Per-domain residual fits (`4_residual/domains`).** Same model, with the eigen-volumes confined to one domain mask (TMD1 1–380, NBD1 381–645,
-TMD2 840–1172, NBD2 1173–1480, from the fitted PDB, dilated ~8 Å, inside the envelope). With `MCR_SUBSET` the fit uses only a particle
-subset (e.g. one window or class) against that subset's own mean map, i.e. it looks for domain variation *within* a state.
+### 7 · Refinement (`7_refine`)
 
-**Soft windows (`6_classes/windows`).** Along any axis $S_j$ (ranked $r_i\in[0,1]$), particle $i$ is kept with probability $\exp(-(r_i-c)^2/2\sigma^2)$.
-1. Position: $\sigma=0.10$, $c=0.1,\dots,0.9$. Pick the interior window farthest from the line between the two end maps (off-line² / end-to-end²).
-2. Size: at that $c$, $\sigma=0.04$–$0.22$. Pick the size whose map changes least from its neighbouring sizes (stability), so the size is not fixed.
+Each class or window is exported as a STAR file on the 128 px stack and imported **without poses**, then refined by ab initio (1 class) → NU with fixed parameters (P17 J451 / J452). The heterorefinement classes go through the identical route. `remote/dispatch.py` spreads the chains over several cryoSPARC instances and fetches the maps back.
 
-Both picks are label-free; the reference classes only score the result.
+### 8 · Comparison (`8_compare`, evaluation only)
 
-**8 · Comparison (evaluation only).**
-1. Bring every map into the deck frame and fix the hand, then refit on the TMD core onto the consensus $c_0$ (n-weighted mean of the refined heterorefinement maps).
-2. At 10 Å inside the envelope, after a linear density-scale fit:
+Every map is aligned to a common frame, hand-corrected and TMD-refitted onto the consensus $c_0$. At 10 Å inside the envelope, after a linear density-scale fit:
 
 $$cc_k=\mathrm{corr}(x-c_0,\ C_k-c_0),\qquad d^2_k=\lVert x-C_k\rVert^2/\lVert C_a-C_b\rVert^2$$
 
-   $(a,b)$ is the most different pair of heterorefinement classes. Each refined set is Hungarian-matched to the heterorefinement classes by $cc$.
+$(a,b)$ is the most different reference pair. Sets are Hungarian-matched by $cc$, and the deck reports the nearest class by $d^2$.
+
+$cc$ is ill-conditioned for a class close to the consensus (J4001 P7: $d^2=0.093$ from the consensus), so $d^2$ is the metric for such classes.
 
 ## Results so far (2026-11-26, preliminary)
 
-- **Network-free starts** (all K = 2–5, J399 to 10, refined on three machines):
-  - J4001: every start gives the same class maps (Hungarian cc 0.95–0.98).
-  - J2708, J399: the network-free starts agree with each other (0.87–0.93); the cryoDRGN-latent start differs.
-  - J207: the first residual model is not reproducible (fold cosine 0.49), so there is no signal to classify.
-- **Reproducibility:** first-axis fold cosines 0.90 (J4001, J2708, J399). Only search rounds 1–2 reproduce (round 3 too on J399), so most of the 11 coordinates are noise.
-- **Envelope:** the wide-V classes (J2708 C09, J399 C11) are not recovered by the protein-envelope starts. Their extra density is 68–69 % outside even a 5UAK + 6MSM union envelope, and 80–93 % of that lies in the membrane belt, mostly > 20 Å from protein, so it looks like micelle rather than protein.
-- **P7 (J4001):** no coordinate separates P7 particles (AUC 0.50–0.57). By distance, mid-axis classes and the S0 middle window are the closest maps to P7 (d² 0.073–0.077 vs consensus 0.093). The S1, S2 and NBD1-axis windows do not beat the consensus.
-- **Per-domain fits (J4001, whole dataset):** TMD1, NBD1 and TMD2 each have one reproducible component (cosine ≈ 0.9). NBD1's is the least redundant with the whole-molecule coordinates and raises P7 AUC from 0.57 to 0.64. Inside single windows (~48 k particles) no domain component reproduces (cosines ≤ 0.49).
-- **NBD1 density:** NBD1 tracks the main axis (0.5× consensus at the P6 end, 1.6× at the P8 end; corr 0.99). The P8-like maps match the P8 reference in NBD1 (cc 0.95 at 6 Å, 93–97 % of its occupancy).
+**Starts.** All five starts were run at K = 2–5 (J399 K = 2–10) and refined.
+- J4001: every start gives the same class maps (Hungarian cc 0.95–0.98). The `free`, `vq` and `mlp` seed replicates reproduce at K = 2.
+- J2708 and J399: the network-free starts agree with each other (0.87–0.93). The cryoDRGN-latent start differs.
 
-## Earlier results (2026-11-24)
+**Residual model.**
+- The first-fit fold cosines are 0.90–0.91 on J4001, J2708 and J399.
+- J207 reaches only 0.49, so there is no reproducible signal to classify.
+- In the search, only rounds 1–2 reproduce (round 3 too on J399). Later coordinates are mostly noise, with correlations up to 0.68.
 
-- **Seed-reproducible search rounds:** J4001 4, J4624 5.
-- **Reproducible and distinct classes:** up to K = 5 on both. K = 4 adds an intermediate (P7- / C07-rich) class, and K = 5 splits P6 / C08.
-- **J4001 K = 3 vs heterorefinement:** P8 0.98, P6 0.99, P7-leaning class 0.53–0.60. Alt-NBD1 merges with P6.
-- **J4624 K = 3:** C09 0.82, C08 0.84, C06 + C10 merged 0.92. K = 4 adds C07 at 0.75.
-- **Label-free K scan:**
-  - J207: elbow 3; only K = 2 passes; K = 3 own_sh is 0.85. The split-half 0.9 cutoff is strict for 61 k particles.
-  - J2708: elbow 3; K = 2–5 pass.
-  - J399: pending.
+**Envelope.** The wide-V classes (J2708 C09, J399 C11) are not recovered by the protein-envelope runs.
+- Their extra density is 68–69 % outside even the 5UAK + 6MSM union.
+- 80–93 % of that density is in the membrane belt, mostly more than 20 Å from protein. It looks like micelle, so the protein-only envelope is kept.
 
-  The candidate sets and the heterorefinement classes of all three datasets are being refined.
-- **Robustness:**
-  - Model variants (seed, z-dim, β, λ, VAE, AE) change particle labels (ARI ≈ 0.35) but not class maps (cc 0.99–1.00 on 2 of 3 classes).
-  - Low-pass 15 Å: maps cc ≥ 0.95.
-  - Keeping only the reproducible rounds (`MP_KEEP`): maps cc 0.95–1.00.
+**P7 (J4001).**
+- No coordinate separates P7 particles (AUC 0.50–0.57).
+- By $d^2$, two maps are closest to P7: the middle K = 3 class (0.073) and the S0 middle window (0.077, the label-free stage-1 pick). For comparison, the consensus is at 0.093.
+- The S1, S2 and NBD1-axis windows do not beat the consensus (0.10–0.11).
 
-## Open decisions and ongoing tests
+**Per-domain fits (J4001).**
+- On the whole dataset, TMD1, NBD1 and TMD2 each have one reproducible component (cosine ≈ 0.9).
+- NBD1's component is the least redundant with the whole-molecule coordinates (canonical corr 0.69 / 0.28). It raises P7 AUC from 0.57 to 0.64.
+- Inside a single window (about 48 k particles), no domain component reproduces (≤ 0.49).
 
-| Decision | Current default | Tested / running | Status |
-|---|---|---|---|
-| Model family | RAE | VAE (β 0.1), plain AE, z 4 / 16, β 0.01, λ 0, width 256 | maps agree (cc ≥ 0.99 on 2 of 3 classes); labels do not |
-| Training resolution | 128 px | 256 px stack (J4001 running) | open |
-| Number of seed replicas | base + 2–4 | J207 / J2708 / J399 replicas training | needed for round and K reproducibility |
-| Envelope | fitted PDB, dilated 2 voxels | consensus envelope (`*c` rows), dilation 0 / 4 (`*d0`, `*d4`) | stress test in progress |
-| Map resolution of steps 4-6 | 10 Å, 64³ | 15 Å (cc ≥ 0.95); 6 / 4 Å at 128³ (ARI 0.5–0.65, off-blend rule gives K = 10, likely noise) | class-map cc at 6 / 4 Å still to compute |
-| Residual model | K = 8, 50–7 Å | `MP_K`, `MP_HI`, `MP_LO` | default kept |
-| Rounds kept | all rounds with p ≤ 0.05 | seed rule: keep while \|r\| ≥ 0.75; `MP_KEEP` test (maps cc 0.95–1.00) | little effect on maps |
-| Class-count rule | pass rule above + candidates | split-half 0.9 cutoff vs dataset size (J207) | user decision: thresholds, and whether seed distinctness is required |
-| Particle reassignment | off | `MP_REASSIGN`: real 6–8 % change per round vs null 13–15 %; margin 5–6 % vs 1.6 %; ARI vs start 0.22 | real signal but uncertain labels; maps robust; optional |
-| Refinement route | import without poses → ab initio → NU, 128 px | (possible) local refinement from consensus poses; full-resolution stack | open |
+**NBD1 density** follows the main axis: 0.5× consensus at the P6 end and 1.6× at the P8 end (corr 0.99). The P8-like maps match the P8 reference in NBD1 (cc 0.95 at 6 Å).
+
+**Earlier cryoDRGN-RAE route (11-24).**
+- J4001 K = 3 matched P8 0.98 and P6 0.99, with a P7-leaning class at 0.53–0.60.
+- J4624 K = 3 matched C09 0.82 and C08 0.84; K = 4 added C07 (0.75).
+- Model variants changed particle labels (ARI ≈ 0.35) but not class maps (cc ≥ 0.99).
+
+## Open questions
+
+| Question | Current state |
+|---|---|
+| Which start to use by default | The network-free starts agree on J4001 / J2708 / J399; `free` is the simplest and `vq` measures map variance directly |
+| How many search coordinates to keep | Only rounds 1–2 reproduce; a fold-cosine or seed rule for keeping rounds is to be fixed |
+| Windows at every new axis | Implemented for S0–S2 and a domain axis; only S0 gives a P7-closer map so far |
+| Domain variation inside a state | Not detectable at about 48 k particles per window; whole-dataset domain axes are the usable form |
+| J207 | No reproducible residual signal; needs more particles or a different band |
+| Class-count thresholds | split-half 0.9 is strict for small datasets (J207, 61 k) |
