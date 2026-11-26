@@ -10,6 +10,7 @@ Two folds: axes learned on one half of the particles give the coefficients of th
 scored on); the folds' subspaces are compared (principal-angle cosines = reproducibility) and aligned by an orthogonal Procrustes rotation.
 Null calibration: the same run on a simulated single-state stack (0_consensus/make_sim_stack.py) or with MCR_NOISENULL=1.
 
+MCR_SUBSET=idx.npy: fit only those particles against their own mean map (conditional / per-window fits); z rows follow idx.
 Usage: residual_ppca.py OUT TAG [K=8] [ITERS=30] [HI=7.0] [LO=50.0]   |   residual_ppca.py selftest
 Env:   MCR_STACK MCR_POSES MCR_CTF, MCR_SCORES (N x d .npy; column 0 defines the cells), MCR_NBM (cells, 20), MCR_FOLDSEED (0), MCR_NOISENULL;
        OUT/env.npy = 128^3 envelope.   Writes OUT/ppca_TAG_z.npy (out-of-fold coefficients, N x K), OUT/ppca_TAG_eigvol_fold0.npy, OUT/ppca_TAG.txt"""
@@ -146,16 +147,18 @@ if __name__ == "__main__":
     def say(*a):
         s = " ".join(str(x) for x in a); print(f"[{time.time() - t0:5.0f}s] " + s, flush=True); out.write(s + "\n"); out.flush()
     say(f"=== {TAG}: K {K}, {IT} EM iterations, band {LO}-{HI} A, {NBm} cells, fold seed {FOLDSEED}, noise null {NOISENULL}")
-    bp = FastBP(E["MCR_STACK"], E["MCR_POSES"], E["MCR_CTF"]); N = bp.data.N; D = bp.D; dev = bp.dev
+    bp = FastBP(E["MCR_STACK"], E["MCR_POSES"], E["MCR_CTF"]); N = bp.data.N; SUB = E.get('MCR_SUBSET'); IDX = np.load(SUB).astype(int) if SUB else np.arange(N); D = bp.D; dev = bp.dev
     band = bp.band_mask(LO, HI); coords = bp.lat.coords[bp.mask][band]; Mb = int(band.sum())
     shell = (bp.lat.freqs2d[bp.mask][band].norm(dim=1) * D).round().long(); say("band pixels", Mb, "| Fourier radius", int(shell.min()), "-", int(shell.max()))
     V = np.load(E["MCR_SCORES"])[:, 0]; rank = np.argsort(np.argsort(V)) / N; pbin = np.minimum((rank * NBm).astype(int), NBm - 1)
-    maps = [bp.hvol(np.where(pbin == k)[0]) for k in range(NBm)]; say("cell maps done")
+    if SUB: pbin = np.zeros(N, int); maps = [bp.hvol(IDX)]; say(f'subset fit: {len(IDX)} particles, reference = the subset mean map')
+    else: maps = [bp.hvol(np.where(pbin == k)[0]) for k in range(NBm)]
+    say("cell maps done"); N = len(IDX)
     # ---- whitened residuals of all particles
     R = torch.empty((N, Mb), device=dev); Cw = torch.empty((N, Mb), device=dev); ROT = torch.empty((N, 3, 3), device=dev)
     with torch.no_grad():
         for s in range(0, N, 2000):
-            ii = np.arange(s, min(N, s + 2000)); ff, rot, c = bp._batch(ii); ff = ff[:, band]; c = c[:, band]; P = torch.empty_like(ff); lb = pbin[ii]
+            ii = IDX[s:s + 2000]; ff, rot, c = bp._batch(ii); ff = ff[:, band]; c = c[:, band]; P = torch.empty_like(ff); lb = pbin[ii]
             for m in np.unique(lb):
                 rr = np.flatnonzero(lb == m); P[rr] = projK(maps[m][None], rot[rr], coords, D)[:, 0]
             pred = c * P; al = (ff * pred).sum(1, keepdim=True) / pred.pow(2).sum(1, keepdim=True).clamp(min=1e-20)

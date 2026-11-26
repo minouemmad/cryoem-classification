@@ -13,6 +13,12 @@ config/      env.sh (site paths), datasets.tsv (stack, poses, CTF, envelope, mas
 lib/         fastbp.py (GPU back-projection / half maps / simulation), maps.py (envelope crop, class-map algebra), cryo_utils.py, mapdiff.py
 pipeline/    0_consensus  1_envelope  2_train  3_scores  4_residual  5_search  6_classes  7_refine  8_compare
              run_model.sh (steps 3-6 for one model), pipe_worker.sh (queue), auto_select.sh (K scan -> refinement, hands-off)
+             3_scores/start.py         network-free starting axes (MP_START=free|vq|diffmap|mlp|latent)
+             4_residual/domains/       per-domain residual fits (whole dataset, or inside a particle subset via MCR_SUBSET)
+             6_classes/windows/        two-stage variable-size soft windows along any pipeline axis
+             7_refine/remote/          multi-machine refinement dispatcher (hudson / ganges / east cryoSPARC v4-v5 via cli)
+diagnostics/ evaluation-only checks: reproducibility stats, start-vs-start agreement, envelope / micelle tests, P7 and domain-density checks
+tools/deck/  pptx deck of every refined map with its nearest heterorefinement class (rebuilt as maps arrive)
 reference/   PDB models, per-dataset envelopes, cryoSPARC job ids, K-scan / reproducibility results (see reference/README.md)
 legacy/      earlier approaches (latent trees, diagnostics); not used
 ```
@@ -110,6 +116,20 @@ Refined candidates = every passing K, plus the elbow, plus (largest passing K + 
 **7 · Refinement.** One STAR per class is rewritten to the 128 px stack and imported **without poses**. Each is refined by ab initio (1 class) → NU, with parameters from P17 J451 / J452.
 The heterorefinement classes go through the identical route.
 
+**Starting axis without a network (`MP_START`).** `free`: fit the residual model once with random cells (reference = consensus) and use
+PC1 of its coordinates $z^{(0)}$. `vq` (k-means codebook of $z^{(0)}$ → cell maps → map PCA), `diffmap` (diffusion-map embedding) and `mlp`
+(autoencoder bottleneck) are alternatives built on the same $z^{(0)}$; `latent` uses the cryoDRGN encoder PC1. `MP_SEED` replicates a start.
+
+**Per-domain residual fits (`4_residual/domains`).** Same model, with the eigen-volumes confined to one domain mask (TMD1 1–380, NBD1 381–645,
+TMD2 840–1172, NBD2 1173–1480, from the fitted PDB, dilated ~8 Å, inside the envelope). With `MCR_SUBSET` the fit uses only a particle
+subset (e.g. one window or class) against that subset's own mean map, i.e. it looks for domain variation *within* a state.
+
+**Soft windows (`6_classes/windows`).** Along any axis $S_j$ (ranked $r_i\in[0,1]$), particle $i$ is kept with probability $\exp(-(r_i-c)^2/2\sigma^2)$.
+1. Position: $\sigma=0.10$, $c=0.1,\dots,0.9$. Pick the interior window farthest from the line between the two end maps (off-line² / end-to-end²).
+2. Size: at that $c$, $\sigma=0.04$–$0.22$. Pick the size whose map changes least from its neighbouring sizes (stability), so the size is not fixed.
+
+Both picks are label-free; the reference classes only score the result.
+
 **8 · Comparison (evaluation only).**
 1. Bring every map into the deck frame and fix the hand, then refit on the TMD core onto the consensus $c_0$ (n-weighted mean of the refined heterorefinement maps).
 2. At 10 Å inside the envelope, after a linear density-scale fit:
@@ -118,7 +138,19 @@ $$cc_k=\mathrm{corr}(x-c_0,\ C_k-c_0),\qquad d^2_k=\lVert x-C_k\rVert^2/\lVert C
 
    $(a,b)$ is the most different pair of heterorefinement classes. Each refined set is Hungarian-matched to the heterorefinement classes by $cc$.
 
-## Results so far (2026-11-24)
+## Results so far (2026-11-26, preliminary)
+
+- **Network-free starts** (all K = 2–5, J399 to 10, refined on three machines):
+  - J4001: every start gives the same class maps (Hungarian cc 0.95–0.98).
+  - J2708, J399: the network-free starts agree with each other (0.87–0.93); the cryoDRGN-latent start differs.
+  - J207: the first residual model is not reproducible (fold cosine 0.49), so there is no signal to classify.
+- **Reproducibility:** first-axis fold cosines 0.90 (J4001, J2708, J399). Only search rounds 1–2 reproduce (round 3 too on J399), so most of the 11 coordinates are noise.
+- **Envelope:** the wide-V classes (J2708 C09, J399 C11) are not recovered by the protein-envelope starts. Their extra density is 68–69 % outside even a 5UAK + 6MSM union envelope, and 80–93 % of that lies in the membrane belt, mostly > 20 Å from protein, so it looks like micelle rather than protein.
+- **P7 (J4001):** no coordinate separates P7 particles (AUC 0.50–0.57). By distance, mid-axis classes and the S0 middle window are the closest maps to P7 (d² 0.073–0.077 vs consensus 0.093). The S1, S2 and NBD1-axis windows do not beat the consensus.
+- **Per-domain fits (J4001, whole dataset):** TMD1, NBD1 and TMD2 each have one reproducible component (cosine ≈ 0.9). NBD1's is the least redundant with the whole-molecule coordinates and raises P7 AUC from 0.57 to 0.64. Inside single windows (~48 k particles) no domain component reproduces (cosines ≤ 0.49).
+- **NBD1 density:** NBD1 tracks the main axis (0.5× consensus at the P6 end, 1.6× at the P8 end; corr 0.99). The P8-like maps match the P8 reference in NBD1 (cc 0.95 at 6 Å, 93–97 % of its occupancy).
+
+## Earlier results (2026-11-24)
 
 - **Seed-reproducible search rounds:** J4001 4, J4624 5.
 - **Reproducible and distinct classes:** up to K = 5 on both. K = 4 adds an intermediate (P7- / C07-rich) class, and K = 5 splits P6 / C08.

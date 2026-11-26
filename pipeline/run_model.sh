@@ -5,7 +5,7 @@
 #   OPTS = comma list KEY=VALUE exported to every step.  Knobs (defaults):
 #     MP_DECBOX 64, MP_NMED 2000 (decode) | MP_SCFW 8 (score smoothing FWHM, A) | MP_K 8, MP_HI 7, MP_LO 50 (residual model: directions, band A)
 #     MP_LP 10, MP_GRID 64 (map low-pass A / grid for sharpen, search, classes) | MP_NC_SH 200, MP_NC_IT 400, MP_NC_CL 300 (cells per step)
-#     MP_KEEP (classes on the first KEEP coordinates only) | MP_REASSIGN=1 (+ MP_RE_K MP_RE_LO MP_RE_HI MP_RE_IT MP_RE_NULL)
+#     MP_START latent|free|vq|diffmap|mlp (+ MP_SEED, MP_REUSE_START=DS/RUN) | MP_KEEP (classes on the first KEEP coordinates only) | MP_REASSIGN=1 (+ MP_RE_K MP_RE_LO MP_RE_HI MP_RE_IT MP_RE_NULL)
 #   Sharing upstream steps of the same model: REUSE_DEC=DS/NAME (decode) | REUSE_SC (decode + scores) | REUSE (+ first residual model) | REUSE_IT (all but classes)
 source "$(dirname "$(readlink -f "$0")")/../config/env.sh"; H=$ROOT/pipeline
 GPU=$1; DS=$2; NM=$3; MD=$4; EP=$5
@@ -23,8 +23,16 @@ with mrcfile.new('$SMASK', overwrite=True) as o: o.set_data(v); o.voxel_size = $
 log() { echo "$(date '+%m-%d %H:%M') [gpu$GPU] $DS/$NM $*" >> $WORK/pipe.log; }
 step() { local name=$1 out=$2; shift 2; [ -e "$out" ] && return 0; log "$name"; "$@" > $OUT/$name.log 2>&1 || { log "FAILED $name (see $OUT/$name.log)"; exit 1; }; }
 export MP_OUT=$OUT MP_ENV64=$ENV64 MP_STACK=$STK MP_POSES=$POS MP_CTF=$CTF MP_AP64=$AP64 CUDA_VISIBLE_DEVICES=$GPU OMP_NUM_THREADS=8
-step decode $OUT/dec/sample.json $PY $H/3_scores/decode.py --run $MD --epoch $EP --samples ${MP_NMED:-2000} --box $DBOX --native-apix $(awk -v a=$AP64 'BEGIN{print a/2}') --device 0 -o $OUT/dec
-step scores $OUT/pc.scores.npy $PY $H/3_scores/scores.py $OUT/dec $SMASK $OUT/pc 10
+case "${MP_START:-}" in      # starting axis: default = volume PC1 of decoded medoid maps | latent = encoder-latent PC1 | free/vq/diffmap/mlp = no network (3_scores/start.py)
+  latent) step start $OUT/pc.scores.npy $PY $H/3_scores/start.py latent $MD $EP $OUT;;
+  free|vq|diffmap|mlp) [ -n "${MP_REUSE_START:-}" ] && [ ! -e $OUT/start ] && ln -s $WORK/pipe/$MP_REUSE_START/start $OUT/start; mkdir -p $OUT/start
+    [ -f $OUT/start/env.npy ] || $PY -c "import numpy as np; e = np.load('$ENV64').astype(bool); np.save('$OUT/start/env.npy', np.repeat(np.repeat(np.repeat(e, 2, 0), 2, 1), 2, 2))"
+    step start_rand $OUT/start/rand.scores.npy $PY $H/3_scores/start.py rand $OUT
+    step start_ppca $OUT/start/ppca_null_z.npy env MCR_STACK=$STK MCR_POSES=$POS MCR_CTF=$CTF MCR_SCORES=$OUT/start/rand.scores.npy $PY $H/4_residual/residual_ppca.py $OUT/start null ${MP_K:-8} 30 ${MP_HI:-7.0} ${MP_LO:-50.0}
+    step start $OUT/pc.scores.npy $PY $H/3_scores/start.py $MP_START $OUT;;
+  *) step decode $OUT/dec/sample.json $PY $H/3_scores/decode.py --run $MD --epoch $EP --samples ${MP_NMED:-2000} --box $DBOX --native-apix $(awk -v a=$AP64 'BEGIN{print a/2}') --device 0 -o $OUT/dec
+     step scores $OUT/pc.scores.npy $PY $H/3_scores/scores.py $OUT/dec $SMASK $OUT/pc 10;;
+esac
 mkdir -p $OUT/ppca; [ -f $OUT/ppca/env.npy ] || $PY -c "import numpy as np; e = np.load('$ENV64').astype(bool); np.save('$OUT/ppca/env.npy', np.repeat(np.repeat(np.repeat(e, 2, 0), 2, 1), 2, 2))"
 step ppca $OUT/ppca/ppca_base_z.npy env MCR_STACK=$STK MCR_POSES=$POS MCR_CTF=$CTF MCR_SCORES=$OUT/pc.scores.npy $PY $H/4_residual/residual_ppca.py $OUT/ppca base ${MP_K:-8} 30 ${MP_HI:-7.0} ${MP_LO:-50.0}
 step sharpen $OUT/e2e_s.npy env MP_SCORES=$OUT/pc.scores.npy MP_Z=$OUT/ppca/ppca_base_z.npy $PY $H/4_residual/sharpen.py
